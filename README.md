@@ -17,7 +17,7 @@ While there are commercial solutions available, we have had mixed experience wit
 + A simple and effective user interface allowing access to key settings.
 + A well thought out and flexible control arrangement allowing automated control of pH, temperature, or other parameters.
 + A range of inputs that address the usual aquaculture needs...
-  + One fully isolated water quality amplifier (for pH, ORP, dissolved oxygen, etc.)
+  + One fully isolated water quality amplifier (for pH, ORP, etc.)
   + Two Pt100 temperature inputs
   + Two general purpose analog inputs that can be used with 0-5V, 0-10V, or 4-20mA signals, these can also be used as simple digital inputs.
   + Two relay outputs
@@ -53,6 +53,24 @@ The Symbrosia Team
 The 
 
 ## Software
+
+### Firmware
+
+### SyView
+
+### MbMon
+MbMon is a ModbusTCP data logger.  This script is often used to do simple datalogging for testing and short experiments.  An XML configuration file is used to designate a few Modbus devices on a local network.  The specified registers are monitored and if needed logged to a CSV file that can be used for data analysis.
+
+MbMon will work with any ModbusTCP device including SymbCtrl, and serve as example code for writing your own logging application.
+
+## Examples
+Currently three sample systems are documented here, use these setups as is, or modify them to your own needs...
+
+* [Tank or PBR controller](/samples/PBRCont/)
+* [CO<sub>2</sub> Tapping Point Monitor](/samples/CO2Tap/)
+* Weather Station(/samples/Weather/)
+  
+Each of these designs are provided with schematics, 3D models, and setup files for the Symbrosia Controller.
 
 
 
