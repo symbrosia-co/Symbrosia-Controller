@@ -1,0 +1,83 @@
+<!--
+
+  SyView Configuration File
+  - Setup specific information in XML format
+
+  Symbrosia Inc
+
+  28Jan2022 A. Cooper
+  - initial version
+
+-->
+
+<configuration>
+
+  <ctrl name='Test'>
+    <model>SyCtrl Mk2</model>
+    <description>Software test</description>
+    <address>192.168.9.191</address>
+  </ctrl>
+
+  <ctrl name='Tank C12'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank Controller</description>
+    <address>192.168.0.127</address>
+  </ctrl>
+  <ctrl name='Tank C14'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank Controller</description>
+    <address>192.168.0.213</address>
+  </ctrl>
+
+
+
+  <ctrl name='Tank D07'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank Controller</description>
+    <address>192.168.0.208</address>
+  </ctrl>
+  <ctrl name='Tank D09'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank Controller</description>
+    <address>192.168.0.211</address>
+  </ctrl>
+  <ctrl name='Tank D22'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank Controller</description>
+    <address>192.168.0.212</address>
+  </ctrl>
+  <ctrl name='Tank D24'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank Controller</description>
+    <address>192.168.0.209</address>
+  </ctrl>
+  <ctrl name='Tank D25'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank Controller</description>
+    <address>192.168.0.210</address>
+  </ctrl>
+  <ctrl name='Tank D26'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank Controller</description>
+    <address>192.168.0.206</address>
+  </ctrl>
+  
+  <ctrl name='Blowers'>
+    <model>SyCtrl Mk1</model>
+    <description>Facility monitor</description>
+    <address>192.168.0.105</address>
+  </ctrl>
+
+  <ctrl name='CO2'>
+    <model>SyCtrl Mk1</model>
+    <description>Facility monitor</description>
+    <address>192.168.0.65</address>
+  </ctrl>
+  
+  
+  <ctrl name='New 235'>
+    <model>SyCtrl Mk1</model>
+    <description>New build</description>
+    <address>192.168.9.191</address>
+  </ctrl>
+</configuration>
