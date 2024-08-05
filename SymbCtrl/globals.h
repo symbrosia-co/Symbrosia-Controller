@@ -1,8 +1,20 @@
 /*------------------------------------------------------------------------------
   Globals - Symbrosia Controller
-  - General purpose aquaculture controller
+  Copyright © 2021 Symbrosia Inc.
 
-  - Access to the global definitions used by all classes
+  This program is free software: you can redistribute it and/or modify it under 
+  the terms of the GNU General Public License as published bythe Free Software
+  foundation, either version 3 of the License, or (at your option) any later
+  version.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License along with
+  this program.  If not, see <https://www.gnu.org/licenses/>.
+
+--- revision record ------------------------------------------------------------
 
   26Dec2021 v0.1 A. Cooper
   - initial version
@@ -24,24 +36,6 @@
   - added TofD to IO channel list
   - added a few new units
 
---------------------------------------------------------------------------------
-
-    SymbCtrl - The Symbrosia Aquaculture Controller
-    Copyright © 2021 Symbrosia Inc.
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 ------------------------------------------------------------------------------*/
 #pragma once
 
@@ -58,7 +52,7 @@
 
 // unit ID 
 #define modelNumber   2
-#define serialNumber  237
+#define serialNumber  236
 #define firmMajor     2
 #define firmMinor     6
 #define modelNameStr  "SymbCtrl Mk2"

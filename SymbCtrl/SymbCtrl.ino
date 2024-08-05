@@ -1,12 +1,21 @@
-  /*------------------------------------------------------------------------------
-  Symbrosia Controller
-  - General purpose aquaculture controller
+/*------------------------------------------------------------------------------
 
-  - Written for the ESP32 (generic module or Node MCU)
-  - Uses the Arduino Modbus library by Andre Sarmento Barbosa
-  info and docs at https://github.com/emelianov/modbus-esp8266
-  - Uses the ESP Rotatary library by Lennart Hennigs
-  info and docs at https://github.com/LennartHennigs/ESPRotary
+  SymbCtrl - The Symbrosia Aquaculture Controller
+  Copyright © 2021 Symbrosia Inc.
+
+  This program is free software: you can redistribute it and/or modify it under 
+  the terms of the GNU General Public License as published bythe Free Software
+  foundation, either version 3 of the License, or (at your option) any later
+  version.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License along with
+  this program.  If not, see <https://www.gnu.org/licenses/>.
+
+--- revision record ------------------------------------------------------------
 
   24Dec2021 v0.1 A. Cooper
   - initial version, based on Genesis controller
@@ -114,6 +123,8 @@
   - added CtoF to analogCtrl
   - some corrections to pH temperature calibration, tested successfully
   - apply gain and offset to analog inputs last using selected units
+  - removed MCP3021 library, use direct calls to Wire
+  - added auto I2C address search for MCP3021
   - a successful functional test performed
 
   Known bugs...
@@ -131,26 +142,7 @@
   - ESP Rotary, rotary encoder support by Lennart Hennigs v1.4.2
   - Button2, pushbutton support by Lennart Hennigs v1.6.5
   - Adafruit Neopixel, support for the ESP32 RGB neopixel LED v1.10.4
-  - MCP3021 AtoD handled by MCP3X21 by Pavel Slama v1.0.1
   - MCP3208 AtoD handled by MCP_ADC by Rob Tillaart v0.5.0
-
---------------------------------------------------------------------------------
-
-    SymbCtrl - The Symbrosia Aquaculture Controller
-    Copyright © 2021 Symbrosia Inc.
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ------------------------------------------------------------------------------*/
 

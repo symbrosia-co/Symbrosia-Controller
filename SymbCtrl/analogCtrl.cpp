@@ -1,12 +1,30 @@
-   /*------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
   Analog to Digital Control - Symbrosia Controller
   - handle the AtoD converter
   - perform a pre-scaling to engineering units using default offset and gain
   - perform filtering on all channels
   - perform calibration using user supplied calibration offset and gain
   - perform thermistor conversion if noted by channel type
-
   - Written for the ESP32
+
+--- license --------------------------------------------------------------------
+
+    Copyright © 2021 Symbrosia Inc.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+--- revision record ------------------------------------------------------------
 
   06Jan2022 A. Cooper
   - initial version
@@ -39,44 +57,27 @@
   - changed temp out-of-range to -30 to 140 (before cal offsets)
   29Jul2024 v2.6 A. Cooper
   - changed from boxcar average to a tracking average
-  - remove MCP3X21 library, use direct calls to twoWire
-  - add auto detect of MCP3021 I2C address
   - removed single channel read function, never implemented or used
   - added CtoF
   - some corrections to pH temperature calibration, tested successfully
   - apply gain and offset to analog inputs last using selected units
-
---------------------------------------------------------------------------------
-
-    SymbCtrl - The Symbrosia Aquaculture Controller
-    Copyright © 2021 Symbrosia Inc.
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  - add auto detect of MCP3021 I2C address
+  - remove MCP3X21 library, use direct calls to Wire (the library is pretty 
+  trivial and the address detection was easier without it).
   
 ------------------------------------------------------------------------------*/
 
 //- library includes -----------------------------------------------------------
 #include <Arduino.h>
 #include <SPI.h>
-//#include <Wire.h>
+#include <Wire.h>
 
 //- Local includes -------------------------------------------------------------
 #include "globals.h"
 #include "analogCtrl.h"
 
 //- constants ------------------------------------------------------------------
-#define AtoDAddrPH  0x4D
+#define pHAtoDDef   0x48
 #define minValidTemp -35  
 #define maxValidTemp 135
 #define adAvgFactor  100
@@ -102,12 +103,12 @@
 #define gainSup  0.004378
 
 //- instantiate libaries -------------------------------------------------------
-MCP3021 AtoDPH(AtoDAddrPH);
 MCP3208 AtoDMain(hdwrSPIMISO,hdwrSPIMOSI,hdwrSPICLK);
 
 //- local variables ------------------------------------------------------------
 int adCurrent= 0;
 unsigned long adLastTime= 0;
+uint8_t pHADAddr= pHAtoDDef;
 
 //- functions ------------------------------------------------------------------
 
@@ -117,15 +118,30 @@ AnalogCtrl::AnalogCtrl(){
 void AnalogCtrl::init(){
   // start pH A/D converter
   Wire.begin(hdwrI2CSCL,hdwrI2CSDA);
-  AtoDPH.init(&Wire);
+  pHADAddr= pHAtoDFind();
   // start main A/D converter
-  //SPI.begin();
   AtoDMain.begin(hdwrSPIAtoDCS);
 } // init
 
 float AnalogCtrl::CtoF(float degC){
   return (degC*1.8) + 32;
 } // CtoF
+
+uint8_t AnalogCtrl::pHAtoDFind(){
+  uint8_t addr;
+  for (uint8_t i=0;i<8;i++){
+    addr= pHAtoDDef|i;
+    Wire.requestFrom(addr,2U);
+    if (Wire.available()==2) return addr;
+  }
+  return pHAtoDDef;
+}
+
+int AnalogCtrl::pHAtoDRead(uint8_t pHADAddr){
+  Wire.requestFrom(pHADAddr,2U);
+  if (Wire.available()==2) return ((Wire.read() << 6) | (Wire.read() >> 2));
+  return 0;
+}
 
 void AnalogCtrl::readAll(){
   uint16_t rawRead;
@@ -141,7 +157,7 @@ void AnalogCtrl::readAll(){
   if (++adCurrent>6) adCurrent=0;
   // get raw reading
   if (adCurrent==0){
-    rawRead= AtoDPH.read();
+    rawRead= pHAtoDRead(pHADAddr);
   }
   else{
     rawRead= AtoDMain.read(adCurrent-1);

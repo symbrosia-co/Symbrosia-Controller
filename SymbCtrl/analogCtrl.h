@@ -54,7 +54,10 @@ class AnalogCtrl{
     const int adChans[7]= {hdwrWQ,hdwrTemp1,hdwrTemp2,hdwrAnalog2,hdwrAnalog1,hdwrSupplyVolt,hdwrTempInt};
     int adCurrent;
     unsigned long adLastTime;
+    uint8_t pHADAddr;
     float adAverage[7];
+    uint8_t pHAtoDFind();
+    int pHAtoDRead(uint8_t pHAddr);
 };
 
 #endif
