@@ -35,7 +35,7 @@ anlgChan=  {'None':0,'WQ Amplifier':1,'Temperature 1':2,'Temperature 2':3,'Analo
 anlgName=  {0:None,1:'WQSensor',2:'Temperature1',3:'Temperature2',4:'Analog1',5:'Analog2',6:'InternalTemp',7:'SupplyVoltage',8:'Processed',30:'Days',31:'Hours',32:'Minutes',33:'Seconds'}
 anlgUnit=  {0:None,1:'WQSensorUnits',2:'Temp1Units',3:'Temp2Units',4:'Analog1Units',5:'Analog2Units',6:'IntTempUnits',7:'SupVoltUnits',8:'ProcUnits',30:'day',31:'hour',32:'min',33:'sec'}
 outChan=   {'None':0,'Relay 1':11,'Relay 2':12,'Output 1':13,'Output 2':14,'Virtual 1':15,'Virtual 2':16}
-digChan=   {'None':0,'Input 1':9,'Input 2':10,'Relay 1':11,'Relay 2':12,'Output 1':13,'Output 2':14,'Virtual 1':15,'Virtual 2':16}
+digChan=   {'None':0,'Input 1':9,'Input 2':10,'Relay 1':11,'Relay 2':12,'Output 1':13,'Output 2':14,'Virtual 1':15,'Virtual 2':16,'TofD':39}
 
 #------------------------------------------------------------------------------
 #  Control Tab

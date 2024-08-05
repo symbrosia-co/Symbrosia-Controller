@@ -16,8 +16,16 @@
 #  - The error result and message may be queried through calls after completion
 #  of the operation to determine success or failure
 #
-# 12May2022 A. Cooper v0.1
+# 12May2022 v0.1 A. Cooper
 #  - initial version
+# 20Mar2024 v1.0 A. Cooper
+# - expanded channels to add alarm states for each control loop and overall
+# 30Jul2024 v1.1 A. Cooper
+#  - modified to support new features in SymbCtrl 2.6
+#  - implemented external enable
+#  - implemented minimum time on/off
+#  - added one-shot registers
+#  - added TofD to channel list
 #
 #------------------------------------------------------------------------------
 from pyModbusTCP.client import ModbusClient
@@ -94,7 +102,7 @@ class SymbCtrl():
     'Analog2Units':    {'addr': 40,'mode':'rw','type':'uint', 'value':0    ,'desc':'Units for analog input 2'},
     'IntTempUnits':    {'addr': 41,'mode':'rw','type':'uint', 'value':0    ,'desc':'Controller internal temperature units, 1=°C or 2=°F'},
     'SupVoltUnits':    {'addr': 42,'mode':'rw','type':'uint', 'value':0    ,'desc':'Controller supply voltage unit is volts'},
-    'ProcUnits':       {'addr': 43,'mode':'r' ,'type':'uint', 'value':0    ,'desc':'Units for processed reading result'},
+    'pHTempComp':      {'addr': 44,'mode':'rw','type':'uint', 'value':0    ,'desc':'pH temperature calibration source'},
     'WQOffset':        {'addr': 50,'mode':'rw','type':'float','value':0    ,'desc':'Calibration offset for the WQ sensor amplifier'},
     'Temp1Offset':     {'addr': 52,'mode':'rw','type':'float','value':0    ,'desc':'Calibration offset for temperature sensor 1'},
     'Temp2Offset':     {'addr': 54,'mode':'rw','type':'float','value':0    ,'desc':'Calibration offset for temperature sensor 1'},
@@ -252,7 +260,7 @@ class SymbCtrl():
                'CtrlAlarm','Ctrl1Alarm','Ctrl2Alarm','Ctrl3Alarm','Ctrl4Alarm',
                'Ctrl1AlarmLow','Ctrl2AlarmLow','Ctrl3AlarmLow','Ctrl4AlarmLow',
                'Ctrl1AlarmHigh','Ctrl2AlarmHigh','Ctrl3AlarmHigh','Ctrl4AlarmHigh',
-               'Flasher','Day','Hour','Minute','Second']
+               'Flasher','Day','Hour','Minute','Second','TofD']
   channelNames= ['None','WQ Amplifier','Temperature 1','Temperature 2','Analog 1','Analog 2',
                'Internal Temp','Supply Voltage','Processed',
                'Digital In 1','Digitial In 2','Relay 1','Relay 2','Digital Out 1','Digitial Out 2','Virtual IO 1','Virtual IO 2',
@@ -260,7 +268,7 @@ class SymbCtrl():
                'Control Alarm','Control 1 Alarm','Control 2 Alarm','Control 3 Alarm','Control 4 Alarm',
                'Control 1 Alarm Low','Control 2 Alarm Low','Control 3 Alarm Low','Control 4 Alarm Low',
                'Control 1 Alarm High','Control 2 Alarm High','Control 3 Alarm High','Control 4 Alarm High',
-               'Flasher','Days','Hours','Minutes','Seconds']
+               'Flasher','Days','Hours','Minutes','Seconds','Time of Day']
   channelUnits= {'WQSensor':'WQSensorUnits',
                  'Temperature1':'Temp1Units',
                  'Temperature2':'Temp2Units',
@@ -475,11 +483,12 @@ class SymbCtrl():
     if chan in self.channelValid:
       if not self.ctrlRegs[self.channelValid[chan]]['value']:
         if self.ctrlRegs[chan]['type']=='float':
-          value= '-.-'
+          text= '-.-'
         else:
-          value= '--'
+          text= '--'
     if chan in self.channelUnits:
-      text= text+self.channelUnit(chan)
+      units= self.channelUnit(chan)
+      if units!=None: text= text+units
     return text
     
   def unit(self,unitID):

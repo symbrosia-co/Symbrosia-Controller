@@ -7,77 +7,177 @@
 
   28Jan2022 A. Cooper
   - initial version
+  17Jun2024 A. Cooper
+  - reconciled with cultivation
 
 -->
 
 <configuration>
-
+  <autoLog>True</autoLog>
+  <logIntv>10</logIntv>
+  <logFile>SyCtrlLog.log</logFile>
   <ctrl name='Test'>
     <model>SyCtrl Mk2</model>
-    <description>Software test</description>
-    <address>192.168.9.191</address>
+    <description>New production test</description>
+    <address>192.168.200.146</address>
   </ctrl>
-
-  <ctrl name='Tank C12'>
+  <ctrl name='CO2 Mon'>
     <model>SyCtrl Mk2</model>
-    <description>Tank Controller</description>
-    <address>192.168.0.127</address>
+    <description>CO2 Monitor</description>
+    <address>192.168.0.235</address>
+  </ctrl>
+  <ctrl name='Blowers'>
+    <model>SyCtrl Mk1</model>
+    <description>Blower Monitor</description>
+    <address>192.168.0.105</address>
+  </ctrl>
+  <ctrl name='Tank C08'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank C15 controller</description>
+    <address>192.168.0.228</address>
   </ctrl>
   <ctrl name='Tank C14'>
     <model>SyCtrl Mk2</model>
-    <description>Tank Controller</description>
+    <description>Tank C15 controller</description>
     <address>192.168.0.213</address>
   </ctrl>
-
-
-
+  <ctrl name='Tank C15'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank C15 controller</description>
+    <address>192.168.0.214</address>
+  </ctrl>
   <ctrl name='Tank D07'>
     <model>SyCtrl Mk2</model>
-    <description>Tank Controller</description>
+    <description>Tank D07 controller</description>
     <address>192.168.0.208</address>
   </ctrl>
   <ctrl name='Tank D09'>
     <model>SyCtrl Mk2</model>
-    <description>Tank Controller</description>
+    <description>Tank D09 controller</description>
     <address>192.168.0.211</address>
   </ctrl>
   <ctrl name='Tank D22'>
     <model>SyCtrl Mk2</model>
-    <description>Tank Controller</description>
+    <description>Tank D22 controller</description>
     <address>192.168.0.212</address>
   </ctrl>
   <ctrl name='Tank D24'>
     <model>SyCtrl Mk2</model>
-    <description>Tank Controller</description>
+    <description>Tank D24 controller</description>
     <address>192.168.0.209</address>
   </ctrl>
   <ctrl name='Tank D25'>
     <model>SyCtrl Mk2</model>
-    <description>Tank Controller</description>
+    <description>Tank 25 controller</description>
     <address>192.168.0.210</address>
   </ctrl>
   <ctrl name='Tank D26'>
     <model>SyCtrl Mk2</model>
-    <description>Tank Controller</description>
+    <description>Tank D26 controller</description>
     <address>192.168.0.206</address>
   </ctrl>
-  
-  <ctrl name='Blowers'>
+  <ctrl name='Tank E01'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank E01 controller</description>
+    <address>192.168.0.204</address>
+  </ctrl>
+  <ctrl name='Tank E02'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank E02 controller</description>
+    <address>192.168.0.203</address>
+  </ctrl>
+  <ctrl name='Tank E03'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank E03 controller</description>
+    <address>192.168.0.205</address>
+  </ctrl>
+  <ctrl name='Tank E04'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank E04 controller</description>
+    <address>192.168.0.202</address>
+  </ctrl>
+  <ctrl name='Tank E05'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank E05 controller</description>
+    <address>192.168.0.200</address>
+  </ctrl>
+    <ctrl name='Blowers'>
     <model>SyCtrl Mk1</model>
-    <description>Facility monitor</description>
+    <description>Blower Monitor</description>
     <address>192.168.0.105</address>
   </ctrl>
-
-  <ctrl name='CO2'>
+  <!-- Unassigned units -->
+  <ctrl name='SymbCtrl 100'>
     <model>SyCtrl Mk1</model>
-    <description>Facility monitor</description>
-    <address>192.168.0.65</address>
+    <description>Unassigned</description>
+    <address>192.168.0.100</address>
   </ctrl>
-  
-  
-  <ctrl name='New 235'>
+  <ctrl name='SymbCtrl 102'>
     <model>SyCtrl Mk1</model>
+    <description>Unassigned</description>
+    <address>192.168.0.102</address>
+  </ctrl>
+  <ctrl name='SymbCtrl 103'>
+    <model>SyCtrl Mk1</model>
+    <description>Unassigned</description>
+    <address>192.168.0.103</address>
+  </ctrl>
+  <ctrl name='SymbCtrl 106'>
+    <model>SyCtrl Mk1</model>
+    <description>Unassigned</description>
+    <address>192.168.0.106</address>
+  </ctrl>
+
+
+
+  <ctrl name='SymbCtrl 215'>
+    <model>SyCtrl Mk2</model>
     <description>New build</description>
-    <address>192.168.9.191</address>
+    <address>192.168.200.146</address>
+  </ctrl>
+  <ctrl name='SymbCtrl 216'>
+    <model>SyCtrl Mk2</model>
+    <description>New build</description>
+    <address>192.168.200.90</address>
+  </ctrl>
+  <ctrl name='SymbCtrl 217'>
+    <model>SyCtrl Mk2</model>
+    <description>New build</description>
+    <address>192.168.200.146</address>
+  </ctrl>
+  <ctrl name='SymbCtrl 228'>
+    <model>SyCtrl Mk2</model>
+    <description>New build</description>
+    <address>192.168.0.228</address>
+  </ctrl>
+  <ctrl name='SymbCtrl 229'>
+    <model>SyCtrl Mk2</model>
+    <description>New build</description>
+    <address>192.168.0.229</address>
+  </ctrl>
+  <ctrl name='SymbCtrl 230'>
+    <model>SyCtrl Mk2</model>
+    <description>New build</description>
+    <address>192.168.200.45</address>
+  </ctrl>
+  <ctrl name='SymbCtrl 231'>
+    <model>SyCtrl Mk2</model>
+    <description>New build</description>
+    <address>192.168.0.231</address>
+  </ctrl>
+  <ctrl name='SymbCtrl 232'>
+    <model>SyCtrl Mk2</model>
+    <description>New build</description>
+    <address>192.168.0.232</address>
+  </ctrl>
+  <ctrl name='SymbCtrl 233'>
+    <model>SyCtrl Mk2</model>
+    <description>New build</description>
+    <address>192.168.200.21</address>
+  </ctrl>
+  <ctrl name='SymbCtrl 234'>
+    <model>SyCtrl Mk2</model>
+    <description>New build</description>
+    <address>192.168.200.200</address>
   </ctrl>
 </configuration>

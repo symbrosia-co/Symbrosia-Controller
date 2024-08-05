@@ -20,7 +20,7 @@
 #  - Added status display value selection to status stab
 #
 # Known issues:
-# - none
+# - missing units for internal temp on status screen
 #
 #------------------------------------------------------------------------------
 verStr= 'SyView v1.1'

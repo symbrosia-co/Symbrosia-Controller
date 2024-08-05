@@ -74,6 +74,9 @@ class Status(tk.Frame):
             {'reg':None,            'form':'label', 'conf':False,'col':4,'row':8, 'span':1,'width':13,'font':1,'just':'r','conf':False,'value':'Midnight Reboot'},
             {'reg':None,            'form':'label', 'conf':False,'col':4,'row':10,'span':1,'width':13,'font':1,'just':'r','conf':False,'value':'Save Settings'  },
             {'reg':None,            'form':'label', 'conf':False,'col':4,'row':11,'span':1,'width':13,'font':1,'just':'r','conf':False,'value':'Clear Settings' },
+            {'reg':None,            'form':'label', 'conf':False,'col':4,'row':12,'span':1,'width':13,'font':1,'just':'l','conf':False,'value':'Display'        },
+            {'reg':'StatusDisp1',   'form':'achan', 'conf':False,'col':4,'row':13,'span':2,'width':32,'font':1,'just':'l','value':None                          },
+            {'reg':'StatusDisp2',   'form':'achan', 'conf':False,'col':4,'row':14,'span':2,'width':32,'font':1,'just':'l','value':None                          },
             # column 5
             {'reg':'SilenceAlarms', 'form':'switch','conf':True ,'col':5,'row':6, 'span':1,'width':48,'font':0,'just':'r','conf':False,'value':None             },
             {'reg':'MidnightSave',  'form':'switch','conf':True ,'col':5,'row':7, 'span':1,'width':48,'font':0,'just':'r','conf':False,'value':None             },
@@ -116,6 +119,10 @@ class Status(tk.Frame):
             {'reg':'LocalTempUnits','form':'unitd', 'conf':False,'col':9,'row':8, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
             {'reg':'SupVoltUnits',  'form':'unitd', 'conf':False,'col':9,'row':9, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
             {'reg':'ProcUnits',     'form':'unitd', 'conf':False,'col':9,'row':10,'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             }]
+  anlgChan= {'None':0,'WQ Amplifier':1,'Temperature 1':2,'Temperature 2':3,'Analog 1':4,'Analog 2':5,'Internal Temp':6,'Supply Voltage':7,'Processed':8}
+  anlgName= {0:None,1:'WQSensor',2:'Temperature1',3:'Temperature2',4:'Analog1',5:'Analog2',6:'InternalTemp',7:'SupplyVoltage',8:'Processed'}
+  anlgUnit= {0:None,1:'WQSensorUnits',2:'Temp1Units',3:'Temp2Units',4:'Analog1Units',5:'Analog2Units',6:'IntTempUnits',7:'SupVoltUnits',8:'ProcUnits'}
+
 
   def __init__(self,parent,controller):
     tk.Frame.__init__(self,master=parent)
@@ -168,6 +175,12 @@ class Status(tk.Frame):
       if wid['form']=='send':
         newWid= tk.Button(self,command=partial(self.set,wid['reg']),image=self.sendArrow,height=16,width=wid['width'],relief=tk.FLAT,state=tk.DISABLED)
         newWid.grid (column=wid['col'],row=wid['row'],padx=padX,pady=padY)
+      if wid['form']=='achan':
+        newStr= tk.StringVar()
+        newStr.set(list(self.anlgChan.keys())[0])
+        newWid= tk.OptionMenu(self,newStr,*self.anlgChan,command=partial(self.setMenu,wid['reg']))
+        newWid.grid (column=wid['col'],columnspan=wid['span'],padx=padX,row=wid['row'],pady=padY,sticky=tk.W+tk.E)
+        wid['entry']= newStr
       if newWid!= None:
         if wid['font']==1:   newWid.configure(font=('Helvetica','10'))
         if wid['font']==2:   newWid.configure(font=('Helvetica','10','bold'))
@@ -234,6 +247,21 @@ class Status(tk.Frame):
                 self.delegates['EventLog']('{} set to {}'.format(reg,wid['value']),True)
               else:
                 self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+
+  def setMenu(self,reg,selection):
+    if self.controller.connected():
+      for wid in self.widgets:
+        if wid['reg']==reg:
+          if wid['form']=='achan':
+            if self.controller.write(reg,self.anlgChan[selection]):
+              self.delegates['EventLog']('{} set to {}'.format(reg,selection),True)
+            else:
+              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+            for w in self.widgets:
+              if w['form']=='input':
+                w['reg']= self.anlgName[self.anlgChan[selection]]
+              if w['form']=='unitin':
+                w['reg']= self.anlgUnit[self.anlgChan[selection]]
 
   #-- external methods --------------------------------------------------------
   def setDelegates(self,funcList):
@@ -351,6 +379,19 @@ class Status(tk.Frame):
           else:
             wid['widget'].configure(text='00:00:00',state=tk.DISABLED)
             wid['value']= None
+      if wid['form']=='achan':
+        if self.controller.connected():
+          wid['widget'].configure(state=tk.NORMAL)
+          for entry in self.anlgChan.keys():
+            if self.anlgChan[entry]==self.controller.value(wid['reg']):
+              wid['entry'].set(entry)
+              for w in self.widgets:
+                if w['form']=='input':
+                  w['reg']= self.anlgName[self.anlgChan[entry]]
+                if w['form']=='unitin':
+                  w['reg']= self.anlgUnit[self.anlgChan[entry]]
+        else:
+          wid['widget'].configure(state=tk.DISABLED)
       if wid['form']=='entry':
         if self.controller.connected():
           wid['widget'].configure(text=value,state=tk.NORMAL)
