@@ -22,6 +22,7 @@
   - added control enable source
   - added control one-shot flag
   - added TofD to IO channel list
+  - added a few new units
 
 --------------------------------------------------------------------------------
 
@@ -408,31 +409,40 @@ const int ioAddr[]={
 #define hdwrAnalog4    8
 
 // units
-#define unitsNone  0	// No units
-#define unitsDegC  1	// °C
-#define unitsDegF  2	// °F
-#define unitspH    3	// pH
-#define unitsmV    4	// mV
-#define unitsV     5	// V
-#define unitsmA    6	// mA
-#define unitsA     7	// A
-#define unitsmm    8	// mm
-#define unitsm     9	// m
-#define unitsml   10	// ml
-#define unitsl    11	// l
-#define unitsg    12	// g
-#define unitskg   13	// kg
-#define unitslbs  14	// lbs
-#define unitskPa  15	// kPa
-#define unitsPSI  16	// PSI
-#define unitsHz   17	// Hz
-#define unitsPct  18	// %
-#define unitsPPM  19	// %
-#define unitsOhm  20	// Ω
-#define unitsDay  21  // day
-#define unitsHour 22  // hour
-#define unitsMin  23  // min
-#define unitsSec  24  // s
+#define unitsNone   0	// No units
+#define unitsDegC   1	// °C
+#define unitsDegF   2	// °F
+#define unitspH     3	// pH
+#define unitsmV     4	// mV
+#define unitsV      5	// V
+#define unitsmA     6	// mA
+#define unitsA      7	// A
+#define unitsmm     8	// mm
+#define unitsm      9	// m
+#define unitsml    10	// ml
+#define unitsl     11	// l
+#define unitsg     12	// g
+#define unitskg    13	// kg
+#define unitslbs   14	// lbs
+#define unitskPa   15	// kPa
+#define unitsPSI   16	// PSI
+#define unitsHz    17	// Hz
+#define unitsPct   18	// %
+#define unitsPPM   19	// %
+#define unitsOhm   20	// Ω
+#define unitsDay   21  // day
+#define unitsHour  22  // hour
+#define unitsMin   23  // min
+#define unitsSec   24  // s
+#define unitsMol   25  // mol
+#define unitsMPH   26  // mph
+#define unitsMPS   27  // m/s
+#define unitsDeg   28  // degrees
+#define unitsmmH   29  // mmHg
+#define unitsmBar  30  // mBar
+#define unitsWatt  31  // watts
+#define unitskWatt 32  // kilowatts
+#define unitskVA   33  // kVA
 
 // data processing
 #define procAvg    0  // average

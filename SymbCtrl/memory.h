@@ -46,7 +46,7 @@
 
 //- limits ---------------------------------------------------------------------
 #define minUnits             0
-#define maxUnits            24
+#define maxUnits            33
 #define minTimeUnits        35
 #define maxTimeUnits        38
 #define minTempUnits         1

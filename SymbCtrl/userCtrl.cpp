@@ -25,6 +25,7 @@
   - fixed left scroll out of ScrWiFiDone bug
   27Jul2024 v2.6 A. Cooper
   - removed a decimal point from status screen value display
+  - added a number of new units
 
 --------------------------------------------------------------------------------
 
@@ -409,6 +410,15 @@ void UserCtrl::printRead(float read,int space,int decs,int unit,bool valid){
     case unitsHour: lcd.print("hrs"); break;
     case unitsMin:  lcd.print("min"); break;
     case unitsSec:  lcd.print("s  "); break;
+    case unitsMol:  lcd.print("mol"); break;
+    case unitsMPH:  lcd.print("mph"); break;
+    case unitsMPS:  lcd.print("m/s"); break;
+    case unitsDeg:  lcd.print(char(223)); lcd.print("  "); break;
+    case unitsmmH:  lcd.print("mmH"); break;
+    case unitsmBar: lcd.print("mBr"); break;
+    case unitsWatt: lcd.print("W  "); break;
+    case unitskWatt:lcd.print("kW "); break;
+    case unitskVA:  lcd.print("kVA"); break;
   }
 }
 
