@@ -126,6 +126,7 @@
   - removed MCP3021 library, use direct calls to Wire
   - added auto I2C address search for MCP3021
   - a successful functional test performed
+  - concat SymbCtrl to unit name to make network name
 
   Known bugs...
   - none
