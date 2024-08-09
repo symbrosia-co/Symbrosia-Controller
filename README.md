@@ -57,7 +57,7 @@ The PCB assembly is designed to be mounted in either a simple case for DIN rail 
 ![A SymbCtrl in the DIN mount case](/res/CL50-12-24115-DC.jpg)
 
 ## Software
-There are several software elements to the controller, all can be found in this repository.  While you may simply download everything here, as easier solution would be to install a copy of [GitHub desktop](https://desktop.github.com/download/).  Synchronizing with Github would allow you to keep an always up-to-date version available for use.
+There are several software elements to the controller, all can be found in this repository.  While you may simply download everything here, an easier solution would be to install a copy of [GitHub desktop](https://desktop.github.com/download/).  Synchronizing with Github would allow you to keep an always up-to-date version available for use.
 
 ### Firmware
 Firmware for the Symbrosia Controller was wriiten in the Arduino Framework for ESP-32.  The Arduino ecosystem is open source, free, and is amazing well supported by an enormous user community.  If you do not know how to use an Arduino device it is a good skill to learn, an incredibly useful tool to have in your skillset.
