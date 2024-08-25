@@ -1,0 +1,46 @@
+<!--
+
+  Weather Display Configuration File
+  - display weather data from a SymbCtrl weather station
+
+  Symbrosia Inc
+
+  25Aug2024 A. Cooper
+  - initial version
+  
+  -Four sensors are currently supported and must have the names listed...
+    o Temperature
+    o Precipitation
+    o PAR
+    o Humidity
+  
+  - Channels may be on any number of controllers present on the network,
+  multiple device entries are used to address multiple controllers 
+  - Any sensor not present is ignored, list only the sensors available
+  
+-->
+
+<configuration>
+  <scanInterval>10</scanInterval>
+  <logInterval>300</logInterval>
+  <logName>Weather</logName>
+  <device>
+    <name>Weather</name>
+    <ipAddr>192.168.9.202</ipAddr>
+    <port>502</port>
+    <datum>
+      <name>Precipitation</name>
+      <addr>Counter</addr>
+      <gain>0.3546</gain>
+      <offset>0</offset>
+      <unit>mm</unit>
+    </datum>
+    <datum>
+      <name>Temperature</name>
+      <addr>Temperature1</addr>
+      <gain>1</gain>
+      <offset>0</offset>
+      <unit>°C</unit>
+    </datum>
+  </device>
+</configuration>

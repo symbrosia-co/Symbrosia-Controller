@@ -1,29 +1,28 @@
 #------------------------------------------------------------------------------
-#  Monitor
+#  Weather
 #
-#  - Monitor a set of Modbus addresses
+#  - A simple weather display GUI
 #  - written for Python v3.9
 #
 #  Symbrosia
-#  Copyright 2021, all rights reserved
+#  Copyright 2024, all rights reserved
 #
-# 29Nov2021 A. Cooper v0.1
+# 25Aug2024 A. Cooper v0.1
 #  - initial version
 #
 #------------------------------------------------------------------------------
-verStr= 'MBMon v1.0'
+verStr= 'Weather v0.1'
 
 #-- constants -----------------------------------------------------------------
-cfgFileName= 'MBMon.xml'
-logFileName= 'MBMon'
-logFilePath= 'logs'
-cfgFilePath= 'setup'
+cfgFileName= 'config.xml'
+logFileName= 'Weather'
+logFilePath= 'log'
+cfgFilePath= 'cfg'
+libFilePath= 'lib'
 colBack=     '#BBBBBB'
 colDev=      '#999999'
 colOn=       '#ADFF8C'
 colOff=      '#FFADAD'
-
-verbose=     False;
 
 #-- library -------------------------------------------------------------------
 import string
@@ -42,14 +41,17 @@ import xml.etree.ElementTree as xml
 localDir= os.path.dirname(os.path.realpath(__file__))
 logPath=  os.path.join(localDir,logFilePath)
 cfgPath=  os.path.join(localDir,cfgFilePath)
+libPath=  os.path.join(localDir,libFilePath)
+sys.path.append(libPath)
+
+#-- includes ------------------------------------------------------------------
+from config import loadConfig
+import symbCtrlModbus
 
 #------------------------------------------------------------------------------
-#  MBMon GUI
+#  Weather GUI
 #
 #  - setup the GUI
-#
-#  29Nov2021 A. Cooper
-#  - initial version
 #
 #------------------------------------------------------------------------------
 class Application(tk.Frame):
@@ -62,9 +64,11 @@ class Application(tk.Frame):
   logging=      False
 
   def __init__(self, master=None):
-    if not self.loadConfig(cfgPath,cfgFileName):
+    self.config= loadConfig(cfgPath,cfgFileName)
+    if self.config==None:
       sys.exit()
-    # print(self.config)
+    print(self.config)
+    sys.exit()
     tk.Frame.__init__(self, master)
     self.grid()
     self.createWidgets()
@@ -139,31 +143,6 @@ class Application(tk.Frame):
     self.spacer1.grid      (column=0,row=0)
     self.spacer2=          tk.Label(self,text=' ')
     self.spacer2.grid      (column=7,row=row+2)
-
-  def loadConfig(self,configPath,configFile):
-    #try:
-    tree = xml.parse(os.path.join(configPath,configFile))
-    #except:
-    #  messagebox.showerror(title='Startup error...',message='Unable to load configuration file {}\{}'.format(configPath,configFile))
-    #  return False
-    #process top level
-    self.config['devices']= []
-    root= tree.getroot()
-    for item in root:
-      if item.tag=='device':
-        device= {'data':[]}
-        for dev in item:
-          if dev.tag=='datum':
-            datum= {}
-            for dat in dev:
-              datum[dat.tag]= dat.text
-            device['data'].append(datum)
-          else:
-            device[dev.tag]= dev.text
-        self.config['devices'].append(device)
-      else:
-        self.config[item.tag]= item.text
-    return True
 
   #- GUI event handling -------------------------------------------------------
 
@@ -285,137 +264,6 @@ class Application(tk.Frame):
     outFile.close()
     self.logEvent('Log file {} appended'.format(logName),True)
 
-  #- Modbus -------------------------------------------------------------------
-
-  def mbOpen(self,device,ipAddr,port):
-    if self.device.is_open():
-      self.device.close()
-    self.device.timeout(timeout=5)
-    if not self.device.host(ipAddr):
-      self.logEvent('Unable to set IP address {}@{}'.format(device,ipAddr),True)
-      return False
-    if not self.device.port(port):
-      self.logEvent('Unable to set IP port {}@{}:{}'.format(device@ipAddr,port),True)
-      return False
-    if not self.device.open():
-      self.logEvent('Unable to open device {}@{}:{}'.format(device,ipAddr,port),True)
-      return False
-    return True
-    
-  def mbClose(self):
-    if self.device.is_open():
-      self.device.close()
-    
-  def mbRead(self,device,name,mbAddr,varType):
-    if not self.device.is_open():
-      self.logEvent('Modbus device {} not open for reading!!'.format(device),True)
-      return None
-    try:
-      mbAddr= int(mbAddr)
-    except:
-      return None
-    if verbose: print ('Attempt read of {}:{}:{:d} as {}...'.format(device,name,mbAddr,varType))
-    if varType=='float':
-      val= self.device.read_holding_registers(mbAddr,2)
-      if val==None:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      else:
-        val= utils.word_list_to_long(val,big_endian=False)
-        val= utils.decode_ieee(val[0])
-        return val
-    if varType=='hold':
-      val= self.device.read_holding_registers(mbAddr,1)
-      if val==None:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      else:
-        return val[0]
-    if varType=='long':
-      valL= self.device.read_holding_registers(mbAddr,1)
-      valH= self.device.read_holding_registers(mbAddr+1,1)
-      if valL!=None and valH!= None:
-        val= valL[0]+valH[0]*65536
-        return val
-      else:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      return val
-    if varType=='coil':
-      val= self.device.read_coils(mbAddr,1)
-      if val==None:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      else:
-        if val[0]==1:
-          return True
-        else:
-          return False
-    if varType=='discrete':
-      # if mbAddr<10000 or mbAddr>19999:
-        # self.logEvent('Bad modbus address {}:{:d} for discrete!!'.format(name,mbAddr),True)
-        # return False
-      val= self.device.read_discrete_inputs(mbAddr,1)
-      if val==None:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      else:
-        if val[0]==1:
-          return True
-        else:
-          return False
-    if varType=='input':
-      # if mbAddr<30000 or mbAddr>39999:
-        # self.logEvent('Bad modbus address {}:{:d} for input!!'.format(name,mbAddr),True)
-        # return False
-      val= self.device.read_input_registers(mbAddr,1)
-      if val==None:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      else:
-        return val[0]
-
-  def scanModbus(self):
-    ip= None
-    for datum in self.data:
-      if ip==None or ip!=datum['ipAddr']:
-        ip= datum['ipAddr']
-        if not self.mbOpen(datum['name'],ip,datum['port']):
-          ip= None
-          continue
-      if ip!=datum['ipAddr']:
-        self.mbClose()
-        if not self.mbOpen(datum['name'],ip,datum['port']):
-          ip= None
-          continue
-        ip=datum['ipAddr']
-      result= self.mbRead(datum['devName'],datum['name'],datum['addr'],datum['type'])
-      if result==None:
-        datum['value']= None
-        datum['valueDisp'].config(text='---')
-      else:
-        if datum['type']=='float':
-          val= float(result)
-          datum['valueDisp'].config(text='{0:.{1}f}'.format(val,datum['prec']))
-          datum['value']= val
-        if datum['type']=='hold' or datum['type']=='long':
-          val= int(result)
-          datum['valueDisp'].config(text='{:d}'.format(val))
-          datum['value']= val
-        if datum['type']=='coil':
-          if result:
-            datum['valueDisp'].config(text='On')
-          else:
-            datum['valueDisp'].config(text='Off')
-          datum['value']= result
-    self.mbClose()
-
 #------------------------------------------------------------------------------
 #  GUI Main
 #
@@ -432,4 +280,4 @@ root.protocol("WM_DELETE_WINDOW",app.done)
 app.mainloop()
 root.destroy()
 
-#-- End MBMon -----------------------------------------------------------------
+#-- End Weather ---------------------------------------------------------------

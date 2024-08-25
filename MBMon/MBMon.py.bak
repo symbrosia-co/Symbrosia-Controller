@@ -432,4 +432,4 @@ root.protocol("WM_DELETE_WINDOW",app.done)
 app.mainloop()
 root.destroy()
 
-#-- End MBMon -----------------------------------------------------------------
+#-- End Weather ---------------------------------------------------------------

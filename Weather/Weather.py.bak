@@ -1,29 +1,28 @@
 #------------------------------------------------------------------------------
-#  Monitor
+#  Weather
 #
-#  - Monitor a set of Modbus addresses
+#  - A simple weather display GUI
 #  - written for Python v3.9
 #
 #  Symbrosia
-#  Copyright 2021, all rights reserved
+#  Copyright 2024, all rights reserved
 #
-# 29Nov2021 A. Cooper v0.1
+# 25Aug2024 A. Cooper v0.1
 #  - initial version
 #
 #------------------------------------------------------------------------------
-verStr= 'MBMon v1.0'
+verStr= 'Weather v0.1'
 
 #-- constants -----------------------------------------------------------------
-cfgFileName= 'MBMon.xml'
-logFileName= 'MBMon'
-logFilePath= 'logs'
-cfgFilePath= 'setup'
+cfgFileName= 'config.xml'
+logFileName= 'Weather'
+logFilePath= 'log'
+cfgFilePath= 'cfg'
+libFilePath= 'lib'
 colBack=     '#BBBBBB'
 colDev=      '#999999'
 colOn=       '#ADFF8C'
 colOff=      '#FFADAD'
-
-verbose=     False;
 
 #-- library -------------------------------------------------------------------
 import string
@@ -42,14 +41,17 @@ import xml.etree.ElementTree as xml
 localDir= os.path.dirname(os.path.realpath(__file__))
 logPath=  os.path.join(localDir,logFilePath)
 cfgPath=  os.path.join(localDir,cfgFilePath)
+libPath=  os.path.join(localDir,libFilePath)
+sys.path.append(libPath)
+
+#-- includes ------------------------------------------------------------------
+from config import loadConfig
+import symbCtrlModbus
 
 #------------------------------------------------------------------------------
-#  MBMon GUI
+#  Weather GUI
 #
 #  - setup the GUI
-#
-#  29Nov2021 A. Cooper
-#  - initial version
 #
 #------------------------------------------------------------------------------
 class Application(tk.Frame):
@@ -62,9 +64,11 @@ class Application(tk.Frame):
   logging=      False
 
   def __init__(self, master=None):
-    if not self.loadConfig(cfgPath,cfgFileName):
+    self.config= loadConfig(cfgPath,cfgFileName)
+    if self.config==None:
       sys.exit()
-    # print(self.config)
+    print(self.config)
+    sys.exit()
     tk.Frame.__init__(self, master)
     self.grid()
     self.createWidgets()
@@ -139,31 +143,6 @@ class Application(tk.Frame):
     self.spacer1.grid      (column=0,row=0)
     self.spacer2=          tk.Label(self,text=' ')
     self.spacer2.grid      (column=7,row=row+2)
-
-  def loadConfig(self,configPath,configFile):
-    #try:
-    tree = xml.parse(os.path.join(configPath,configFile))
-    #except:
-    #  messagebox.showerror(title='Startup error...',message='Unable to load configuration file {}\{}'.format(configPath,configFile))
-    #  return False
-    #process top level
-    self.config['devices']= []
-    root= tree.getroot()
-    for item in root:
-      if item.tag=='device':
-        device= {'data':[]}
-        for dev in item:
-          if dev.tag=='datum':
-            datum= {}
-            for dat in dev:
-              datum[dat.tag]= dat.text
-            device['data'].append(datum)
-          else:
-            device[dev.tag]= dev.text
-        self.config['devices'].append(device)
-      else:
-        self.config[item.tag]= item.text
-    return True
 
   #- GUI event handling -------------------------------------------------------
 
@@ -432,4 +411,4 @@ root.protocol("WM_DELETE_WINDOW",app.done)
 app.mainloop()
 root.destroy()
 
-#-- End MBMon -----------------------------------------------------------------
+#-- End Weather ---------------------------------------------------------------
