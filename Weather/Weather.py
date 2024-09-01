@@ -11,7 +11,7 @@
 #  - initial version
 #
 #------------------------------------------------------------------------------
-verStr= 'Weather v0.1'
+verStr= 'Weather v0.1'   
 
 #-- constants -----------------------------------------------------------------
 cfgFileName= 'config.xml'
@@ -23,6 +23,17 @@ colBack=     '#BBBBBB'
 colDev=      '#999999'
 colOn=       '#ADFF8C'
 colOff=      '#FFADAD'
+colTemp=     '#A00000'
+colHumid=    '#0070A0'
+colRain=     '#0000A0'
+colPAR=      '#00A000'
+dataSize=     14
+unitSize=     10
+dataFont=     'Arial'
+graphX=       250
+graphY=       100
+
+verbose=     True
 
 #-- library -------------------------------------------------------------------
 import string
@@ -60,20 +71,22 @@ class Application(tk.Frame):
   logFile=      None
   lastLog=      dt.datetime.now()
   eventNow=     dt.datetime.min
-  mbActive=     False
+  scanActive=   False
   logging=      False
 
   def __init__(self, master=None):
     self.config= loadConfig(cfgPath,cfgFileName)
     if self.config==None:
       sys.exit()
-    print(self.config)
-    sys.exit()
+    # create GUI
     tk.Frame.__init__(self, master)
     self.grid()
     self.createWidgets()
     root.resizable(width=False, height=False)
     root.protocol("WM_DELETE_WINDOW",self.done)
+    # setup modbus
+    self.controller= symbCtrlModbus.SymbCtrl()
+    # running
     self.logEvent('{} started'.format(verStr),True)
     self.device= ModbusClient(debug=verbose)
     print('{} running...'.format(verStr))
@@ -81,107 +94,130 @@ class Application(tk.Frame):
   def createWidgets(self):
     spaceX= 5
     spaceY= 1
-    #data fields
-    row= 1
-    for device in self.config['devices']:
-      label= tk.Label(self,text=device['name'],width=50,anchor=tk.W,font=("Helvetica","12"),bg=colDev)
-      label.grid(column=1,row=row,columnspan=4,sticky=tk.W)
-      label= tk.Label(self,text=device['ipAddr'],width=40,anchor=tk.E,font=("Helvetica","12"),bg=colDev)
-      label.grid(column=4,row=row,columnspan=3,sticky=tk.W)
-      row+= 1
-      for dat in device['data']:
-        datum= {}
-        label= tk.Label(self,text=dat['name'],font=("Helvetica","10"))
-        label.grid    (column=1,row=row,pady=spaceY,sticky=tk.E)
-        datum['ipAddr']=  device['ipAddr']
-        datum['port']=    device['port']
-        datum['devName']= device['name']
-        datum['name']=    dat['name']
-        datum['addr']=    dat['addr']
-        datum['type']=    dat['type']
-        if 'log' in dat:
-          datum['log']=   dat['log']
-        else:
-          datum['log']=   False
-        if 'precision' in dat:
-          datum['prec']=  dat['precision']
-        datum['write']=   False
-        datum['value']=   None
-        if 'log' in dat:
-          if dat['log']== 'True': datum['log']= True
-          else: datum['log']= False
-        else: datum['log']= False
-        label= tk.Label(self,text='---',font=("Helvetica","12"))
-        label.grid     (column=2,row=row,sticky=tk.E)
-        datum['valueDisp']= label
-        if 'unit' in dat:
-          label= tk.Label(self,text=dat['unit'],anchor=tk.W,font=("Helvetica","10"))
-          label.grid     (column=3,row=row,sticky=tk.W)
-        if 'write' in dat:
-          button=  tk.Button(self,text='Write',width=10,command=self.write,font=("Helvetica", "12"))
-          button.grid     (column=5,row=row)
-          datum['button']=  button
-          datum['write']=   True
-        row+= 1
-        self.data.append(datum)
+    # temperature
+    self.label=            tk.Label(self,text='Temp',font=(dataFont,unitSize),fg=colTemp)
+    self.label.grid        (column=1,row=1,sticky=tk.E)
+    self.label=            tk.Label(self,text='Tmax',font=(dataFont,unitSize),fg=colTemp)
+    self.label.grid        (column=1,row=2,sticky=tk.E)
+    self.label=            tk.Label(self,text='Tmin',font=(dataFont,unitSize),fg=colTemp)
+    self.label.grid        (column=1,row=3,sticky=tk.E)
+    self.rainData=         tk.Label(self,text='0.0',font=(dataFont,dataSize),fg=colTemp)
+    self.rainData.grid     (column=2,row=1)
+    self.rainDataMax=      tk.Label(self,text='0.0',font=(dataFont,dataSize),fg=colTemp)
+    self.rainDataMax.grid  (column=2,row=2)
+    self.rainDataMin=      tk.Label(self,text='0.0',font=(dataFont,dataSize),fg=colTemp)
+    self.rainDataMin.grid  (column=2,row=3)
+    self.label=            tk.Label(self,text='°C',font=(dataFont,unitSize),fg=colTemp)
+    self.label.grid        (column=3,row=1,sticky=tk.W)
+    self.label=            tk.Label(self,text='°C',font=(dataFont,unitSize),fg=colTemp)
+    self.label.grid        (column=3,row=2,sticky=tk.W)
+    self.label=            tk.Label(self,text='°C',font=(dataFont,unitSize),fg=colTemp)
+    self.label.grid        (column=3,row=3,sticky=tk.W)
+    self.tempGraph=        tk.Canvas(self,width=graphX,height=graphY,bg=colBack)
+    self.tempGraph.grid    (column=4,row=1,padx=spaceX,pady=spaceY,rowspan=3)
+    # humidity
+    self.label=            tk.Label(self,text='Humidity',font=(dataFont,unitSize),fg=colHumid)
+    self.label.grid        (column=6,row=1,sticky=tk.E)
+    self.label=            tk.Label(self,text='RHmax',font=(dataFont,unitSize),fg=colHumid)
+    self.label.grid        (column=6,row=2,sticky=tk.E)
+    self.label=            tk.Label(self,text='RHmin',font=(dataFont,unitSize),fg=colHumid)
+    self.label.grid        (column=6,row=3,sticky=tk.E)
+    self.humidData=        tk.Label(self,text='0.0',font=(dataFont,dataSize),fg=colHumid)
+    self.humidData.grid    (column=7,row=1)
+    self.humidDataMax=     tk.Label(self,text='0.0',font=(dataFont,dataSize),fg=colHumid)
+    self.humidDataMax.grid (column=7,row=2)
+    self.humidDataMin=     tk.Label(self,text='0.0',font=(dataFont,dataSize),fg=colHumid)
+    self.humidDataMin.grid (column=7,row=3)
+    self.label=            tk.Label(self,text='%RH',font=(dataFont,unitSize),fg=colHumid)
+    self.label.grid        (column=8,row=1,sticky=tk.W)
+    self.label=            tk.Label(self,text='%RH',font=(dataFont,unitSize),fg=colHumid)
+    self.label.grid        (column=8,row=2,sticky=tk.W)
+    self.label=            tk.Label(self,text='%RH',font=(dataFont,unitSize),fg=colHumid)
+    self.label.grid        (column=8,row=3,sticky=tk.W)
+    self.tempGraph=        tk.Canvas(self,width=graphX,height=graphY,bg=colBack)
+    self.tempGraph.grid    (column=9,row=1,padx=spaceX,pady=spaceY,rowspan=3)
+    # precipitation
+    self.label=            tk.Label(self,text='Precipitation',font=(dataFont,unitSize),fg=colRain)
+    self.label.grid        (column=1,row=5,sticky=tk.E)
+    self.label=            tk.Label(self,text='Rate',font=(dataFont,unitSize),fg=colRain)
+    self.label.grid        (column=1,row=6,sticky=tk.E)
+    self.rainData=         tk.Label(self,text='0.0',font=(dataFont,dataSize),fg=colRain)
+    self.rainData.grid     (column=2,row=5)
+    self.rainDataRate=      tk.Label(self,text='0.0',font=(dataFont,dataSize),fg=colRain)
+    self.rainDataRate.grid  (column=2,row=6)
+    self.label=            tk.Label(self,text='mm',font=(dataFont,unitSize),fg=colRain)
+    self.label.grid        (column=3,row=5,sticky=tk.W)
+    self.label=            tk.Label(self,text='mm/h',font=(dataFont,unitSize),fg=colRain)
+    self.label.grid        (column=3,row=6,sticky=tk.W)
+    self.spacer=           tk.Label(self,text=' ',font=(dataFont,unitSize))
+    self.spacer.grid       (column=3,row=7)
+    self.rainGraph=        tk.Canvas(self,width=graphX,height=graphY,bg=colBack)
+    self.rainGraph.grid    (column=4,row=5,padx=spaceX,pady=spaceY,rowspan=3)
+    # PAR
+    self.label=            tk.Label(self,text='PAR',font=(dataFont,unitSize),fg=colPAR)
+    self.label.grid        (column=6,row=5,sticky=tk.E)
+    self.label=            tk.Label(self,text='Tmax',font=(dataFont,unitSize),fg=colPAR)
+    self.label.grid        (column=6,row=6,sticky=tk.E)
+    self.parData=          tk.Label(self,text='0.0',font=(dataFont,dataSize),fg=colPAR)
+    self.parData.grid      (column=7,row=5)
+    self.parDataMax=       tk.Label(self,text='0.0',font=(dataFont,dataSize),fg=colPAR)
+    self.parDataMax.grid   (column=7,row=6)
+    self.label=            tk.Label(self,text='µMol/m²/s',font=(dataFont,unitSize),fg=colPAR)
+    self.label.grid        (column=8,row=5,sticky=tk.W)
+    self.label=            tk.Label(self,text='µMol/m²/s',font=(dataFont,unitSize),fg=colPAR)
+    self.label.grid        (column=8,row=6,sticky=tk.W)
+    self.spacer=           tk.Label(self,text=' ')
+    self.spacer.grid       (column=8,row=7)
+    self.parGraph=         tk.Canvas(self,width=graphX,height=graphY,bg=colBack)
+    self.parGraph.grid     (column=9,row=5,padx=spaceX,pady=spaceY,rowspan=3)
     #log window
-    self.eventLog=         tk.Text(self,width=80,height=8,bg=colBack)
-    self.eventLog.grid     (column=1,row=row,padx=0,pady=spaceY,columnspan=5,sticky=tk.E+tk.W)
+    self.eventLog=         tk.Text(self,width=60,height=5,bg=colBack)
+    self.eventLog.grid     (column=1,row=9,padx=spaceX,pady=spaceY,columnspan=6,rowspan=2)
     self.scrollbar=        tk.Scrollbar(self)
     self.scrollbar.config  (command=self.eventLog.yview)
     self.eventLog.config   (yscrollcommand=self.scrollbar.set)
-    self.scrollbar.grid    (column=6,row=row,padx=0,pady=8,sticky=tk.N+tk.S+tk.W)
+    self.scrollbar.grid    (column=7,row=9,padx=0,pady=spaceY,sticky=tk.N+tk.S+tk.W)
     #buttons
     self.startButton=      tk.Button(self,text="Stopped",width=10,command=self.startStop,font=("Helvetica", "12"),bg=colOff)
-    self.startButton.grid  (column=1,row=row+1,padx=spaceX,pady=spaceY)
-    self.logButton=        tk.Button(self,text="No Log",width=10,command=self.startLog,font=("Helvetica", "12"),bg=colOff)
-    self.logButton.grid    (column=2,row=row+1,padx=spaceX,pady=spaceY)
+    self.startButton.grid  (column=9,row=9,padx=spaceX,pady=spaceY,sticky=tk.E)
     self.quitButton=       tk.Button(self,text="Quit",width=10,command=self.done,font=("Helvetica", "12"))
-    self.quitButton.grid   (column=5,row=row+1,padx=spaceX,pady=spaceY)
+    self.quitButton.grid   (column=9,row=10,padx=spaceX,pady=spaceY,sticky=tk.E)
     #spacers
-    self.spacer1=          tk.Label(self,text=' ')
-    self.spacer1.grid      (column=0,row=0)
-    self.spacer2=          tk.Label(self,text=' ')
-    self.spacer2.grid      (column=7,row=row+2)
+    self.spacer=          tk.Label(self,text=' ')
+    self.spacer.grid      (column=0,row=0)
+    self.spacer=          tk.Label(self,text=' ')
+    self.spacer.grid      (column=0,row=4)
+    self.spacer=          tk.Label(self,text=' ')
+    self.spacer.grid      (column=0,row=8)
+    self.spacer=          tk.Label(self,text=' ')
+    self.spacer.grid      (column=10,row=11)
 
   #- GUI event handling -------------------------------------------------------
-
-  def write(self):
-    pass
     
   def startStop(self):
-    if self.mbActive:
-      self.mbActive= False
-      self.logging= False
-      root.after_cancel(self.mbEvent)
-      self.startButton.config(text="Stopped",bg=colOff)
+    if self.scanActive:
+      self.scanActive= False
+      root.after_cancel(self.scanEvent)
     else:
-      self.mbActive= True
+      self.scanActive= True
       self.update();
-      self.startButton.config(text="Running",bg=colOn)
-      
-  def startLog(self):
-    if self.logging:
-      self.logging= False
-      self.logButton.config(text="No Log",bg=colOff)
-    else:
-      if self.mbActive:
-        self.logging= True
-        self.logButton.config(text="Logging",bg=colOn)
 
   # handle the quit button
   def done(self):
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
-      if self.mbActive:
-        root.after_cancel(self.mbEvent)
+      if self.scanActive:
+        root.after_cancel(self.scanEvent)
       #self.closeLogFile()
       self.quit()
 
   def update(self):
-    self.scanModbus();
-    self.logWrite();
-    if self.mbActive:
-      self.mbEvent= root.after(int(self.config['scanInterval'])*1000,self.update)
+    # self.scanModbus();
+    # self.logWrite();
+    if self.scanActive:
+      self.startButton.config(text="Running",bg=colOn)
+      self.scanEvent= root.after(int(self.config['scanInterval'])*1000,self.update)
+    else:
+      self.startButton.config(text="Stopped",bg=colOff)
 
   #- Event reporting ----------------------------------------------------------
 

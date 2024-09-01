@@ -4,3 +4,4 @@ configuration.xml
 configuration.xml.bak
 MbMon.xml
 MbMon.xml.bak
+*.csv
