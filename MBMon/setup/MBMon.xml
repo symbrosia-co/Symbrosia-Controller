@@ -11,31 +11,33 @@
 
 <configuration>
   <scanInterval>1</scanInterval>
-  <logInterval>10</logInterval>
-  <logName>LabCtrl</logName>
+  <logInterval>300</logInterval>
+  <logName>Weather</logName>
   <device>
-    <name>LabCtrl</name>
-    <ipAddr>192.168.9.101</ipAddr>
+    <name>Weather</name>
+    <ipAddr>192.168.9.202</ipAddr>
     <port>502</port>
     <datum>
-      <name>CO2On</name>
-      <addr>10</addr>
-      <type>coil</type>
+      <name>Precipitation</name>
+      <addr>151</addr>
+      <type>long</type>
       <unit></unit>
       <log>True</log>
     </datum>
     <datum>
-      <name>LightOn</name>
-      <addr>15</addr>
-      <type>coil</type>
-      <unit></unit>
+      <name>PAR</name>
+      <addr>20</addr>
+      <type>float</type>
+      <unit>mol/m²/sec</unit>
+      <precision>1</precision>
       <log>True</log>
     </datum>
     <datum>
-      <name>Light Level</name>
-      <addr>36</addr>
-      <type>hold</type>
-      <unit>%</unit>
+      <name>Outdoor Temp</name>
+      <addr>22</addr>
+      <type>float</type>
+      <unit>°C</unit>
+      <precision>2</precision>
       <log>True</log>
     </datum>
   </device>
