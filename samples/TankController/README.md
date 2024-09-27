@@ -1,10 +1,20 @@
-# Tank or PBR Conbtroller with CO<sub>2</sub>
+# Tank or PBR Controller with CO<sub>2</sub>
 
-The primary use of the Symbrosia Controller is as a culture tank or photo-bioreactor controller.  In such a role the controller can monitor and control water temperature, pH, and potentially other parameters as needed.  With up to five sensors the conditions of a culture vessel can be throughly monitored.  This includes one water quality sensor (pH, ORP, or similar), two temperature sensors, and two general purpose analog sensors.  Likewise four outputs allow control of the usual tank or PBR conditions such as CO<sub>2</sub> sparging and temperature control.
+<img align="right" src="/res/CL46-47-24138-DC.jpg" alt="A tank controller using SymbCtrl">The primary use of the Symbrosia Controller is as a culture tank or photo-bioreactor controller.  In such a role the controller can monitor and control water temperature, pH, and potentially other parameters as needed.  With up to five sensors the conditions of a culture vessel can be throughly monitored.  This includes one water quality sensor (pH, ORP, or similar), two temperature sensors, and two general purpose analog sensors.  Likewise four outputs allow control of the usual tank or PBR conditions such as CO<sub>2</sub> sparging and temperature control.
 
-![A tank controller using SymbCtrl](/res/CL46-47-24138-DC.jpg)
+Documented here are the standard tank control boxes as used on the Symbrosia cultivation pads.  This is a control box built in a commonly available enclosure using standard parts.
 
-Documented here are the standard tank control boxes as used on the Symbrosia cultivation pads.  This is a control box built in a commonly available enclosure using standard parts.  A 3D printed frame is used to mount the various components into the enclosure in a oganized and robust manner.  The use of standard DIN rail terminal blocks makes field wiring to sensors and valves easy to use and maintain.  CO<sub>2</sub> sparging is handled using a built in valve and flow gauge.
+A 3D printed frame is used to mount the various components into the enclosure in a oganized and robust manner.  The use of standard DIN rail terminal blocks makes field wiring to sensors and valves easy to use and maintain.  CO<sub>2</sub> sparging is handled using a built in valve and flow gauge.
+
+## Arrangement
+
+<img align="right" src="PBRControl.png" alt="Tank or PBR Control">Any experienced aquaculture technician will find no surprises here, the controller is arranged exactly as one would expect.  In this case both temperature and pH control are implmented for use in algae culture.
+
+Temperature control may be implemented with cool water circulating through a heat exchanger (as shown in the figure), direct addition of cool water, or conversely by use of a heater to warm rather than cool if the need demands.  In any case one of the controller relays can be used to actuate this control.  The onboard relays are rated at 240Vac and 5A, if a larger load such as a large heater or pump is required the onboard relay may be used to control a larger relay or contactor.
+
+As shown, pH control is implemented in a very traditional manner, simply monitoring with a pH probe and when needed sparging CO<sub>2</sub> directly into the PBR or tank.
+
+Built as documented below the controller should be capable of controlling tanks from a few tens of liters to a few thousand liters.  Larger tanks will require larger valves to allow more flow and well considered placement of sensors.  If two temperature sensors are needed in a large tank the Symbrosia Controller can be configured to min/max or average the two readings and use the result.
 
 ## Documentation
 
@@ -27,8 +37,10 @@ All the needed parts can be purchaesed through online vendors.
 * Electronic components - Digikey (www.digikey.com) or Mouser (www.mouser.com)
 * PCB - JLCPCB (www.jlcpcb.com) or Advanced PCB (www.advancedpcb.com)
 * Valve - WIC Valve [2ACK-1/4-12VDC-G](https://wicvalve.com/product/1-4-inch-fast-response-air-water-electric-solenoid-valve-nc/)
-* Flow Gauge - Omega [FL-2002](https://www.omega.com/en-us/flow-instruments/flow-meters/variable-area-flow-meters/fl2000-series/p/FL-2002) or 
-*
+* Flow Gauge - Omega [FL-2002](https://www.omega.com/en-us/flow-instruments/flow-meters/variable-area-flow-meters/fl2000-series/p/FL-2002) or Dwyer [VFA-23](https://dwyer-inst.com/en/products/flow/flowmeters/series-vf-visi-floatr-acrylic-flowmeter.html)
+* Enclosure - Home Depot [Serpac I342HL](https://www.homedepot.com/p/Serpac-11-8-in-L-x-10-2-in-W-x-5-5-in-H-Cabinent-Enclosure-Polycarbonate-Clear-Hinged-Latch-Top-Gray-Bottom-I342HL-TCBG/303702896)
+
+Note that the flow meter model needed may require checking against the size of tank or PBR and the CO<sub>2</sub> flow rates needed to control pH.
 
 ## 3D Printing
 
