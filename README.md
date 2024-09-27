@@ -75,9 +75,9 @@ MbMon will work with any ModbusTCP device including SymbCtrl, it can also serve 
 ## Examples
 Currently three sample systems are documented here, use these setups as is, or modify them to your own needs...
 
-* [Tank or PBR controller](/samples/PBRCont/)
-* [CO<sub>2</sub> Tapping Point Monitor](/samples/CO2Tap/)
-* [Weather Station](/samples/Weather/)
+* [Tank or PBR controller](/samples/TankController/)
+* [CO<sub>2</sub> Tapping Point Monitor](/samples/CO2Monitor/)
+* [Weather Station](/samples/weather/)
   
 Each of these designs are provided with schematics, 3D models, and setup files for the Symbrosia Controller.
 
