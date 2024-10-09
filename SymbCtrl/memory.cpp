@@ -201,6 +201,8 @@ void Memory::defaults(){
   setInt  (datModelNumber,modelNumber);
   setInt  (datSerialNumber,serialNumber);
   setStr  (datModelName,modelNameStr);
+  setStr  (datWifiAPName,defWiFi);
+  setStr  (datWifiPassword,defPass);
   setInt  (datFirmwareRev,firmMajor*256+firmMinor);
   setBool (statMidnightSave,    false);
   setBool (statMidnightReset,   false);
@@ -349,9 +351,9 @@ void Memory::load(){
   for (int addr=0;addr<dataSize*2;addr++) ((byte *)data)[addr]= EEPROM.read(addr);
   for (int addr=0;addr<statSize;addr++) stat[addr]= EEPROM.read(addr+(dataSize*2))==1;
   Serial.println("    Loaded setup from EEPROM");
-  //if (true){
   if ((getInt(datModelNumber)!=modelNumber) ||
-      (getInt(datSerialNumber)!=serialNumber)){
+      (getInt(datSerialNumber)!=serialNumber  ||
+      loadDefaults)){
     defaults();
     Serial.println("    EEPROM uninitialized!! Defaults loaded.");
     save();

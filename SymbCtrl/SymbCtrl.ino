@@ -127,6 +127,15 @@
   - added auto I2C address search for MCP3021
   - a successful functional test performed
   - concat SymbCtrl to unit name to make network name
+  08Oct2024 v2.7 A. Cooper
+  - convert WiFi scanNetworks to non-blocking
+  - add a timeout to scanNetworks
+  - change ToD logic to not use direct mode as long as any controller
+  has the channel whether the controller is enabled or disabled
+  - note, any processor that uses the Arduino/Espressif board definition
+    version 3.0.4 may have issues using the WiFi.scanNetworks function
+    resulting in no networks found, this seems to be fixed in 3.0.5,
+    this does exist in the wild
 
   Known bugs...
   - none

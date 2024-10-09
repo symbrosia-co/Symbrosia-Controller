@@ -18,8 +18,18 @@
   <logFile>SyCtrlLog.log</logFile>
   <ctrl name='Test'>
     <model>SyCtrl Mk2</model>
-    <description>New production test</description>
-    <address>192.168.200.245</address>
+    <description>Functional test unit</description>
+    <address>192.168.26.23</address>
+  </ctrl>
+  <ctrl name='Taylor 1'>
+    <model>SyCtrl Mk2</model>
+    <description>Functional test unit</description>
+    <address>192.168.26.16</address>
+  </ctrl>
+  <ctrl name='X01'>
+    <model>SyCtrl Mk2</model>
+    <description>Xicheng</description>
+    <address>192.168.0.244</address>
   </ctrl>
   <ctrl name='CO2 Mon'>
     <model>SyCtrl Mk2</model>

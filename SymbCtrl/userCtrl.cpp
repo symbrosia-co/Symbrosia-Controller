@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------
+ /*------------------------------------------------------------------------------
   User Interface Control - Symbrosia Controller
   - handle an input encoder and an LCD display
 
@@ -26,6 +26,9 @@
   27Jul2024 v2.6 A. Cooper
   - removed a decimal point from status screen value display
   - added a number of new units
+  08Oct2024 v2.7 A. Cooper
+  - convert WiFi scanNetworks to non-blocking
+  - add a timeout to scanNetworks
 
 --------------------------------------------------------------------------------
 
@@ -73,6 +76,7 @@ bool userSetAcpt= false;
 bool userSetEnd=  false;
 unsigned long userSetTime;
 unsigned long wifiStart;
+unsigned long wifiScanTime;
 int userSelect= 0;
 int userSelLimit= 0;
 int userSelPos= 0;
@@ -83,6 +87,7 @@ char wifiPass[16];
 #define lcdUpdate  250
 #define chanOffset  16   //spacing of channel data in setup registers
 #define screenStatDelay 600
+#define wifiTimeout 60000  // timeout for WiFi scanNetworks
 
 //- functions ------------------------------------------------------------------
 
@@ -222,7 +227,8 @@ void UserCtrl::press(){
         lcd.print("Scanning...");
         lcd.setCursor(0,1);
         lcd.print("                ");
-        userSelLimit=  WiFi.scanNetworks(false,true);
+        wifiScanTime= millis();
+        Serial.println("Scanning networks...");
       }
       else userSetEnd= true;
       break;
@@ -932,7 +938,7 @@ void UserCtrl::drawWiFi(){
         return;        
       }
       if (userSetAcpt){
-        if (WiFi.SSID(userSelect).length()>1) memory.setStr(datWifiAPName,WiFi.SSID(userSelect).c_str());
+        if (WiFi.SSID(userSelect).length()>0) memory.setStr(datWifiAPName,WiFi.SSID(userSelect).c_str());
         else memory.setStr(datWifiAPName,"Unknown");
         userSetAcpt= false;
         userSetNext= true;
@@ -948,16 +954,32 @@ void UserCtrl::drawWiFi(){
         lcd.print("                ");
       }
       else{
-        lcd.setCursor(5,0);
-        lcd.print("Select...");
-        lcd.setCursor(0,1);
-        if (userSelLimit<1)  lcd.print(" No WiFi found! ");
-        else{
-          if (WiFi.SSID(userSelect).length()<1) lcd.print("Unknown      ");
-          else lcd.print(WiFi.SSID(userSelect).substring(0,12));
-          lcd.print("             ");
-          lcd.setCursor(13,1);
-          lcd.print(WiFi.RSSI(userSelect));
+        userSelLimit= WiFi.scanComplete();
+        if (wifiScanTime>millis()) wifiScanTime= millis(); // handle millis rollover
+        if (userSelLimit==-2 && millis()-wifiScanTime>2000){
+          WiFi.scanNetworks(true,false);
+          Serial.println("  Network scan start");
+        }
+        if (millis()-wifiScanTime>wifiTimeout){
+          userSelLimit= 0;
+          WiFi.disconnect();
+          Serial.println("  Network scan timeout");
+        }
+        if (userSelLimit>=0){
+          Serial.print("Network scan complete, ");
+          Serial.print(userSelLimit);
+          Serial.println(" found");
+          lcd.setCursor(5,0);
+          lcd.print("Select...");
+          lcd.setCursor(0,1);
+          if (userSelLimit<1)  lcd.print(" No WiFi found! ");
+          else{
+            if (WiFi.SSID(userSelect).length()<1) lcd.print("Unknown      ");
+            else lcd.print(WiFi.SSID(userSelect).substring(0,12));
+            lcd.print("             ");
+            lcd.setCursor(13,1);
+            lcd.print(WiFi.RSSI(userSelect));
+          }
         }
       }
     }
