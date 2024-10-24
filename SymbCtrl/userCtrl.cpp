@@ -29,6 +29,8 @@
   08Oct2024 v2.7 A. Cooper
   - convert WiFi scanNetworks to non-blocking
   - add a timeout to scanNetworks
+  - change memory.save to memory.saveFloat in calibration routines
+  - change momory.save to memory.saveWiFi in credential entry routine
 
 --------------------------------------------------------------------------------
 
@@ -621,17 +623,17 @@ void UserCtrl::drawWQSensor(){
       else{
         if (read>3 && read<5){
           memory.setFloat(datWQGain,-3/(read-7.0+memory.getFloat(datWQOffset)));
-          memory.save();
+          memory.saveFloat(datWQGain);
           lcd.print(" Cal'd @ 4pH ");
         }
         else if (read>6 && read<8){
           memory.setFloat(datWQOffset,7.0-read);
-          memory.save();
+          memory.saveFloat(datWQOffset);
           lcd.print(" Cal'd @ 7pH ");
         }
         else if (read>9 && read<11){
           memory.setFloat(datWQGain,3/(read-7.0+memory.getFloat(datWQOffset)));
-          memory.save();
+          memory.saveFloat(datWQGain);
           lcd.print(" Cal'd @ 10pH");
         }
         else lcd.print("Out of Range!");
@@ -678,7 +680,8 @@ void UserCtrl::drawTemps(){
       lcd.print("T2:");
       if (!userSetNext) userSetNext=true;
       else{
-        memory.save();
+        memory.saveFloat(datTemp1Offset);
+        memory.saveFloat(datTemp2Offset);
         userSetReq= false;
       }
       userSetAcpt= false;
@@ -774,7 +777,7 @@ void UserCtrl::drawControlC(int loop){
     memory.setFloat(datCtrl1Setpoint+(loop*chanOffset),memory.getFloat(datCtrl1Setpoint+(loop*chanOffset))+(float(userSelScroll)*0.1));
     userSelScroll= 0;
     if (userSetAcpt || millis()-userSetTime>30000){
-      memory.save();
+      memory.saveFloat(datCtrl1Setpoint+(loop*chanOffset));
       userSetReq=  false;
       lcd.setCursor(6,0);
       lcd.print("S:");
@@ -992,7 +995,7 @@ void UserCtrl::drawWiFi(){
           wifiPass[userSelPos]= 0;
         }
         memory.setStr(datWifiPassword,wifiPass);
-        memory.save();
+        memory.saveWiFi();
         setScreen(scrUnit);
         return;
       }

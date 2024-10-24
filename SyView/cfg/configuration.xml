@@ -19,7 +19,7 @@
   <ctrl name='Test'>
     <model>SyCtrl Mk2</model>
     <description>Functional test unit</description>
-    <address>192.168.26.23</address>
+    <address>192.168.200.122</address>
   </ctrl>
   <ctrl name='Taylor 1'>
     <model>SyCtrl Mk2</model>

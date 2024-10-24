@@ -39,8 +39,8 @@
 ------------------------------------------------------------------------------*/
 #pragma once
 
-#define hardwareS2Mini 2
-//#define hardwareS3Mini 3
+//#define hardwareS2Mini 2
+#define hardwareS3Mini 3
 
 #ifdef hardwareS2Mini
 #include "hardwareSymbCtrlS2Mini.h"
@@ -52,7 +52,7 @@
 
 // unit ID 
 #define modelNumber   2
-#define serialNumber  252
+#define serialNumber  225
 #define firmMajor     2
 #define firmMinor     7
 #define modelNameStr  "SymbCtrl Mk2"
@@ -74,8 +74,10 @@
 #define loadDefaults  false // force load of defaults on boot
 
 //- WiFi credentials -----------------------------------------------------------
-#define defWiFi "Taylor-Staff"
-#define defPass "Taylor1234"
+#define defWiFi "Symbrosia 2.4HGz"
+#define defPass "LimuKohu19*"
+//#define defWiFi "Taylor-Staff"
+//#define defPass "Taylor1234"
 
 //- ntp server -----------------------------------------------------------------
 #define ntpServer1 "pool.ntp.org"

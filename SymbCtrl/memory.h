@@ -12,6 +12,9 @@
   - revised memory map for first release
   20Mar2024 v2.4 A. Cooper
   - added combined alarm states for each control loop and overall control
+  23Oct2024 v2.7 A. Cooper
+  - add saveFloat to allow storing of calibration values without global save
+  - add saveWiFi to allow storing credentials without global save
 
 --------------------------------------------------------------------------------
 
@@ -101,6 +104,8 @@ class Memory{
     void     limitCheck();
     void     load();
     void     save();
+    void     saveFloat(uint16_t addr);
+    void     saveWiFi();
     void     service();
   private:
     uint16_t data[dataSize];

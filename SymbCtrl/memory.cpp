@@ -15,6 +15,10 @@
   31Jul2024 v2.6 A. Cooper
   - added value restriction for internal temperature units
   - added value restriction for control enable source
+  31Jul2024 v2.7 A. Cooper
+  - add saveFloat to allow storing of calibration values without global save
+  - add saveWiFi to allow storing credentials without global save
+  - changed serial messages during EEPROM load
 
 --------------------------------------------------------------------------------
 
@@ -345,19 +349,19 @@ void Memory::limitCheck(){
 void Memory::load(){
   // check for initialized EEPROM memory, model and serial must match
   EEPROM.begin((dataSize+statSize)*2);
-  Serial.println("  Retrieve EEPROM...");
+  Serial.println("  Retrieve parameters...");
   // read EEPROM
-  Serial.println("    EEPROM Valid");
   for (int addr=0;addr<dataSize*2;addr++) ((byte *)data)[addr]= EEPROM.read(addr);
   for (int addr=0;addr<statSize;addr++) stat[addr]= EEPROM.read(addr+(dataSize*2))==1;
-  Serial.println("    Loaded setup from EEPROM");
+  Serial.println("    Loaded parameters from flash");
   if ((getInt(datModelNumber)!=modelNumber) ||
       (getInt(datSerialNumber)!=serialNumber  ||
       loadDefaults)){
     defaults();
-    Serial.println("    EEPROM uninitialized!! Defaults loaded.");
+    Serial.println("    Flash uninitialized!! Defaults loaded.");
     save();
   }
+  else Serial.println("    Flash parameters valid");
   EEPROM.end();
 } // load
 
@@ -368,8 +372,28 @@ void Memory::save(){
   for (int addr=0;addr<statSize;addr++) EEPROM.write(addr+(dataSize*2),int(stat[addr]));
   EEPROM.commit();
   EEPROM.end();
-  Serial.println("    EEPROM saved");
+  Serial.println("    Parameters save in flash");
 } // save
+
+void Memory::saveFloat(uint16_t addr){
+  if (addr>=0 || addr<dataSize){
+    EEPROM.begin((dataSize*2)+statSize);
+    for (int off=0;off<4;off++) EEPROM.write(addr*2+off,((byte *)data)[addr*2+off]);
+    EEPROM.commit();
+    EEPROM.end();
+    Serial.println("    Value saved in flash");
+  }
+  return;
+} // saveFloat
+
+void Memory::saveWiFi(){
+  EEPROM.begin((dataSize*2)+statSize);
+  for (int off=0;off<32;off++)
+    EEPROM.write(datWifiAPName*2+off,((byte *)data)[datWifiAPName*2+off]);
+  EEPROM.commit();
+  EEPROM.end();
+  Serial.println("    WiFi credentials saved in flash");
+} // saveWiFi
 
 void Memory::service(){
   // check for save settings bit
