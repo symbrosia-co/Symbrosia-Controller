@@ -1,23 +1,22 @@
 #------------------------------------------------------------------------------
-#  Monitor
+#  SyCheck
 #
-#  - Monitor a set of Modbus addresses
+#  - Ensure correct configuration of controllers on the network
 #  - written for Python v3.9
 #
 #  Symbrosia
 #  Copyright 2021, all rights reserved
 #
-# 29Nov2021 A. Cooper v0.1
-#  - initial version
+# 23Oct2024 A. Cooper v0.1
+# - initial version
 #
 #------------------------------------------------------------------------------
-verStr= 'MBMon v1.0'
+verStr= 'SyCheck v0.1'
 
 #-- constants -----------------------------------------------------------------
-cfgFileName= 'MBMon.xml'
-logFileName= 'MBMon'
-logFilePath= 'logs'
-cfgFilePath= 'setup'
+cfgFileName= 'configuration.xml'
+cfgFilePath= 'cfg'
+rptFilePath= 'rpt'
 colBack=     '#BBBBBB'
 colDev=      '#999999'
 colOn=       '#ADFF8C'
@@ -40,15 +39,15 @@ import xml.etree.ElementTree as xml
 
 #-- globals -------------------------------------------------------------------
 localDir= os.path.dirname(os.path.realpath(__file__))
-logPath=  os.path.join(localDir,logFilePath)
+rptPath=  os.path.join(localDir,rptFilePath)
 cfgPath=  os.path.join(localDir,cfgFilePath)
 
 #------------------------------------------------------------------------------
-#  MBMon GUI
+#  SyCheck GUI
 #
 #  - setup the GUI
 #
-#  29Nov2021 A. Cooper
+#  23Oct2024 A. Cooper
 #  - initial version
 #
 #------------------------------------------------------------------------------
