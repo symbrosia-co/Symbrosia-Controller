@@ -368,8 +368,6 @@ class SymbCtrl():
     result= []
     for reg in self.ctrlRegs:
       result.append({'reg':reg,'value':self.ctrlRegs[reg]['value'],'type':self.ctrlRegs[reg]['type']})
-    for reg in result:
-      print(reg)
     return result;
 
   def putValue(self,reg,value):

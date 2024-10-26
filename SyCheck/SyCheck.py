@@ -161,20 +161,68 @@ class Application(tk.Frame):
   #- GUI event handling -------------------------------------------------------
 
   def scan(self):
-    pass
+    self.report= []
+    for unit in self.units:
+      if unit['name']==self.ctrlStr.get():
+        self.scanUnit(unit)
       
   def scanAll(self):
-    report= []
+    self.report= []
+    self.report.append('SyCheck Report')
+    self.report.append('  {:%Y-%m-%d %H:%M:%S}'.format(dt.datetime.now()))
+    self.report.append('  ')
     for unit in self.units:
-      self.logEvent('Check config for {}...'.format(unit['name']),True)
+      self.scanUnit(unit)
+    for line in self.report:
+      print(line)
+
+  def scanUnit(self,unit):
+      self.logEvent('Check config for {} against {}...'.format(unit['name'],unit['ref']),True)
+      self.report.append('Check config for {} against {}...'.format(unit['name'],unit['ref']))
+      diffs= 0
       if self.controller.start(unit['address'],502):
         self.controller.service()
-        print(unit['ref'])
-        for reg in self.refs[unit['ref']]:
-          print(reg)
+        if self.controller.error():
+          self.logEvent('  Communications error with {}'.format(unit['name']),True)
+          self.report.append('  Communications error with {}'.format(unit['name']))
+        else:
+          self.logEvent('  {} configuration read'.format(unit['name']),True)
+          self.report.append('  {} configuration read'.format(unit['name']))
+          for reg in self.refs[unit['ref']]:
+            regValue= self.controller.value(reg['reg'])
+            refValue= self.controller.convert(reg['reg'],reg['value'])
+            if reg['type']=='str':
+              if regValue!=refValue:
+                self.logEvent('  {}:\'{}\' ≠ \'{}\' in reference'.format(reg['reg'],regValue,refValue),True)
+                self.report.append('  {}:\'{}\' ≠ \'{}\' in reference'.format(reg['reg'],regValue,refValue))
+                diffs+=1
+            if reg['type']=='int' or reg['reg']=='uint':
+              if regValue!=refValue:
+                self.logEvent('  {}:{:d} ≠ {:d} in reference'.format(reg['reg'],regValue,refValue),True)
+                self.report.append('  {}:\'{:d}\' ≠ \'{:d}\' in reference'.format(reg['reg'],regValue,refValue))
+                diffs+=1
+            if reg['type']=='float':
+              if round(regValue,4)!=round(refValue,4):
+                self.logEvent('  {}:{:.2f} ≠ {:.2f} in reference'.format(reg['reg'],regValue,refValue),True)
+                self.report.append('  {}:\'{:.2f}\' ≠ \'{:.2f}\' in reference'.format(reg['reg'],regValue,refValue))
+                diffs+=1
+            if reg['type']=='bool':
+              if regValue!=refValue:
+                self.logEvent('  {}:{} ≠ {} in reference'.format(reg['reg'],regValue,refValue),True)
+                self.report.append('  {}:\'{}\' ≠ \'{}\' in reference'.format(reg['reg'],regValue,refValue))
+                diffs+=1
+          if diffs==0:
+            self.logEvent('  No differences found'.format(diffs),True)
+            self.report.append('  No differences found'.format(diffs))
+          if diffs==1:
+            self.logEvent('  {:d} difference found'.format(diffs),True)
+            self.report.append('  {:d} difference found'.format(diffs))
+          else:
+            self.logEvent('  {:d} differences found'.format(diffs),True)
+            self.report.append('  {:d} differences found'.format(diffs))
       else:
         self.logEvent('  Error!! Unable to open {}'.format(unit['name']),True)
-        
+        self.report.append('  Error!! Unable to open {}'.format(unit['name']))        
     
   def save(self):
     pass
@@ -190,7 +238,7 @@ class Application(tk.Frame):
   def logEvent(self,event,incDate):
     self.eventLast= self.eventNow
     self.eventNow= dt.datetime.now()
-    if (self.eventNow-self.eventLast)<dt.timedelta(seconds=2):
+    if (self.eventNow-self.eventLast)<dt.timedelta(seconds=10):
       incDate= False
     if incDate:
       self.eventLog.insert(tk.END,'{:%Y-%m-%d %H:%M:%S} '.format(self.eventNow))
