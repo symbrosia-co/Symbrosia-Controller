@@ -365,8 +365,10 @@ class SymbCtrl():
     return None
 
   def getRegs(self):
-    result= {}
+    result= []
     for reg in self.ctrlRegs:
+      result.append({'reg':reg,'value':self.ctrlRegs[reg]['value'],'type':self.ctrlRegs[reg]['type']})
+    for reg in result:
       print(reg)
     return result;
 

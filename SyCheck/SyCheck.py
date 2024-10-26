@@ -45,11 +45,10 @@ rptPath=  os.path.join(localDir,rptFilePath)
 cfgPath=  os.path.join(localDir,cfgFilePath)
 refPath=  os.path.join(localDir,refFilePath)
 libPath=  os.path.join(localDir,libFilePath)
-print(libPath)
 sys.path.append(libPath)
 
 #-- local libraries -----------------------------------------------------------
-import symbCtrlModbus.py
+import symbCtrlModbus
 
 #------------------------------------------------------------------------------
 #  SyCheck GUI
@@ -63,9 +62,9 @@ import symbCtrlModbus.py
 class Application(tk.Frame):
   units= {}
   refs=  {}
+  report=[]
   lastLog=  dt.datetime.now()
   eventNow= dt.datetime.min
-  controller= SymbCtrl();
 
   def __init__(self, master=None):
     tk.Frame.__init__(self, master)
@@ -73,6 +72,7 @@ class Application(tk.Frame):
     self.createWidgets()
     root.resizable(width=False, height=False)
     root.protocol("WM_DELETE_WINDOW",self.done)
+    self.controller= symbCtrlModbus.SymbCtrl()
     # load units and refs
     if not self.loadConfig(cfgPath,cfgFileName):
       sys.exit()
@@ -149,11 +149,11 @@ class Application(tk.Frame):
           messagebox.showerror(title='Startup error...',message='Unable to load refernce file {}\{}'.format(configPath,unit['ref']))
           return False
         #process top level
-        new= {}
+        new= []
         root= tree.getroot()
         for reg in root:
           if reg.tag=='register':
-            new[reg.attrib['name']]= reg.text
+            new.append({'reg':reg.attrib['name'],'value':reg.text,'type':self.controller.type(reg.attrib['name'])})
         self.refs[unit['ref']]= new
         self.logEvent('Reference file {} loaded'.format(unit['ref']),True)
     return True
@@ -164,12 +164,13 @@ class Application(tk.Frame):
     pass
       
   def scanAll(self):
+    report= []
     for unit in self.units:
       self.logEvent('Check config for {}...'.format(unit['name']),True)
       if self.controller.start(unit['address'],502):
         self.controller.service()
-        regs= self.controller.getRegs()
-        for reg in regs:
+        print(unit['ref'])
+        for reg in self.refs[unit['ref']]:
           print(reg)
       else:
         self.logEvent('  Error!! Unable to open {}'.format(unit['name']),True)
@@ -181,9 +182,6 @@ class Application(tk.Frame):
   # handle the quit button
   def done(self):
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
-      if self.mbActive:
-        root.after_cancel(self.mbEvent)
-      #self.closeLogFile()
       self.quit()
 
   #- Event reporting ----------------------------------------------------------
