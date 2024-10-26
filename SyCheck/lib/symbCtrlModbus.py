@@ -26,6 +26,8 @@
 #  - implemented minimum time on/off
 #  - added one-shot registers
 #  - added TofD to channel list
+# 24Oct2024 v1.2 A. Cooper
+#  - added getRegs to return a full register/value dictionary
 #
 #------------------------------------------------------------------------------
 from pyModbusTCP.client import ModbusClient
@@ -361,6 +363,14 @@ class SymbCtrl():
       self.lastMessage= 'Bad register name'
     self.lastError= True
     return None
+
+  def getRegs(self):
+    result= []
+    for reg in self.ctrlRegs:
+      result.append({'reg':reg,'value':self.ctrlRegs[reg]['value'],'type':self.ctrlRegs[reg]['type']})
+    for reg in result:
+      print(reg)
+    return result;
 
   def putValue(self,reg,value):
     self.lastError= True
