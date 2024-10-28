@@ -83,15 +83,21 @@ class UserCtrl{
     void press();
     void dClick();
   private:
-    int screen;
-    bool newScr;
+    int screen= 0;
+    bool newScr= true;
     unsigned long lastUpdate;
     unsigned long screenTime;
-    bool userSetReq;
-    bool userSetConf;
+    int userSetReq;
+    bool userSetNext;
     bool userSetAcpt;
+    unsigned long userSetTime;
+    int userSelect;   
+    int userSelLimit;
     int userSelScroll;
-    unsigned long  userSetTime;
+    int userSelPos;
+    char wifiPass[16];
+    unsigned long wifiStart;
+
     void printChan(int chan);
     void printState(int chan);
     void printRead(float read,int space,int decs,int unit,bool valid);

@@ -15,26 +15,12 @@
 <configuration>
   <scanInterval>1</scanInterval>
   <logInterval>120</logInterval>
-  <logName>PBRFlow</logName>
+  <logName>Weather</logName>
   <device>
-    <name>PBR Flow</name>
-    <ipAddr>192.168.0.100</ipAddr>
+    <name>Weather</name>
+    <ipAddr>192.168.9.202</ipAddr>
     <port>502</port>
-    <type>Flow</type>
-    <datum>
-      <name>PBR Flow Gauge</name>
-      <addr>151</addr>
-      <type>long</type>
-      <unit></unit>
-      <log>True</log>
-    </datum>
-  </device>
-  
-  <device>
-    <name>CO2 Monitor</name>
-    <ipAddr>192.168.0.105</ipAddr>
-    <port>502</port>
-    <type>Monitor</type>
+    <type>Weather</type>
     <datum>
       <name>Ambient Temp</name>
       <addr>22</addr>
@@ -44,11 +30,19 @@
       <log>True</log>
     </datum>
     <datum>
-      <name>VFD Temp</name>
+      <name>Temp</name>
       <addr>24</addr>
       <type>float</type>
       <unit>°C</unit>
       <precision>2</precision>
       <log>True</log>
-    </datum>  </device>
+    </datum>
+    <datum>
+      <name>Rain Gauge</name>
+      <addr>151</addr>
+      <type>long</type>
+      <unit></unit>
+      <log>True</log>
+    </datum>
+  </device>
 </configuration>

@@ -27,8 +27,6 @@
   - removed a decimal point from status screen value display
   - added a number of new units
   08Oct2024 v2.7 A. Cooper
-  - convert WiFi scanNetworks to non-blocking
-  - add a timeout to scanNetworks
   - change memory.save to memory.saveFloat in calibration routines
   - change momory.save to memory.saveWiFi in credential entry routine
 
@@ -70,26 +68,28 @@ LiquidCrystal lcd(hdwrLCDRS,hdwrLCDRW,hdwrLCDE,hdwrLCDD0,hdwrLCDD1,hdwrLCDD2,hdw
 
 //- class variables ------------------------------------------------------------
 int screen= 0;
-bool newScr= true;
+bool newScr= true;         // flags a full refresh of the screen
 unsigned long lastUpdate= 0;
-bool userSetReq=  false;
-bool userSetNext= false;
-bool userSetAcpt= false;
-bool userSetEnd=  false;
-unsigned long userSetTime;
+unsigned long screenTime;  // timeout to return to status screen
+int userSetReq= 0;         // if not zero a user setting is in progress
+bool userSetNext= false;   // long press, accept or go to next step in setting
+bool userSetAcpt= false;   // short click, accept setting
+unsigned long userSetTime; // used to timeout any setting process
+int userSelect= 0;         // current value used for item selection     
+int userSelLimit= 0;       // max value in item selection
+int userSelScroll= 0;      // used to change item selection
+int userSelPos= 0;         // charater position in password entry
 unsigned long wifiStart;
-unsigned long wifiScanTime;
-int userSelect= 0;
-int userSelLimit= 0;
-int userSelPos= 0;
+char wifiPass[16];         // password entry buffer
 const char pwChars[]= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$@^`,|%;.()/{}:?[]=-+_#!*";
-char wifiPass[16]; 
 
 //- constants ------------------------------------------------------------------
 #define lcdUpdate  250
 #define chanOffset  16   //spacing of channel data in setup registers
 #define screenStatDelay 600
 #define wifiTimeout 60000  // timeout for WiFi scanNetworks
+
+#define debugUI true
 
 //- functions ------------------------------------------------------------------
 
@@ -103,10 +103,9 @@ void UserCtrl::init(){
   newScr= true;
   drawScreen();
   lastUpdate= millis();
-  userSetReq=  false;
+  userSetReq=  0;
   userSetNext= false;
   userSetAcpt= false;
-  userSetEnd=  false;
   userSetTime= millis();
 } // init
 
@@ -116,7 +115,7 @@ void UserCtrl::service(){
   if (millis()-lastUpdate<lcdUpdate) return;
   lastUpdate= millis();
   // timeout return to status screen
-  if (!userSetReq){
+  if (userSetReq==0){
     if (millis()<screenTime) screenTime= 0;
     if (millis()-screenTime>screenStatDelay*1000) setScreen(scrStatus); 
     userSetNext= false;
@@ -125,8 +124,8 @@ void UserCtrl::service(){
   // timeout of setting request
   else{
     if (millis()<userSetTime) userSetTime= 0;
-    if (millis()-userSetTime>120000){
-      userSetReq= false;
+    if (millis()-userSetTime> 30000){
+      userSetReq= 0;
       newScr= true;
     }
   }
@@ -139,51 +138,61 @@ void UserCtrl::setScreen(int scr){
   if (scr==scrWiFiStart) screen= scr;
   if (scr==scrWiFiDone) screen= scr;
   newScr= true;
-  userSetReq= false;
+  userSetReq= 0;
   drawScreen();
 } // setScreen
 
 void UserCtrl::right(){
-  if (userSetReq) userSelScroll++;
-  else{
+  if (debugUI) Serial.println("Right");
+  userSetTime= millis();
+  if (userSetReq==0){
     if (++screen>scrLast) screen= scrFirst;
     setScreen(screen);
   }
+  else userSelScroll++;
 }
 
-void UserCtrl::left(){  
-  if (userSetReq) userSelScroll--;
-  else{
+void UserCtrl::left(){
+  if (debugUI) Serial.println("Left");
+  userSetTime= millis();
+  if (userSetReq==0){
     if (screen==scrWiFiDone) screen= scrFirst;
     if (--screen<scrFirst) screen= scrLast;
     if (screen==scrWiFi2 && !wifiStat) screen= scrWiFi; // patch to allow scrolling back over WiFi2
     setScreen(screen);
   }
+  else userSelScroll--;
 }
 
 void UserCtrl::click(){
-  if (userSetReq) userSetAcpt= true;
-  else{
+  if (debugUI) Serial.println("Click");
+  userSetTime= millis();
+  if (userSetReq==0){
     if (++screen>scrLast) screen= 1;
     setScreen(screen);
+    userSetAcpt= false;
+  }
+  else {
+    userSetAcpt= true;
+    userSetNext= false;
   }
 }
 
 void UserCtrl::press(){
+  if (debugUI) Serial.println("Press");
+  userSetTime= millis();
+  userSetNext= false;
+  userSetAcpt= false;
   switch (screen){
     // WQ calibrate
     case scrWQSensor:
-      userSetTime= millis();    
-      if (!userSetReq) userSetReq= true;
-      else
-        if (!userSetNext) userSetNext= true;
-        else userSetAcpt= true;
+      if (userSetReq==0) userSetReq= 1;
+      else userSetNext= true;
       break;
     // temperature calibrate
     case scrTemps:
-      userSetTime= millis();    
-      if (!userSetReq) userSetReq= true;
-      else userSetAcpt= true;
+      if (userSetReq==0) userSetReq= 1;
+      else userSetNext= true;
       break;
     // control loop activate
     case scrControl1a:
@@ -203,9 +212,8 @@ void UserCtrl::press(){
     case scrControl2c:
     case scrControl3c:
     case scrControl4c:
-      if (!userSetReq) userSetReq= true;
-      else userSetAcpt= true;
-      userSetTime= millis();
+      if (userSetReq==0) userSetReq= 1;
+      else userSetNext= true;
       break;
     // ToD Enable
     case scrToD:
@@ -222,17 +230,8 @@ void UserCtrl::press(){
       timeCtrl.setTime();
       break;
     case scrWiFi:
-      if (!userSetReq){
-        userSetReq= true;
-        WiFi.disconnect();
-        lcd.setCursor(5,0);
-        lcd.print("Scanning...");
-        lcd.setCursor(0,1);
-        lcd.print("                ");
-        wifiScanTime= millis();
-        Serial.println("Scanning networks...");
-      }
-      else userSetEnd= true;
+      if (userSetReq==0) userSetReq= 1;
+      else userSetNext= true;
       break;
     case scrUnit:
       ESP.restart();
@@ -241,7 +240,7 @@ void UserCtrl::press(){
 }
 
 void UserCtrl::dClick(){
-   setScreen(scrStatus);
+   return;
 }
 
 //- formatting -----------------------------------------------------------------
@@ -483,7 +482,7 @@ void UserCtrl::drawScreen(){
   if (newScr){
     lcd.clear();
     lcd.noCursor();
-    userSetReq= false;
+    userSetReq= 0;
     userSetNext= false;
     userSetAcpt= false;
     userSetTime= millis();
@@ -570,7 +569,6 @@ void UserCtrl::drawScreen(){
       drawWiFiDone();
       break;
   }
-  newScr= false;
 } // drawScreen
 
 void UserCtrl::drawSplash(){
@@ -582,7 +580,8 @@ void UserCtrl::drawSplash(){
     lcd.print(firmMajor);
     lcd.print(".");
     lcd.print(firmMinor);
-    }
+    newScr= false;
+  }
 } // drawSplash
 
 void UserCtrl::drawStatus(){
@@ -592,7 +591,8 @@ void UserCtrl::drawStatus(){
     if (name[0]!=0) lcd.print(name);
     else lcd.print("Stat");
     lcd.setCursor(7,0);
-    lcd.print(" ");    
+    lcd.print(" ");
+    newScr= false;   
   }
   lcd.setCursor(8,0);
   printTime();
@@ -607,12 +607,13 @@ void UserCtrl::drawWQSensor(){
     lcd.print("WQ");
     lcd.setCursor(8,1);
     lcd.print("Tc:");
-    }
+    newScr= false;
+  }
   // get reading with gain and offset removed
   float read= ((memory.getFloat(datWQ)-7)/memory.getFloat(datWQGain))+7-memory.getFloat(datWQOffset);
   // handle calibration
   lcd.setCursor(3,0);
-  if (userSetReq){
+  if (userSetReq==1){
     if (!memory.getBool(statWQSensorValid) || !(memory.getInt(datWQSensorUnits)==unitspH)){
       userSetReq= false;
       return;
@@ -653,38 +654,37 @@ void UserCtrl::drawWQSensor(){
 void UserCtrl::drawTemps(){
   if (newScr){
     lcd.print("Temp");
-    lcd.setCursor(5,0);
+    lcd.setCursor(5,0);  
     lcd.print("T1:");
     lcd.setCursor(5,1);
     lcd.print("T2:");
-    }
-  if (userSetReq){
-    if (!userSetNext){
-      lcd.setCursor(5,0);
-      if (memory.getBool(statFlash)) lcd.print("T1:");
-      else lcd.print("   ");
-      memory.setFloat(datTemp1Offset,memory.getFloat(datTemp1Offset)+float(userSelScroll)*0.1);
-      userSelScroll= 0;
-    }
-    else{
-      lcd.setCursor(5,1);
-      if (memory.getBool(statFlash)) lcd.print("T2:");
-      else lcd.print("   ");
-      memory.setFloat(datTemp2Offset,memory.getFloat(datTemp2Offset)+float(userSelScroll)*0.1);
-      userSelScroll= 0;
-    }
-    if (userSetAcpt){
+    newScr= false;
+  }
+  if (userSetReq==1){  // adjust Temp1 offset
+    lcd.setCursor(5,0);
+    if (memory.getBool(statFlash)) lcd.print("T1:");
+    else lcd.print("   ");
+    if (userSelScroll!=0) memory.setFloat(datTemp1Offset,memory.getFloat(datTemp1Offset)+float(userSelScroll)*0.1);
+    userSelScroll= 0;
+    if (userSetAcpt || userSetNext){
       lcd.setCursor(5,0);
       lcd.print("T1:");
-      lcd.setCursor(5,1);
-      lcd.print("T2:");
-      if (!userSetNext) userSetNext=true;
-      else{
-        memory.saveFloat(datTemp1Offset);
-        memory.saveFloat(datTemp2Offset);
-        userSetReq= false;
-      }
       userSetAcpt= false;
+      userSetNext= false;
+      userSetReq= 2;
+    }
+  }
+  if (userSetReq==2){  // adjust Temp2 offset
+    lcd.setCursor(5,1);
+    if (memory.getBool(statFlash)) lcd.print("T2:");
+    else lcd.print("   ");
+    if (userSelScroll!=0) memory.setFloat(datTemp2Offset,memory.getFloat(datTemp2Offset)+float(userSelScroll)*0.1);
+    userSelScroll= 0;
+    if (userSetAcpt || userSetNext){
+      memory.saveFloat(datTemp1Offset);
+      memory.saveFloat(datTemp2Offset);
+      newScr= true;
+      userSetReq= 0;
     }
   }
   lcd.setCursor(8,0);
@@ -700,11 +700,12 @@ void UserCtrl::drawAnalog(){
     lcd.print("A1:");
     lcd.setCursor(4,1);
     lcd.print("A2:");
-    }
-    lcd.setCursor(8,0);
-    printRead(memory.getFloat(datAnalog1),8,2,memory.getInt(datAnalog1Units),memory.getBool(statAnalog1Valid));
-    lcd.setCursor(8,1);
-    printRead(memory.getFloat(datAnalog2),8,2,memory.getInt(datAnalog2Units),memory.getBool(statAnalog2Valid));
+    newScr= false;
+  }
+  lcd.setCursor(8,0);
+  printRead(memory.getFloat(datAnalog1),8,2,memory.getInt(datAnalog1Units),memory.getBool(statAnalog1Valid));
+  lcd.setCursor(8,1);
+  printRead(memory.getFloat(datAnalog2),8,2,memory.getInt(datAnalog2Units),memory.getBool(statAnalog2Valid));
 } // drawAnalog
 
 void UserCtrl::drawProc(){
@@ -714,7 +715,8 @@ void UserCtrl::drawProc(){
     lcd.print("A:");
     lcd.setCursor(8,1);
     lcd.print("B:");
-    }
+    newScr= false;
+  }
   lcd.setCursor(8,0);
   printRead(memory.getFloat(datProcessedData),8,2,memory.getInt(datProcUnits),memory.getBool(statProcReadValid));
   lcd.setCursor(2,1);
@@ -728,7 +730,8 @@ void UserCtrl::drawControlA(int loop){
   if (newScr){
     lcd.print("Ctrl");
     lcd.print(loop+1);
-    }
+    newScr= false;
+  }
   int chan= memory.getInt(datCtrl1Input+(loop*chanOffset));
   lcd.setCursor(6,0);
   memory.getStr(datControl1Name+loop*8,name);
@@ -753,7 +756,8 @@ void UserCtrl::drawControlB(int loop){
     lcd.print(" In:");
     lcd.setCursor(6,1);
     lcd.print("Out:");
-    }
+    newScr= false;
+  }
   lcd.setCursor(10,0);
   printChan(memory.getInt(datCtrl1Input+(loop*chanOffset)));
   lcd.setCursor(10,1);
@@ -768,21 +772,21 @@ void UserCtrl::drawControlC(int loop){
     lcd.print("S:");
     lcd.setCursor(6,1);
     lcd.print("H:");
-    userSelScroll= 0;
+    newScr= false;
   }
-  if (userSetReq){
+  if (userSetReq==1){
     lcd.setCursor(6,0);
     if (memory.getBool(statFlash)) lcd.print("S:");
     else lcd.print("  ");
-    memory.setFloat(datCtrl1Setpoint+(loop*chanOffset),memory.getFloat(datCtrl1Setpoint+(loop*chanOffset))+(float(userSelScroll)*0.1));
+    if (userSelScroll!=0) memory.setFloat(datCtrl1Setpoint+(loop*chanOffset),memory.getFloat(datCtrl1Setpoint+(loop*chanOffset))+(float(userSelScroll)*0.1));
     userSelScroll= 0;
-    if (userSetAcpt || millis()-userSetTime>30000){
-      memory.saveFloat(datCtrl1Setpoint+(loop*chanOffset));
-      userSetReq=  false;
+    if (userSetAcpt || userSetNext){
       lcd.setCursor(6,0);
       lcd.print("S:");
+      userSetReq=  0;
     }
   }
+  userSelScroll= 0;
   lcd.setCursor(8,0);
   int chan= memory.getInt(datCtrl1Input+(loop*chanOffset));
   printRead(memory.getFloat(datCtrl1Setpoint+(loop*chanOffset)),8,1,memory.getInt(datWQSensorUnits+chan-1),true);
@@ -797,7 +801,8 @@ void UserCtrl::drawLogic(){
     lcd.print("A:");
     lcd.setCursor(8,1);
     lcd.print("B:");
-    }
+    newScr= false;
+  }
   lcd.setCursor(6,0);
   switch(memory.getInt(datLogicFunction)){
     case logicNot:  lcd.print("NOT A");break;
@@ -821,7 +826,8 @@ void UserCtrl::drawLogic(){
 void UserCtrl::drawToD(){
   if (newScr){    
     lcd.print("TofD");
-    }
+    newScr= false;
+  }
   lcd.setCursor(5,0);
   printLeadZero(memory.getInt(datToDStartHour));
   lcd.print(":");
@@ -844,7 +850,8 @@ void UserCtrl::drawToD(){
 void UserCtrl::drawToD2(){
   if (newScr){    
     lcd.print("TofD");
-    }
+    newScr= false;
+  }
   lcd.setCursor(5,0);
   printChan(memory.getInt(datToDOutput1));
   lcd.setCursor(11,0);
@@ -862,7 +869,8 @@ void UserCtrl::drawOutputs(){
     lcd.print("1:    D1:");
     lcd.setCursor(1,1);
     lcd.print("Rly2:    D2:");
-    }
+    newScr= false;
+  }
   lcd.setCursor(6,0);
   printOnOff(memory.getBool(statRelay1Status));
   lcd.setCursor(13,0);
@@ -878,6 +886,7 @@ void UserCtrl::drawCounter(){
     lcd.print("Counter");
     lcd.setCursor(4,1);
     lcd.print("Hz");
+    newScr= false;
   }
   lcd.setCursor(10,0);
   printChan(memory.getInt(datCountSource));
@@ -890,6 +899,7 @@ void UserCtrl::drawCounter(){
 void UserCtrl::drawTimer(){
   if (newScr){
     lcd.print("Timer");
+    newScr= false;
   }
   lcd.setCursor(10,0);
   printChan(memory.getInt(datTimerSource));
@@ -901,7 +911,8 @@ void UserCtrl::drawTimer(){
 void UserCtrl::drawModbus(){
   if (newScr){
     lcd.print("ModB");
-    }
+    newScr= false;
+  }
   lcd.setCursor(8,0);
   if (ModbusActive()) lcd.print(" Active ");
   else lcd.print("Inactive");
@@ -913,7 +924,8 @@ void UserCtrl::drawModbus(){
 void UserCtrl::drawTime(){
   if (newScr){
     lcd.print("Time");
-    }
+    newScr= false;
+  }
   lcd.setCursor(7,0);
   if (timeCtrl.NTPValid()) lcd.print("NTP Valid");
   else lcd.print("NTP Fail");
@@ -926,100 +938,9 @@ void UserCtrl::drawTime(){
 void UserCtrl::drawWiFi(){
   if (newScr){
     lcd.print("WiFi");
-    userSelScroll= 0;
+    newScr= false;
   }
-  if (userSetReq){
-    userSelect= userSelect+userSelScroll;
-    userSelScroll= 0;
-    if (userSelect<0) userSelect= userSelLimit;
-    if (userSelect>userSelLimit) userSelect= 0;
-    if (!userSetNext){  // choose network access point name
-      if (userSetEnd){
-        userSetEnd= false;
-        userSetReq= false;
-        setScreen(scrUnit);
-        return;        
-      }
-      if (userSetAcpt){
-        if (WiFi.SSID(userSelect).length()>0) memory.setStr(datWifiAPName,WiFi.SSID(userSelect).c_str());
-        else memory.setStr(datWifiAPName,"Unknown");
-        userSetAcpt= false;
-        userSetNext= true;
-        userSelect= 0;
-        userSelPos= 0;
-        userSelLimit= sizeof(pwChars)-1;
-        lcd.cursor();
-        //lcd.blink();
-        wifiPass[0]= 0;
-        lcd.setCursor(5,0);
-        lcd.print("Password:");
-        lcd.setCursor(0,1);
-        lcd.print("                ");
-      }
-      else{
-        userSelLimit= WiFi.scanComplete();
-        if (wifiScanTime>millis()) wifiScanTime= millis(); // handle millis rollover
-        if (userSelLimit==-2 && millis()-wifiScanTime>2000){
-          WiFi.scanNetworks(true,false);
-          Serial.println("  Network scan start");
-        }
-        if (millis()-wifiScanTime>wifiTimeout){
-          userSelLimit= 0;
-          WiFi.disconnect();
-          Serial.println("  Network scan timeout");
-        }
-        if (userSelLimit>=0){
-          Serial.print("Network scan complete, ");
-          Serial.print(userSelLimit);
-          Serial.println(" found");
-          lcd.setCursor(5,0);
-          lcd.print("Select...");
-          lcd.setCursor(0,1);
-          if (userSelLimit<1)  lcd.print(" No WiFi found! ");
-          else{
-            if (WiFi.SSID(userSelect).length()<1) lcd.print("Unknown      ");
-            else lcd.print(WiFi.SSID(userSelect).substring(0,12));
-            lcd.print("             ");
-            lcd.setCursor(13,1);
-            lcd.print(WiFi.RSSI(userSelect));
-          }
-        }
-      }
-    }
-    else{  // enter password
-      if (userSetEnd || userSelPos>15){
-        userSetEnd= false;
-        userSetReq= false;
-        if (userSelPos<15 && userSelect<userSelLimit){
-          wifiPass[userSelPos++]= pwChars[userSelect];
-          wifiPass[userSelPos]= 0;
-        }
-        memory.setStr(datWifiPassword,wifiPass);
-        memory.saveWiFi();
-        setScreen(scrUnit);
-        return;
-      }
-      if (userSetAcpt){  // accept and goto next char
-        userSetAcpt= false;
-        if (userSelect==userSelLimit){  // delete
-          if (userSelPos>0) userSelPos--;
-        }
-        else wifiPass[userSelPos++]= pwChars[userSelect];
-        if (userSelPos<15){
-          wifiPass[userSelPos]= 0;
-        }
-      }
-      else{
-        lcd.setCursor(0,1);
-        lcd.print(wifiPass);
-        if (userSelect==userSelLimit) lcd.print((char)127);
-        else lcd.print(pwChars[userSelect]);
-        lcd.print(" ");
-        lcd.setCursor(userSelPos,1);
-      }
-    }
-  }
-  else{  // normal display
+  if (userSetReq==0){  // normal display
     if (wifiStat){
       lcd.setCursor(5,0);
       lcd.print(WiFi.SSID());
@@ -1027,14 +948,116 @@ void UserCtrl::drawWiFi(){
       lcd.print(wifiIPAddr);
     }
     else{
-      lcd.setCursor(2,1);
-      lcd.print("No network!");
+      lcd.setCursor(0,1);
+      lcd.print("  No network!");
+    }
+  }
+  if (userSetReq==1){  // setup
+    wifiStat= false;
+    lcd.setCursor(5,0);
+    lcd.print("Scanning...");
+    lcd.setCursor(0,1);
+    lcd.print("                ");
+    WiFi.disconnect(true);
+    userSetReq= 2;
+    return;
+  }
+  if (userSetReq==2){  // start scan
+    if (debugUI) Serial.println("Scanning networks...");
+    WiFi.mode(WIFI_STA);
+    userSelLimit= WiFi.scanNetworks(true, false); // async, do not show hidden
+    userSetReq= 3;
+    return;
+  }
+  if (userSetReq==3){  // wait for scan
+    userSelLimit= WiFi.scanComplete();
+    if (debugUI){
+      Serial.print("Wait: ");
+      Serial.println(userSelLimit);
+    }
+    if (userSelLimit>=0){
+      lcd.setCursor(5,0);
+      lcd.print("Select SSID...");
+      userSetNext= false;
+      userSetAcpt= false;
+      userSelScroll= 0;
+      userSelect= 0;
+      userSetReq= 4;
+      return;
+    }
+  }
+  if (userSetReq==4){  // select SSID
+    lcd.setCursor(0,1);
+    if (userSelLimit<1) lcd.print(" No WiFi found! ");
+    else{
+      userSelect= userSelect+userSelScroll;
+      userSelScroll= 0;
+      if (userSelect<0) userSelect= userSelLimit;
+      if (userSelect>userSelLimit) userSelect= 0;
+      if (WiFi.SSID(userSelect).length()<1) lcd.print("Unknown      ");
+      else lcd.print(WiFi.SSID(userSelect).substring(0,12));
+      lcd.print("             ");
+      lcd.setCursor(13,1);
+      lcd.print(WiFi.RSSI(userSelect));
+    }
+    if (userSetNext || userSetAcpt){
+      if (WiFi.SSID(userSelect).length()>0) memory.setStr(datWifiAPName,WiFi.SSID(userSelect).c_str());
+      else memory.setStr(datWifiAPName,"Unknown");
+      userSetNext= false;
+      userSetAcpt= false;
+      userSelScroll= 0;
+      userSelLimit= sizeof(pwChars)-1;
+      userSelPos= 0;
+      lcd.cursor();
+      wifiPass[0]= 0;
+      lcd.setCursor(5,0);
+      lcd.print("Password:");
+      lcd.setCursor(0,1);
+      lcd.print("                ");
+      userSetReq= 5;
+      return;
+    }
+  }
+  if (userSetReq==5){  // enter password
+    lcd.setCursor(0,1);
+    lcd.print(wifiPass);
+    if (userSelect==userSelLimit) lcd.print((char)127);
+    else lcd.print(pwChars[userSelect]);
+    lcd.print(" ");
+    lcd.setCursor(userSelPos,1);
+    userSelect= userSelect+userSelScroll;
+    userSelScroll= 0;
+    if (userSelect<0) userSelect= userSelLimit;
+    if (userSelect>userSelLimit) userSelect= 0;
+    if (userSetAcpt){  // accept and goto next char
+      userSetAcpt= false;
+      if (userSelect==userSelLimit){  // delete
+        if (userSelPos>0) userSelPos--;
+      }
+      else wifiPass[userSelPos++]= pwChars[userSelect];
+      if (userSelPos<15){
+        wifiPass[userSelPos]= 0;
+      }
+    }
+    if (userSetNext || userSelPos>15){
+      if (userSelPos<15 && userSelect<userSelLimit){
+        wifiPass[userSelPos++]= pwChars[userSelect];
+        wifiPass[userSelPos]= 0;
+      }
+      memory.setStr(datWifiPassword,wifiPass);
+      memory.saveWiFi();
+      userSetReq= 0;
+      newScr= true;
+      return;
     }
   }
 } // drawWiFi
 
 void UserCtrl::drawWiFi2(){
-  if (newScr) lcd.print("WiFi");
+  if (newScr){
+    lcd.print("WiFi");
+    newScr= false;
+  }
   if (wifiStat){
       lcd.setCursor(5,0);
       lcd.print(WiFi.SSID());
@@ -1081,6 +1104,7 @@ void UserCtrl::drawUnit(){
     lcd.print(firmMajor);
     lcd.print(".");
     lcd.print(firmMinor);
+    newScr= false;
   }
 } // drawUnit
 
@@ -1088,6 +1112,7 @@ void UserCtrl::drawWiFiStart(){
   if (newScr){
     lcd.print("WiFi  Connect");
     wifiStart= millis();
+    newScr= false;
   }
   int pos= (millis()-wifiStart)/1000;
   if (pos>15) pos=15;
@@ -1102,6 +1127,7 @@ void UserCtrl::drawWiFiDone(){
     else lcd.print("Failed");
     lcd.setCursor(0,1);
     if (wifiStat) lcd.print(wifiIPAddr);
+    newScr= false;
   }
   // go to status screen after startup delay
   if (!memory.getBool(statStartup)) setScreen(1);

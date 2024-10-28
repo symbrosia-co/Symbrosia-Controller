@@ -128,18 +128,12 @@
   - a successful functional test performed
   - concat SymbCtrl to unit name to make network name
   08Oct2024 v2.7 A. Cooper
-  - convert WiFi scanNetworks to non-blocking
-  - add a timeout to scanNetworks
   - add memory.saveFloat to allow storing of calibration values without global save
   - add memory.saveWiFi to allow storing credentials without global save
   - change memory.save to memory.saveFloat in calibration routines
   - change momory.save to memory.saveWiFi in credential entry routing
   - change ToD logic to not use direct mode as long as any controller
   has the channel whether the controller is enabled or disabled
-  - note, any processor that uses the Arduino/Espressif board definition
-    version 3.0.4 may have issues using the WiFi.scanNetworks function
-    resulting in no networks found, this seems to be fixed in 3.0.5,
-    this does exist in the wild
   - changed serial messages during EEPROM load
 
   Known bugs...
@@ -385,7 +379,7 @@ float getAChan(int chan){
 
 //- WiFI -----------------------------------------------------------------------
 void wifiCheck(){
-  if (wifiTime>millis()) wifiTime= 0;
+  if (wifiTime>millis()) wifiTime= 0; // handle millis rollover
   if (millis()-wifiTime>600000){ // check and retry every 10 minutes
     wifiTime= millis();
     if (!wifiStat) wifiConnect();
@@ -399,25 +393,26 @@ void wifiConnect(){
   char pass[18];
   char name[18];
   char hostName[28];
+  char serNum[8];
   memory.getStr(datWifiAPName,ssid);
   memory.getStr(datWifiPassword,pass);
   memory.getStr(datControlName,name);
   Serial.println("  Initializing WiFi...");
   Serial.print("    SSID:");Serial.println(ssid);
   Serial.print("    Pass:");Serial.println(pass);
-  Serial.print("    Unit:");Serial.println(name);
   strcpy(hostName,"SymbCtrl");
   for (int i=0;i<strlen(name);i++) if (!isAlphaNumeric(name[i])) name[i]= char(45);
-  if (strlen(name)>1) {strcat(hostName,"-");strcat(hostName,name);}  
+  if (strlen(name)>1) {strcat(hostName,"-");strcat(hostName,name);} 
+  else  {strcat(hostName,"-");ultoa(serialNumber,serNum,10);strcat(hostName,serNum);}
   Serial.print("    Name:");Serial.println(hostName);
+  WiFi.mode(WIFI_STA);
   WiFi.setHostname(hostName);  
   WiFi.begin(ssid,pass);
   unsigned long timeOut= millis();
   Serial.print("    Connecting ");
-  while ((WiFi.status()!= WL_CONNECTED) && ((millis()-timeOut)<15000)){
+  while ((WiFi.status()!= WL_CONNECTED) && ((millis()-timeOut)<600000)){
     delay(500);
     Serial.print("-");
-    //timeCtrl.service();
     userCtrl.service();
     }
   if (WiFi.status()==WL_CONNECTED){
@@ -434,6 +429,7 @@ void wifiConnect(){
     Serial.println("");
     Serial.print("    WiFi connection failed to ");
     Serial.println(ssid);
+    WiFi.disconnect(true);
     }
   userCtrl.setScreen(scrWiFiDone);
 } //wifiConnect
