@@ -8,6 +8,10 @@
   - initial version
   20Mar2024 v2.4 A. Cooper
   - added screen for internal temp and supply voltage
+  08Oct2024 v2.7 A. Cooper
+  - major re-write to clean up the methods for handling user input
+  such as calibration and WiFi credential input, a number of private
+  variables were added and deleted
 
 --------------------------------------------------------------------------------
 

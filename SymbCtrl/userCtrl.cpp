@@ -27,8 +27,16 @@
   - removed a decimal point from status screen value display
   - added a number of new units
   08Oct2024 v2.7 A. Cooper
+  - major re-write to clean up the methods for handling user input
+  such as calibration and WiFi credential input, it needed it
+  - solved WiFi.scanNetworks bug, would not initiate a scan when the
+  previous network connection or connection attempt was not fully
+  terminated, use WiFi.disconnect with a wifioff=true to fully
+  disconnect and shutdown the conection before an SSID scan
   - change memory.save to memory.saveFloat in calibration routines
-  - change momory.save to memory.saveWiFi in credential entry routine
+  - change memory.save to memory.saveWiFi in credential entry routine
+  - added debugUI to enable debug serial output
+  - restart userSetTime timeout on all encoder or button input
 
 --------------------------------------------------------------------------------
 
