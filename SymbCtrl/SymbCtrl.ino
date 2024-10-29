@@ -128,10 +128,19 @@
   - a successful functional test performed
   - concat SymbCtrl to unit name to make network name
   08Oct2024 v2.7 A. Cooper
-  - add memory.saveFloat to allow storing of calibration values without global save
-  - add memory.saveWiFi to allow storing credentials without global save
+  - major re-write of userCtrl to clean up the methods for handling user
+  input such as calibration and WiFi credential input, it needed it
+  - solved WiFi.scanNetworks bug, would not initiate a scan when the
+  previous network connection or connection attempt was not fully
+  terminated, use WiFi.disconnect with a wifioff=true to fully
+  disconnect and shutdown the conection before an SSID scan
   - change memory.save to memory.saveFloat in calibration routines
-  - change momory.save to memory.saveWiFi in credential entry routing
+  - change memory.save to memory.saveWiFi in credential entry routine
+  - restart userSetTime timeout on all encoder or button input
+  - add manual offset adjustment to analog inputs
+  - add indication of manual NTP fetch
+  - re-write pH calibration process to reduce putton pushing
+  - add simple offset adjustment to WQ input when not used for pH
   - change ToD logic to not use direct mode as long as any controller
   has the channel whether the controller is enabled or disabled
   - changed serial messages during EEPROM load
@@ -410,7 +419,7 @@ void wifiConnect(){
   WiFi.begin(ssid,pass);
   unsigned long timeOut= millis();
   Serial.print("    Connecting ");
-  while ((WiFi.status()!= WL_CONNECTED) && ((millis()-timeOut)<600000)){
+  while ((WiFi.status()!= WL_CONNECTED) && ((millis()-timeOut)<20000)){
     delay(500);
     Serial.print("-");
     userCtrl.service();

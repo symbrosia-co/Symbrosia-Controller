@@ -28,7 +28,9 @@
   - added a number of new units
   08Oct2024 v2.7 A. Cooper
   - major re-write to clean up the methods for handling user input
-  such as calibration and WiFi credential input, it needed it
+  such as calibration and WiFi credential input, it needed it,
+  basically userSetReq is now an int that steps though the process
+  rather than the complex flag system used previously
   - solved WiFi.scanNetworks bug, would not initiate a scan when the
   previous network connection or connection attempt was not fully
   terminated, use WiFi.disconnect with a wifioff=true to fully
@@ -37,6 +39,10 @@
   - change memory.save to memory.saveWiFi in credential entry routine
   - added debugUI to enable debug serial output
   - restart userSetTime timeout on all encoder or button input
+  - add offset adjustment to analog inputs
+  - add indication of manual NTP fetch
+  - re-write pH calibration process to simplify and reduce putton pushing
+  - add simple offset adjustment to WQ input when not used for pH
 
 --------------------------------------------------------------------------------
 
@@ -92,12 +98,12 @@ char wifiPass[16];         // password entry buffer
 const char pwChars[]= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$@^`,|%;.()/{}:?[]=-+_#!*";
 
 //- constants ------------------------------------------------------------------
-#define lcdUpdate  250
-#define chanOffset  16   //spacing of channel data in setup registers
-#define screenStatDelay 600
-#define wifiTimeout 60000  // timeout for WiFi scanNetworks
+#define lcdUpdate  250      // screen update interval in milliseconds
+#define chanOffset  16      // spacing of channel data in setup registers
+#define screenStatDelay 600 // time to return to status screen in seconds
+#define wifiTimeout 60000   // timeout for WiFi scanNetworks
 
-#define debugUI true
+#define debugUI false
 
 //- functions ------------------------------------------------------------------
 
@@ -202,6 +208,11 @@ void UserCtrl::press(){
       if (userSetReq==0) userSetReq= 1;
       else userSetNext= true;
       break;
+    // amalog calibrate
+    case scrAnalog:
+      if (userSetReq==0) userSetReq= 1;
+      else userSetNext= true;
+      break;
     // control loop activate
     case scrControl1a:
       memory.setBool(statCtrl1Enable,!memory.getBool(statCtrl1Enable));
@@ -235,7 +246,7 @@ void UserCtrl::press(){
       memory.setLong(datTimer,0);
       break;
     case scrTime:
-      timeCtrl.setTime();
+      if (userSetReq==0) userSetReq= 1;
       break;
     case scrWiFi:
       if (userSetReq==0) userSetReq= 1;
@@ -613,23 +624,27 @@ void UserCtrl::drawStatus(){
 void UserCtrl::drawWQSensor(){
   if (newScr){
     lcd.print("WQ");
-    lcd.setCursor(8,1);
-    lcd.print("Tc:");
+    if (memory.getInt(datWQSensorUnits)==unitspH){
+      lcd.setCursor(8,1);
+      lcd.print("Tc:");
+    }
     newScr= false;
   }
   // get reading with gain and offset removed
   float read= ((memory.getFloat(datWQ)-7)/memory.getFloat(datWQGain))+7-memory.getFloat(datWQOffset);
   // handle calibration
-  lcd.setCursor(3,0);
-  if (userSetReq==1){
-    if (!memory.getBool(statWQSensorValid) || !(memory.getInt(datWQSensorUnits)==unitspH)){
-      userSetReq= false;
-      return;
-    }  
-    if (!userSetNext) lcd.print("   Confirm?  ");      
-    else{
-      if (!userSetAcpt) lcd.print("  Calibrate! ");
-      else{
+  if (!memory.getBool(statWQSensorValid)) userSetReq= 0;
+  if (memory.getInt(datWQSensorUnits)==unitspH){ // do pH gain and offset calibration
+    if (userSetReq==1){ // cal message
+      lcd.setCursor(3,0);
+      lcd.print("  Calibrate! ");
+      userSetAcpt= false;
+      userSetNext= false;
+      userSetReq= 2;
+    }
+    if (userSetReq==2){ // wait for stable reading
+      if (userSetAcpt || userSetNext){
+        lcd.setCursor(3,0);
         if (read>3 && read<5){
           memory.setFloat(datWQGain,-3/(read-7.0+memory.getFloat(datWQOffset)));
           memory.saveFloat(datWQGain);
@@ -646,17 +661,45 @@ void UserCtrl::drawWQSensor(){
           lcd.print(" Cal'd @ 10pH");
         }
         else lcd.print("Out of Range!");
-        userSetReq=  false;
-        userSetNext= false;
         userSetAcpt= false;
+        userSetNext= false;
+        userSetReq= 3;
       }
     }
+    if (userSetReq==3){ // display result
+      if (millis()-userSetTime>2500 || userSetAcpt || userSetNext){
+        newScr= true;
+        userSetReq= 0;
+      }
+    }
+    // display reading    
+    lcd.setCursor(0,1);
+    printRead(memory.getFloat(datWQ),8,2,unitspH,memory.getBool(statWQSensorValid));
+    lcd.setCursor(11,1);
+    printChan(memory.getInt(datPHTempComp)); 
   }
-  // display reading    
-  lcd.setCursor(0,1);
-  printRead(memory.getFloat(datWQ),8,2,memory.getInt(datWQSensorUnits),memory.getBool(statWQSensorValid));
-  lcd.setCursor(11,1);
-  printChan(memory.getInt(datPHTempComp)); 
+  else {  // do simple offset calibration for non-pH
+    if (userSetReq==1){
+      if (userSelScroll!=0) memory.setFloat(datWQOffset,memory.getFloat(datWQOffset)+float(userSelScroll)*0.1);
+      userSelScroll= 0;
+      if (userSetAcpt || userSetNext){
+        memory.saveFloat(datWQOffset);
+        newScr= true;
+        userSetReq= 0;
+      }
+      // display reading with flashing units    
+      lcd.setCursor(0,1);
+      if (memory.getBool(statFlash))
+        printRead(memory.getFloat(datWQ),8,2,memory.getInt(datWQSensorUnits),memory.getBool(statWQSensorValid));
+      else
+        printRead(memory.getFloat(datWQ),8,2,unitsNone,memory.getBool(statWQSensorValid));
+    }
+    else{
+      // display reading    
+      lcd.setCursor(0,1);
+      printRead(memory.getFloat(datWQ),8,2,memory.getInt(datWQSensorUnits),memory.getBool(statWQSensorValid));
+    }
+  }
 } // drawWQSensor
 
 void UserCtrl::drawTemps(){
@@ -709,6 +752,33 @@ void UserCtrl::drawAnalog(){
     lcd.setCursor(4,1);
     lcd.print("A2:");
     newScr= false;
+  }
+  if (userSetReq==1){  // adjust Analog1 offset
+    lcd.setCursor(4,0);
+    if (memory.getBool(statFlash)) lcd.print("A1:");
+    else lcd.print("   ");
+    if (userSelScroll!=0) memory.setFloat(datAnalog1Offset,memory.getFloat(datAnalog1Offset)+float(userSelScroll)*0.1);
+    userSelScroll= 0;
+    if (userSetAcpt || userSetNext){
+      lcd.setCursor(4,0);
+      lcd.print("A1:");
+      userSetAcpt= false;
+      userSetNext= false;
+      userSetReq= 2;
+    }
+  }
+  if (userSetReq==2){  // adjust Analog2 offset
+    lcd.setCursor(4,1);
+    if (memory.getBool(statFlash)) lcd.print("A2:");
+    else lcd.print("   ");
+    if (userSelScroll!=0) memory.setFloat(datAnalog2Offset,memory.getFloat(datAnalog2Offset)+float(userSelScroll)*0.1);
+    userSelScroll= 0;
+    if (userSetAcpt || userSetNext){
+      memory.saveFloat(datAnalog1Offset);
+      memory.saveFloat(datAnalog2Offset);
+      newScr= true;
+      userSetReq= 0;
+    }
   }
   lcd.setCursor(8,0);
   printRead(memory.getFloat(datAnalog1),8,2,memory.getInt(datAnalog1Units),memory.getBool(statAnalog1Valid));
@@ -789,12 +859,12 @@ void UserCtrl::drawControlC(int loop){
     if (userSelScroll!=0) memory.setFloat(datCtrl1Setpoint+(loop*chanOffset),memory.getFloat(datCtrl1Setpoint+(loop*chanOffset))+(float(userSelScroll)*0.1));
     userSelScroll= 0;
     if (userSetAcpt || userSetNext){
+      memory.saveFloat(datCtrl1Setpoint+(loop*chanOffset));
       lcd.setCursor(6,0);
       lcd.print("S:");
       userSetReq=  0;
     }
   }
-  userSelScroll= 0;
   lcd.setCursor(8,0);
   int chan= memory.getInt(datCtrl1Input+(loop*chanOffset));
   printRead(memory.getFloat(datCtrl1Setpoint+(loop*chanOffset)),8,1,memory.getInt(datWQSensorUnits+chan-1),true);
@@ -934,9 +1004,22 @@ void UserCtrl::drawTime(){
     lcd.print("Time");
     newScr= false;
   }
-  lcd.setCursor(7,0);
-  if (timeCtrl.NTPValid()) lcd.print("NTP Valid");
-  else lcd.print("NTP Fail");
+  if (userSetReq==0){  // normal display
+    lcd.setCursor(5,0);
+    if (timeCtrl.NTPValid()) lcd.print("  NTP Valid");
+    else lcd.print("  NTP Fail ");
+  }
+  if (userSetReq==1){  // get NTP time
+    lcd.setCursor(5,0);
+    lcd.print("  NTP Fetch");
+    lcd.setCursor(5,0);
+    if (timeCtrl.setTime()) lcd.print("Fetch Good ");
+    else lcd.print("Fetch Fail ");
+    userSetReq= 2;
+  }
+  if (userSetReq==2){  // display request for another 2.5s
+    if (millis()-userSetTime>2500) userSetReq= 0;
+  }
   lcd.setCursor(0,1);
   printDate();
   lcd.print(" ");
@@ -1090,7 +1173,8 @@ void UserCtrl::drawIntData(){
     lcd.print("Int Temp");
     lcd.setCursor(0,1);
     lcd.print("   Sup V");
-    }
+    newScr= false;
+  }
   lcd.setCursor(9,0);
   printRead(memory.getFloat(datIntTemp),7,1,memory.getInt(datIntTempUnits),memory.getBool(statIntTempValid));
   lcd.setCursor(9,1);

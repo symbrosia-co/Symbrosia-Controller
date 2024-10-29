@@ -101,7 +101,6 @@ class UserCtrl{
     int userSelPos;
     char wifiPass[16];
     unsigned long wifiStart;
-
     void printChan(int chan);
     void printState(int chan);
     void printRead(float read,int space,int decs,int unit,bool valid);
