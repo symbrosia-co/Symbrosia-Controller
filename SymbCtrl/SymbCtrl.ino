@@ -144,6 +144,8 @@
   - change ToD logic to not use direct mode as long as any controller
   has the channel whether the controller is enabled or disabled
   - changed serial messages during EEPROM load
+  - modified control loop screen active messaging to reflect enable source
+  if not active, if active for any reason diplays 'Active'
 
   Known bugs...
   - none

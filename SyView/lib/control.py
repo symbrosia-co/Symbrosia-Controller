@@ -3,8 +3,10 @@
 #
 #  - Handle the control tabs
 #
-#  1Jul2022 A. Cooper
+#  01Jul2022 A. Cooper
 #  - initial version
+#  31Oct2024 v1.2 A. Cooper
+#  - Fix analog channels numbers for time
 
 #-- includes ------------------------------------------------------------------
 import os
@@ -31,9 +33,9 @@ setButtonFile=      'setButton.png'
 spacerFile=         'spacer.png'
 colGood=            '#000000'
 colBad=             '#FFADAD'
-anlgChan=  {'None':0,'WQ Amplifier':1,'Temperature 1':2,'Temperature 2':3,'Analog 1':4,'Analog 2':5,'Internal Temp':6,'Supply Voltage':7,'Processed':8,'Days':30,'Hours':31,'Minutes':32,'Seconds':33}
-anlgName=  {0:None,1:'WQSensor',2:'Temperature1',3:'Temperature2',4:'Analog1',5:'Analog2',6:'InternalTemp',7:'SupplyVoltage',8:'Processed',30:'Days',31:'Hours',32:'Minutes',33:'Seconds'}
-anlgUnit=  {0:None,1:'WQSensorUnits',2:'Temp1Units',3:'Temp2Units',4:'Analog1Units',5:'Analog2Units',6:'IntTempUnits',7:'SupVoltUnits',8:'ProcUnits',30:'day',31:'hour',32:'min',33:'sec'}
+anlgChan=  {'None':0,'WQ Amplifier':1,'Temperature 1':2,'Temperature 2':3,'Analog 1':4,'Analog 2':5,'Internal Temp':6,'Supply Voltage':7,'Processed':8,'Days':35,'Hours':36,'Minutes':37,'Seconds':38}
+anlgName=  {0:None,1:'WQSensor',2:'Temperature1',3:'Temperature2',4:'Analog1',5:'Analog2',6:'InternalTemp',7:'SupplyVoltage',8:'Processed',35:'Day',36:'Hour',37:'Minute',38:'Second'}
+anlgUnit=  {0:None,1:'WQSensorUnits',2:'Temp1Units',3:'Temp2Units',4:'Analog1Units',5:'Analog2Units',6:'IntTempUnits',7:'SupVoltUnits',8:'ProcUnits',36:'day',37:'hour',38:'min',39:'sec'}
 outChan=   {'None':0,'Relay 1':11,'Relay 2':12,'Output 1':13,'Output 2':14,'Virtual 1':15,'Virtual 2':16}
 digChan=   {'None':0,'Input 1':9,'Input 2':10,'Relay 1':11,'Relay 2':12,'Output 1':13,'Output 2':14,'Virtual 1':15,'Virtual 2':16,'TofD':39}
 
