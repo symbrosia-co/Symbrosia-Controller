@@ -1,0 +1,40 @@
+SyCheck Report
+  2024-10-31 08:41:56
+
+Check config for Weather against TankSetup.xml...
+  Weather configuration read from 192.168.9.202
+  Register               Controller   Reference        Description
+  -------------------------------------------------------------------------------------------
+  WQName                        PAR ≠ pH               Water quality sensor description
+  Temp1Name            Outdoor Temp ≠ Tank Temp        Temperature sensor 1 description
+  Input1Name             Rain Gauge ≠                  Input 1 description
+  Relay1Name                        ≠ Cooling Valve    Relay 1 description
+  Output1Name                       ≠ CO2 Valve        Digital output 1 description
+  Control1Name                      ≠ pH               Decription of control loop 1
+  Control2Name                      ≠ Cooling          Decription of control loop 2
+  Control3Name                      ≠ Lights           Decription of control loop 3
+  WQOffset                     0.00 ≠ -0.20            Calibration offset for the WQ sensor amplifier
+  Temp1Offset                  7.20 ≠ 0.10             Calibration offset for temperature sensor 1
+  WQGain                       1.00 ≠ 1.08             Calibration gain for the WQ sensor amplifier
+  Ctrl1Setpoint                7.00 ≠ 7.50             Control loop 1 setpoint
+  Ctrl1Hysteresis              1.00 ≠ 0.20             Control loop 1 hysteresis
+  Ctrl1AlarmPtLow              6.00 ≠ 7.00             Control loop 1 alarm point low
+  Ctrl2Setpoint               20.00 ≠ 23.50            Control loop 2 setpoint
+  Ctrl2Hysteresis              5.00 ≠ 1.00             Control loop 2 hysteresis
+  Ctrl2AlarmPtLow             10.00 ≠ 20.00            Control loop 2 alarm point low
+  Ctrl2AlarmPtHigh            30.00 ≠ 28.00            Control loop 2 alarm point high
+  Ctrl3Setpoint               20.00 ≠ 6.00             Control loop 3 setpoint
+  Ctrl3Hysteresis              5.00 ≠ 12.00            Control loop 3 hysteresis
+  Ctrl3AlarmPtLow             10.00 ≠ 0.00             Control loop 3 alarm point low
+  Ctrl4AlarmPtLow              1.00 ≠ 0.00             Control loop 4 alarm point low
+  Ctrl1Enable                   Off ≠ On               
+  Ctrl2Enable                   Off ≠ On               
+  Ctrl3High                      On ≠ Off              
+  Ctrl4High                      On ≠ Off              
+  ToDEnable                     Off ≠ On               Enable time of day function
+  27 differences found
+
+Check config for Water against Water.xml...
+  Water configuration read from 192.168.9.41
+  No differences found
+

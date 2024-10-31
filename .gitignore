@@ -1,9 +1,6 @@
 config.xml
-config.xml.bak
 configuration.xml
-configuration.xml.bak
 MBMon.xml
-MBMon.xml.bak
 *.csv
 *.bak
-*.csv
+*.pyc

@@ -18,10 +18,10 @@
     <address>192.168.9.202</address>
   </ctrl>
   
-  <ctrl name='Tank D20'>
+  <ctrl name='Water'>
     <model>SyCtrl Mk2</model>
-    <description>1500L Tank</description>
-    <address>192.168.0.236</address>
+    <description>Irrigation</description>
+    <address>192.168.9.41</address>
   </ctrl>
 
 </configuration>

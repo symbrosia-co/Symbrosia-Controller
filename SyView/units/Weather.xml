@@ -2,7 +2,7 @@
 <!--
 
   Weather configuration file
-  2024Oct26 08:47:40
+  2024Oct30 19:27:47
 
 -->
 
@@ -21,7 +21,7 @@
   <register name="Control2Name"></register>
   <register name="Control3Name"></register>
   <register name="Control4Name"></register>
-  <register name="HeartbeatIn">20</register>
+  <register name="HeartbeatIn">16</register>
   <register name="StatusDisp1">2</register>
   <register name="StatusDisp2">1</register>
   <register name="TimeZone">-10</register>
