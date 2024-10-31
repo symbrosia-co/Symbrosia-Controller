@@ -2,7 +2,7 @@
 <!--
 
   Water configuration file
-  2024Oct31 11:21:28
+  2024Oct31 12:49:25
 
 -->
 
@@ -21,7 +21,7 @@
   <register name="Control2Name"></register>
   <register name="Control3Name"></register>
   <register name="Control4Name">Water Pressure</register>
-  <register name="HeartbeatIn">1498</register>
+  <register name="HeartbeatIn">14</register>
   <register name="StatusDisp1">2</register>
   <register name="StatusDisp2">4</register>
   <register name="TimeZone">-10</register>
@@ -109,7 +109,7 @@
   <register name="Ctrl1Enable">False</register>
   <register name="Ctrl2Enable">False</register>
   <register name="Ctrl3Enable">True</register>
-  <register name="Ctrl4Enable">True</register>
+  <register name="Ctrl4Enable">False</register>
   <register name="Ctrl1High">True</register>
   <register name="Ctrl2High">True</register>
   <register name="Ctrl3High">True</register>
