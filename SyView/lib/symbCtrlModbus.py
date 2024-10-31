@@ -251,7 +251,7 @@ class SymbCtrl():
     'statCtrl2OneShot':{'addr': 67,'mode':'rw','type':'bool', 'value':False,'desc':'Control loop 2 one-shot mode'},
     'statCtrl3OneShot':{'addr': 68,'mode':'rw','type':'bool', 'value':False,'desc':'Control loop 3 one-shot mode'},
     'statCtrl4OneShot':{'addr': 69,'mode':'rw','type':'bool', 'value':False,'desc':'Control loop 4 one-shot mode'}}
-  units= ['None','°C','°F','pH','mV','V','mA','A','mm','m','ml','l','g','kg','lbs','kPa','PSI','Hz','%','ppm','Ω','day','hr','min','sec']
+  units= ['None','°C','°F','pH','mV','V','mA','A','mm','m','ml','l','g','kg','lbs','kPa','PSI','Hz','%','ppm','Ω','day','hr','min','sec','mol','mph','m/s','°','mmHg','mBar','kW','kVA']
   processes= ['Average','Minimum','Maximum','Sum','Difference','Priority']
   channels= ['None','WQSensor','Temperature1','Temperature2','Analog1','Analog2',
                'InternalTemp','SupplyVoltage','ProcessedData',

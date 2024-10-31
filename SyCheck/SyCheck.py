@@ -194,7 +194,6 @@ class Application(tk.Frame):
           self.report.append('  Communications error with {}'.format(unit['name']))
         else:
           self.logEvent('  {} configuration read'.format(unit['name']),True)
-          self.report.append('  {} configuration read from {}'.format(unit['name'],unit['address']))
           firstErr= True
           for reg in self.refs[unit['ref']]:
             regValue= self.controller.value(reg['reg'])

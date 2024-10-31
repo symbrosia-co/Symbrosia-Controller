@@ -115,7 +115,7 @@ class Status(tk.Frame):
             {'reg':'Temp1Units',    'form':'unitd', 'conf':False,'col':9,'row':4, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
             {'reg':'Temp2Units',    'form':'unitd', 'conf':False,'col':9,'row':5, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
             {'reg':'Analog1Units',  'form':'unitd', 'conf':False,'col':9,'row':6, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
-            {'reg':'Analog1Units',  'form':'unitd', 'conf':False,'col':9,'row':7, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
+            {'reg':'Analog2Units',  'form':'unitd', 'conf':False,'col':9,'row':7, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
             {'reg':'LocalTempUnits','form':'unitd', 'conf':False,'col':9,'row':8, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
             {'reg':'SupVoltUnits',  'form':'unitd', 'conf':False,'col':9,'row':9, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
             {'reg':'ProcUnits',     'form':'unitd', 'conf':False,'col':9,'row':10,'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             }]

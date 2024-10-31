@@ -11,17 +11,14 @@
 -->
 
 <configuration>
-
   <ctrl name='Weather'>
     <model>SyCtrl Mk2</model>
     <description>Weather station</description>
     <address>192.168.9.202</address>
   </ctrl>
-  
   <ctrl name='Water'>
     <model>SyCtrl Mk2</model>
     <description>Irrigation</description>
-    <address>192.168.9.41</address>
+    <address>192.168.9.208</address>
   </ctrl>
-
 </configuration>

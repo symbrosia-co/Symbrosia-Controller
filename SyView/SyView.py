@@ -18,12 +18,15 @@
 #    - external enable
 #  - Added simulated LCD to status display
 #  - Added status display value selection to status stab
+#  31Oct2024 v1.2 A. Cooper
+#  - Fix analog channels numbers for time
 #
 # Known issues:
 # - missing units for internal temp on status screen
+# - current reading not displayed for some inputs on control tab
 #
 #------------------------------------------------------------------------------
-verStr= 'SyView v1.1'
+verStr= 'SyView v1.2'
 
 #-- constants -----------------------------------------------------------------
 configFile= 'configuration.xml'
