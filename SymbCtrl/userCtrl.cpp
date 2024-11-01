@@ -43,6 +43,8 @@
   - add indication of manual NTP fetch
   - re-write pH calibration process to simplify and reduce putton pushing
   - add simple offset adjustment to WQ input when not used for pH
+  - modified loop condition messaging in control screen A, will show active
+  if the loop is active for any reason, otherwise will show enable source
 
 --------------------------------------------------------------------------------
 
@@ -819,10 +821,10 @@ void UserCtrl::drawControlA(int loop){
     printRead(memory.getFloat(datWQ+(2*(chan-1))),8,1,memory.getInt(datWQSensorUnits+chan-1),memory.getBool(statWQSensorValid+chan-1));
   else lcd.print("  ----  ");
   lcd.setCursor(8,1);
-  if (memory.getBool(statCtrl1Active+loop) && memory.getBool(statCtrl1OneShot+loop)) lcd.print("One-Shot");
-  else if (memory.getBool(statCtrl1Active+loop) && !memory.getBool(statCtrl1Enable+loop)) lcd.print("External");
-  else if (!memory.getBool(statCtrl1Active+loop) && memory.getBool(statCtrl1Enable+loop)) lcd.print("Inactive");
-  else if (memory.getBool(statCtrl1Active+loop)) lcd.print(" Active ");
+  if (memory.getBool(statCtrl1Active+loop)) lcd.print(" Active ");
+  else if (memory.getBool(datCtrl1EnbSource+(loop*chanOffset))>ioNone && memory.getBool(statCtrl1OneShot+loop)) lcd.print("One-Shot");
+  else if (memory.getBool(datCtrl1EnbSource+(loop*chanOffset))>ioNone) lcd.print("External");
+  else if (memory.getBool(statCtrl1Enable+loop)) lcd.print("Inactive");
   else lcd.print("Disabled");
 } // drawControlA
 
