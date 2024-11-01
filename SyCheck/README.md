@@ -16,9 +16,10 @@ One library is required beyond the standard Python install, the [pyModbusTCP lib
 The configuration file is an XML file that contains a record for each controller on the network you wish to check.
 
 ```xml
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-  SyView Configuration File
-  - Installation specific information in XML format
+  SyCheck Configuration File
+  - Installation specific information
 -->
 <configuration>
   <ctrl name='Tank 1'>

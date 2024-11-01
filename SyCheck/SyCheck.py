@@ -170,7 +170,7 @@ class Application(tk.Frame):
     for unit in self.units:
       if unit['name']==self.ctrlStr.get():
         self.scanUnit(unit)
-    self.logEvent('  Scan {} comlete'.format(unit['name']),True)
+    self.logEvent('Scan {} complete'.format(self.ctrlStr.get()),True)
       
   def scanAll(self):
     self.report= []
@@ -179,7 +179,7 @@ class Application(tk.Frame):
     self.report.append('')
     for unit in self.units:
       self.scanUnit(unit)
-    self.logEvent('  Scan all comlete',True)
+    self.logEvent('Scan all complete',True)
 
   def scanUnit(self,unit):
       header= '  Register               Controller   Reference        Description'
@@ -256,6 +256,8 @@ class Application(tk.Frame):
       type= [('Text', '*.txt')]
       name= 'SyCheck{:%Y%m%d}'.format(dt.datetime.now())
       file= filedialog.asksaveasfilename(title='Save report...',initialfile=name,filetypes=type,defaultextension=type,initialdir=localDir)
+      print(file)
+      if file=='': return
       if file==None: return
       try:
         reportFile= open(file,'w',encoding="utf-8")
@@ -279,7 +281,7 @@ class Application(tk.Frame):
   def logEvent(self,event,incDate):
     self.eventLast= self.eventNow
     self.eventNow= dt.datetime.now()
-    if (self.eventNow-self.eventLast)<dt.timedelta(seconds=10):
+    if (self.eventNow-self.eventLast)<dt.timedelta(seconds=3):
       incDate= False
     if incDate:
       self.eventLog.insert(tk.END,'{:%Y-%m-%d %H:%M:%S} '.format(self.eventNow))
