@@ -144,6 +144,7 @@
   - change ToD logic to not use direct mode as long as any controller
   has the channel whether the controller is enabled or disabled
   - changed serial messages during EEPROM load
+  - show sensor name on WQ screen
 
   Known bugs...
   - none
@@ -343,6 +344,7 @@ void statLED(){
   // send it
   pixel.show();
 #endif
+  return;
 } // statLED
 
 //- Utility --------------------------------------------------------------------

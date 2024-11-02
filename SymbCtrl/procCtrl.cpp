@@ -90,13 +90,19 @@ void ProcCtrl::service(){
     valid= false;
     units= unitsNone;
   }
-  if (validA && !validB){
-    result= a;
-    units= memory.getInt(datWQSensorUnits+chanA-1);
+  if ((memory.getInt(datProcessID)==procSum || memory.getInt(datProcessID)==procDiff) && !(validA && validB)){
+    valid= false;
+    units= unitsNone;
   }
-  if (!validA && validB){
-    result= b;
-    units= memory.getInt(datWQSensorUnits+chanB-1);
+  else{
+    if (validA && !validB){
+      result= a;
+      units= memory.getInt(datWQSensorUnits+chanA-1);
+    }
+    if (!validA && validB){
+      result= b;
+      units= memory.getInt(datWQSensorUnits+chanB-1);
+    }
   }
   if (validA && validB){
     units= memory.getInt(datWQSensorUnits+chanA-1);

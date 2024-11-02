@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SyCheck Configuration File
+  - Installation specific information
+-->
+<configuration>
+  <ctrl name='Tank D01'>
+    <address>192.168.0.218</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D02'>
+    <address>192.168.0.232</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D03'>
+    <address>192.168.0.231</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D04'>
+    <address>192.168.0.16</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D05'>
+    <address>192.168.0.234</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+</configuration>
