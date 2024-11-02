@@ -11,6 +11,11 @@
 -->
 
 <configuration>
+  <ctrl name='Test'>
+    <model>SyCtrl Mk2</model>
+    <description>Development unit</description>
+    <address>192.168.9.96</address>
+  </ctrl>
   <ctrl name='Weather'>
     <model>SyCtrl Mk2</model>
     <description>Weather station</description>
