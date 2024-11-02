@@ -43,8 +43,9 @@
   - add indication of manual NTP fetch
   - re-write pH calibration process to simplify and reduce putton pushing
   - add simple offset adjustment to WQ input when not used for pH
-  - modified control loop active messaging to reflect enable source if not
-  active, if active for any reason diplays 'Active'
+  - modified loop condition messaging in control screen A, will show active
+  if the loop is active for any reason, otherwise will show enable source
+  - show sensor name on WQ screen
 
 --------------------------------------------------------------------------------
 
@@ -321,7 +322,7 @@ void UserCtrl::printState(int chan){
     case ioSupplyV:
     case ioProcRead:
       printRead(memory.getFloat(datWQ+((chan-ioWQAmp)*2)),7,1,
-                memory.getInt  (datWQSensorUnits+chan-ioWQAmp),
+                memory.getUInt (datWQSensorUnits+chan-ioWQAmp),
                 memory.getBool (statWQSensorValid+chan-ioWQAmp));
       break;
     case ioDigIn1:
@@ -370,19 +371,19 @@ void UserCtrl::printState(int chan){
       else lcd.print("  False ");
       break;
     case ioDays:
-      read= memory.getInt(datDay)+(memory.getInt(datHour)+(memory.getInt(datMinute)+memory.getInt(datSecond)/60)/60)/24;
+      read= memory.getUInt(datDay)+(memory.getUInt(datHour)+(memory.getUInt(datMinute)+memory.getUInt(datSecond)/60)/60)/24;
       printRead(read,8,0,unitsDay,memory.getBool(statNTPTimeValid));
       break;
     case ioHours:
-      read= memory.getInt(datHour)+memory.getInt(datMinute)/60+memory.getInt(datSecond)/3600;
+      read= memory.getUInt(datHour)+memory.getUInt(datMinute)/60+memory.getUInt(datSecond)/3600;
       printRead(read,8,0,unitsHour,memory.getBool(statNTPTimeValid));
       break;
     case ioMinutes:
-      read= memory.getInt(datMinute)+memory.getInt(datSecond)/60;
+      read= memory.getUInt(datMinute)+memory.getUInt(datSecond)/60;
       printRead(read,8,0,unitsMin,memory.getBool(statNTPTimeValid));
       break;
     case ioSeconds:
-      read= memory.getInt(datSecond);
+      read= memory.getUInt(datSecond);
       printRead(read,8,0,unitsSec,memory.getBool(statNTPTimeValid));
       break;
     default:
@@ -464,8 +465,8 @@ void UserCtrl::printLeftInt(int num,int space){
 
 void UserCtrl::printDate(){
   if (memory.getBool(statNTPTimeValid)){
-    printLeadZero(memory.getInt(datDay));
-    switch (memory.getInt(datMonth)+1){
+    printLeadZero(memory.getUInt(datDay));
+    switch (memory.getUInt(datMonth)+1){
       case 1:  lcd.print("Jan"); break;
       case 2:  lcd.print("Feb"); break;
       case 3:  lcd.print("Mar"); break;
@@ -479,17 +480,17 @@ void UserCtrl::printDate(){
       case 11: lcd.print("Nov"); break;
       case 12: lcd.print("Dec"); break;
     }
-    printLeadZero(memory.getInt(datYear)-2000);
+    printLeadZero(memory.getUInt(datYear)-2000);
   }
   else lcd.print("No NTP!");
 }
 
 void UserCtrl::printTime(){
-  printLeadZero(memory.getInt(datHour));
+  printLeadZero(memory.getUInt(datHour));
   lcd.print(":");
-  printLeadZero(memory.getInt(datMinute));
+  printLeadZero(memory.getUInt(datMinute));
   lcd.print(":");
-  printLeadZero(memory.getInt(datSecond));;
+  printLeadZero(memory.getUInt(datSecond));;
 }
 
 void UserCtrl::printOnOff(bool state){
@@ -618,15 +619,20 @@ void UserCtrl::drawStatus(){
   lcd.setCursor(8,0);
   printTime();
   lcd.setCursor(0,1);
-  printState(memory.getInt(datStatusDisp1));
+  printState(memory.getUInt(datStatusDisp1));
   lcd.setCursor(8,1);
-  printState(memory.getInt(datStatusDisp2));
+  printState(memory.getUInt(datStatusDisp2));
 } // drawStatus
 
 void UserCtrl::drawWQSensor(){
   if (newScr){
     lcd.print("WQ");
-    if (memory.getInt(datWQSensorUnits)==unitspH){
+    char name[18];
+    memory.getStr(datWQName,name);
+    int len= strlen(name);
+    lcd.setCursor(16-constrain(len,0,13),0);
+    if (len>0) lcd.print(name);
+    if (memory.getUInt(datWQSensorUnits)==unitspH){
       lcd.setCursor(8,1);
       lcd.print("Tc:");
     }
@@ -636,7 +642,7 @@ void UserCtrl::drawWQSensor(){
   float read= ((memory.getFloat(datWQ)-7)/memory.getFloat(datWQGain))+7-memory.getFloat(datWQOffset);
   // handle calibration
   if (!memory.getBool(statWQSensorValid)) userSetReq= 0;
-  if (memory.getInt(datWQSensorUnits)==unitspH){ // do pH gain and offset calibration
+  if (memory.getUInt(datWQSensorUnits)==unitspH){ // do pH gain and offset calibration
     if (userSetReq==1){ // cal message
       lcd.setCursor(3,0);
       lcd.print("  Calibrate! ");
@@ -678,7 +684,7 @@ void UserCtrl::drawWQSensor(){
     lcd.setCursor(0,1);
     printRead(memory.getFloat(datWQ),8,2,unitspH,memory.getBool(statWQSensorValid));
     lcd.setCursor(11,1);
-    printChan(memory.getInt(datPHTempComp)); 
+    printChan(memory.getUInt(datPHTempComp)); 
   }
   else {  // do simple offset calibration for non-pH
     if (userSetReq==1){
@@ -692,14 +698,14 @@ void UserCtrl::drawWQSensor(){
       // display reading with flashing units    
       lcd.setCursor(0,1);
       if (memory.getBool(statFlash))
-        printRead(memory.getFloat(datWQ),8,2,memory.getInt(datWQSensorUnits),memory.getBool(statWQSensorValid));
+        printRead(memory.getFloat(datWQ),8,2,memory.getUInt(datWQSensorUnits),memory.getBool(statWQSensorValid));
       else
         printRead(memory.getFloat(datWQ),8,2,unitsNone,memory.getBool(statWQSensorValid));
     }
     else{
       // display reading    
       lcd.setCursor(0,1);
-      printRead(memory.getFloat(datWQ),8,2,memory.getInt(datWQSensorUnits),memory.getBool(statWQSensorValid));
+      printRead(memory.getFloat(datWQ),8,2,memory.getUInt(datWQSensorUnits),memory.getBool(statWQSensorValid));
     }
   }
 } // drawWQSensor
@@ -741,9 +747,9 @@ void UserCtrl::drawTemps(){
     }
   }
   lcd.setCursor(8,0);
-  printRead(memory.getFloat(datTemperature1),8,2,memory.getInt(datTemp1Units),memory.getBool(statTemp1Valid));
+  printRead(memory.getFloat(datTemperature1),8,2,memory.getUInt(datTemp1Units),memory.getBool(statTemp1Valid));
   lcd.setCursor(8,1);
-  printRead(memory.getFloat(datTemperature2),8,2,memory.getInt(datTemp2Units),memory.getBool(statTemp2Valid));
+  printRead(memory.getFloat(datTemperature2),8,2,memory.getUInt(datTemp2Units),memory.getBool(statTemp2Valid));
 } // drawTemps
 
 void UserCtrl::drawAnalog(){
@@ -783,9 +789,9 @@ void UserCtrl::drawAnalog(){
     }
   }
   lcd.setCursor(8,0);
-  printRead(memory.getFloat(datAnalog1),8,2,memory.getInt(datAnalog1Units),memory.getBool(statAnalog1Valid));
+  printRead(memory.getFloat(datAnalog1),8,2,memory.getUInt(datAnalog1Units),memory.getBool(statAnalog1Valid));
   lcd.setCursor(8,1);
-  printRead(memory.getFloat(datAnalog2),8,2,memory.getInt(datAnalog2Units),memory.getBool(statAnalog2Valid));
+  printRead(memory.getFloat(datAnalog2),8,2,memory.getUInt(datAnalog2Units),memory.getBool(statAnalog2Valid));
 } // drawAnalog
 
 void UserCtrl::drawProc(){
@@ -798,33 +804,34 @@ void UserCtrl::drawProc(){
     newScr= false;
   }
   lcd.setCursor(8,0);
-  printRead(memory.getFloat(datProcessedData),8,2,memory.getInt(datProcUnits),memory.getBool(statProcReadValid));
+  printRead(memory.getFloat(datProcessedData),8,2,memory.getUInt(datProcUnits),memory.getBool(statProcReadValid));
   lcd.setCursor(2,1);
-  printChan(memory.getInt(datProcessChanA));
+  printChan(memory.getUInt(datProcessChanA));
   lcd.setCursor(10,1);
-  printChan(memory.getInt(datProcessChanB));
+  printChan(memory.getUInt(datProcessChanB));
 } // drawProc
 
 void UserCtrl::drawControlA(int loop){
-  char name[18];
+  int chan= memory.getUInt(datCtrl1Input+(loop*chanOffset));
   if (newScr){
     lcd.print("Ctrl");
     lcd.print(loop+1);
+    char name[18];
+    memory.getStr(datControl1Name+loop*8,name);
+    int len= strlen(name);
+    lcd.setCursor(16-constrain(len,0,10),0);
+    lcd.print(name);
     newScr= false;
   }
-  int chan= memory.getInt(datCtrl1Input+(loop*chanOffset));
-  lcd.setCursor(6,0);
-  memory.getStr(datControl1Name+loop*8,name);
-  lcd.print(name);
   lcd.setCursor(0,1);
   if (chan>=ioWQAmp && chan<=ioProcRead)
     printRead(memory.getFloat(datWQ+(2*(chan-1))),8,1,memory.getInt(datWQSensorUnits+chan-1),memory.getBool(statWQSensorValid+chan-1));
   else lcd.print("  ----  ");
   lcd.setCursor(8,1);
   if (memory.getBool(statCtrl1Active+loop)) lcd.print(" Active ");
+  else if (memory.getUInt(datCtrl1EnbSource+(loop*chanOffset))>ioNone && memory.getBool(statCtrl1OneShot+loop)) lcd.print("One-Shot");
+  else if (memory.getUInt(datCtrl1EnbSource+(loop*chanOffset))>ioNone) lcd.print("External");
   else if (memory.getBool(statCtrl1Enable+loop)) lcd.print("Inactive");
-  else if (memory.getBool(datCtrl1EnbSource+loop)>0 && memory.getBool(statCtrl1OneShot+loop)) lcd.print("One-Shot");
-  else if (memory.getBool(datCtrl1EnbSource+loop)>0) lcd.print("External");
   else lcd.print("Disabled");
 } // drawControlA
 
@@ -839,9 +846,9 @@ void UserCtrl::drawControlB(int loop){
     newScr= false;
   }
   lcd.setCursor(10,0);
-  printChan(memory.getInt(datCtrl1Input+(loop*chanOffset)));
+  printChan(memory.getUInt(datCtrl1Input+(loop*chanOffset)));
   lcd.setCursor(10,1);
-  printChan(memory.getInt(datCtrl1Output+(loop*chanOffset)));
+  printChan(memory.getUInt(datCtrl1Output+(loop*chanOffset)));
 } // drawControlB
 
 void UserCtrl::drawControlC(int loop){
@@ -868,10 +875,10 @@ void UserCtrl::drawControlC(int loop){
     }
   }
   lcd.setCursor(8,0);
-  int chan= memory.getInt(datCtrl1Input+(loop*chanOffset));
-  printRead(memory.getFloat(datCtrl1Setpoint+(loop*chanOffset)),8,1,memory.getInt(datWQSensorUnits+chan-1),true);
+  int chan= memory.getUInt(datCtrl1Input+(loop*chanOffset));
+  printRead(memory.getFloat(datCtrl1Setpoint+(loop*chanOffset)),8,1,memory.getUInt(datWQSensorUnits+chan-1),true);
   lcd.setCursor(8,1);
-  printRead(memory.getFloat(datCtrl1Hysteresis+(loop*chanOffset)),8,1,memory.getInt(datWQSensorUnits+chan-1),true);
+  printRead(memory.getFloat(datCtrl1Hysteresis+(loop*chanOffset)),8,1,memory.getUInt(datWQSensorUnits+chan-1),true);
 } // drawControlC
 
 void UserCtrl::drawLogic(){
@@ -884,7 +891,7 @@ void UserCtrl::drawLogic(){
     newScr= false;
   }
   lcd.setCursor(6,0);
-  switch(memory.getInt(datLogicFunction)){
+  switch(memory.getUInt(datLogicFunction)){
     case logicNot:  lcd.print("NOT A");break;
     case logicAnd:  lcd.print("AND  ");break;
     case logicNand: lcd.print("NAND ");break;
@@ -898,9 +905,9 @@ void UserCtrl::drawLogic(){
   if(memory.getBool(statLogicGateResult)) lcd.print("High");
   else lcd.print("Low ");
   lcd.setCursor(2,1);
-  printChan(memory.getInt(datLogicInA));
+  printChan(memory.getUInt(datLogicInA));
   lcd.setCursor(10,1);
-  printChan(memory.getInt(datLogicInB));
+  printChan(memory.getUInt(datLogicInB));
 } // drawToD
 
 void UserCtrl::drawToD(){
@@ -909,13 +916,13 @@ void UserCtrl::drawToD(){
     newScr= false;
   }
   lcd.setCursor(5,0);
-  printLeadZero(memory.getInt(datToDStartHour));
+  printLeadZero(memory.getUInt(datToDStartHour));
   lcd.print(":");
-  printLeadZero(memory.getInt(datToDStartMin));
+  printLeadZero(memory.getUInt(datToDStartMin));
   lcd.print("-");
-  printLeadZero(memory.getInt(datToDStopHour));
+  printLeadZero(memory.getUInt(datToDStopHour));
   lcd.print(":");
-  printLeadZero(memory.getInt(datToDStopMin));
+  printLeadZero(memory.getUInt(datToDStopMin));
   lcd.setCursor(0,1);
   printTime();
   lcd.setCursor(8,1);
@@ -933,13 +940,13 @@ void UserCtrl::drawToD2(){
     newScr= false;
   }
   lcd.setCursor(5,0);
-  printChan(memory.getInt(datToDOutput1));
+  printChan(memory.getUInt(datToDOutput1));
   lcd.setCursor(11,0);
-  printChan(memory.getInt(datToDOutput2));
+  printChan(memory.getUInt(datToDOutput2));
   lcd.setCursor(5,1);
-  printChan(memory.getInt(datToDOutput3));
+  printChan(memory.getUInt(datToDOutput3));
   lcd.setCursor(11,1);
-  printChan(memory.getInt(datToDOutput4));  
+  printChan(memory.getUInt(datToDOutput4));  
 } // drawToD2
 
 void UserCtrl::drawOutputs(){
@@ -969,9 +976,9 @@ void UserCtrl::drawCounter(){
     newScr= false;
   }
   lcd.setCursor(10,0);
-  printChan(memory.getInt(datCountSource));
+  printChan(memory.getUInt(datCountSource));
   lcd.setCursor(0,1);
-  printLeftInt(memory.getInt(datFrequency),4);
+  printLeftInt(memory.getUInt(datFrequency),4);
   lcd.setCursor(6,1);
   printLeftInt(memory.getLong(datCounter),10);
 } // drawCounter
@@ -982,7 +989,7 @@ void UserCtrl::drawTimer(){
     newScr= false;
   }
   lcd.setCursor(10,0);
-  printChan(memory.getInt(datTimerSource));
+  printChan(memory.getUInt(datTimerSource));
   lcd.setCursor(2,1);
   printLeftInt(memory.getLong(datTimer),10);
   lcd.print("s");
@@ -1178,9 +1185,9 @@ void UserCtrl::drawIntData(){
     newScr= false;
   }
   lcd.setCursor(9,0);
-  printRead(memory.getFloat(datIntTemp),7,1,memory.getInt(datIntTempUnits),memory.getBool(statIntTempValid));
+  printRead(memory.getFloat(datIntTemp),7,1,memory.getUInt(datIntTempUnits),memory.getBool(statIntTempValid));
   lcd.setCursor(9,1);
-  printRead(memory.getFloat(datSupplyVoltage),7,2,memory.getInt(datSupVoltUnits),memory.getBool(statSupVoltValid));
+  printRead(memory.getFloat(datSupplyVoltage),7,2,memory.getUInt(datSupVoltUnits),memory.getBool(statSupVoltValid));
 } // drawIntData
 
 void UserCtrl::drawUnit(){
@@ -1191,7 +1198,7 @@ void UserCtrl::drawUnit(){
     else lcd.print("Unit");
     lcd.setCursor(0,1);
     lcd.print("SN ");
-    lcd.print(memory.getInt(datSerialNumber));
+    lcd.print(memory.getUInt(datSerialNumber));
     lcd.setCursor(8,1);
     lcd.print("FW ");
     lcd.print("v");

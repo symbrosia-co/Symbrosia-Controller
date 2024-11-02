@@ -144,8 +144,9 @@
   - change ToD logic to not use direct mode as long as any controller
   has the channel whether the controller is enabled or disabled
   - changed serial messages during EEPROM load
-  - modified control loop screen active messaging to reflect enable source
-  if not active, if active for any reason diplays 'Active'
+  - show sensor name on WQ screen
+  - do not use priority for sum or difference processed read, lose
+  any reading => invalid
 
   Known bugs...
   - none
@@ -345,6 +346,7 @@ void statLED(){
   // send it
   pixel.show();
 #endif
+  return;
 } // statLED
 
 //- Utility --------------------------------------------------------------------
