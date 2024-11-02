@@ -71,7 +71,7 @@ void TimeCtrl::init(){
   memory.setBool(statStartup,true);
 } // init
 
-void TimeCtrl::setTime(){
+bool TimeCtrl::setTime(){
   if (wifiStat){
     Serial.println("  Fetch network time...");
     configTime(0,0,ntpServer1,ntpServer2);
@@ -82,11 +82,11 @@ void TimeCtrl::setTime(){
       timeLast= rtc.getLocalEpoch();
       Serial.println("    NTP fetch successful");
       Serial.print("    ");printTime();Serial.println(" ");
+      return true;
     }
-    else{
-      Serial.println("    Failed to obtain time");
-    }
+    else Serial.println("    Failed to obtain time");
   }
+  return false;
 }
 
 bool TimeCtrl::NTPValid(){

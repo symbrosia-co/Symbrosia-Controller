@@ -40,7 +40,7 @@ class TimeCtrl{
   public:
     TimeCtrl();
     void init();
-    void setTime();
+    bool setTime();
     bool NTPValid();
     void service();
     unsigned long timeSinceBoot();

@@ -127,6 +127,25 @@
   - added auto I2C address search for MCP3021
   - a successful functional test performed
   - concat SymbCtrl to unit name to make network name
+  08Oct2024 v2.7 A. Cooper
+  - major re-write of userCtrl to clean up the methods for handling user
+  input such as calibration and WiFi credential input, it needed it
+  - solved WiFi.scanNetworks bug, would not initiate a scan when the
+  previous network connection or connection attempt was not fully
+  terminated, use WiFi.disconnect with a wifioff=true to fully
+  disconnect and shutdown the conection before an SSID scan
+  - change memory.save to memory.saveFloat in calibration routines
+  - change memory.save to memory.saveWiFi in credential entry routine
+  - restart userSetTime timeout on all encoder or button input
+  - add manual offset adjustment to analog inputs
+  - add indication of manual NTP fetch
+  - re-write pH calibration process to reduce putton pushing
+  - add simple offset adjustment to WQ input when not used for pH
+  - change ToD logic to not use direct mode as long as any controller
+  has the channel whether the controller is enabled or disabled
+  - changed serial messages during EEPROM load
+  - modified control loop screen active messaging to reflect enable source
+  if not active, if active for any reason diplays 'Active'
 
   Known bugs...
   - none
@@ -371,7 +390,7 @@ float getAChan(int chan){
 
 //- WiFI -----------------------------------------------------------------------
 void wifiCheck(){
-  if (wifiTime>millis()) wifiTime= 0;
+  if (wifiTime>millis()) wifiTime= 0; // handle millis rollover
   if (millis()-wifiTime>600000){ // check and retry every 10 minutes
     wifiTime= millis();
     if (!wifiStat) wifiConnect();
@@ -385,25 +404,26 @@ void wifiConnect(){
   char pass[18];
   char name[18];
   char hostName[28];
+  char serNum[8];
   memory.getStr(datWifiAPName,ssid);
   memory.getStr(datWifiPassword,pass);
   memory.getStr(datControlName,name);
   Serial.println("  Initializing WiFi...");
   Serial.print("    SSID:");Serial.println(ssid);
   Serial.print("    Pass:");Serial.println(pass);
-  Serial.print("    Unit:");Serial.println(name);
   strcpy(hostName,"SymbCtrl");
   for (int i=0;i<strlen(name);i++) if (!isAlphaNumeric(name[i])) name[i]= char(45);
-  if (strlen(name)>1) {strcat(hostName,"-");strcat(hostName,name);}  
+  if (strlen(name)>1) {strcat(hostName,"-");strcat(hostName,name);} 
+  else  {strcat(hostName,"-");ultoa(serialNumber,serNum,10);strcat(hostName,serNum);}
   Serial.print("    Name:");Serial.println(hostName);
+  WiFi.mode(WIFI_STA);
   WiFi.setHostname(hostName);  
   WiFi.begin(ssid,pass);
   unsigned long timeOut= millis();
   Serial.print("    Connecting ");
-  while ((WiFi.status()!= WL_CONNECTED) && ((millis()-timeOut)<15000)){
+  while ((WiFi.status()!= WL_CONNECTED) && ((millis()-timeOut)<20000)){
     delay(500);
     Serial.print("-");
-    //timeCtrl.service();
     userCtrl.service();
     }
   if (WiFi.status()==WL_CONNECTED){
@@ -420,6 +440,7 @@ void wifiConnect(){
     Serial.println("");
     Serial.print("    WiFi connection failed to ");
     Serial.println(ssid);
+    WiFi.disconnect(true);
     }
   userCtrl.setScreen(scrWiFiDone);
 } //wifiConnect

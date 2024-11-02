@@ -22,7 +22,9 @@
   - implemented minimum on/off time
   - implemented one-shot enable
   - revised much of the service function to make these changes
-
+  08Oct2024 v2.7 A. Cooper
+  - remove enable or disabled status from controlled logic, will show
+  controlled as long as any controller is set to use as output
 --------------------------------------------------------------------------------
 
     SymbCtrl - The Symbrosia Aquaculture Controller
@@ -200,7 +202,7 @@ void Control::service(){
   //   Serial.print("  One:");Serial.print(oneShot[proc]?"T":"F");
   //   Serial.print("  Last:");Serial.print(stateLast[proc]?"T":"F");
   //   Serial.print("  Hold:");Serial.print(stateHold[proc]?"T":"F");
-  //     Serial.print("/");Serial.print((millis()-switchTime[proc])/1000);
+  //   Serial.print("/");Serial.print((millis()-switchTime[proc])/1000);
   //   Serial.print("  Act:");Serial.print(active?"T":"F");
   //   Serial.print("  Valid:");Serial.print(valid?"T":"F");
   //   Serial.print("  Read:");Serial.print(read,2);
@@ -243,10 +245,10 @@ void Control::service(){
 // return true if channel under loop control
 bool Control::controlled(int chan){
   if (chan==0) return false;
-  if (chan==memory.getInt(datCtrl1Output) && memory.getBool(statCtrl1Enable)) return true;
-  if (chan==memory.getInt(datCtrl2Output) && memory.getBool(statCtrl2Enable)) return true;
-  if (chan==memory.getInt(datCtrl3Output) && memory.getBool(statCtrl3Enable)) return true;
-  if (chan==memory.getInt(datCtrl4Output) && memory.getBool(statCtrl4Enable)) return true;
+  if (chan==memory.getInt(datCtrl1Output)) return true;
+  if (chan==memory.getInt(datCtrl2Output)) return true;
+  if (chan==memory.getInt(datCtrl3Output)) return true;
+  if (chan==memory.getInt(datCtrl4Output)) return true;
   if (chan==memory.getInt(datProcessChanA) || chan==memory.getInt(datProcessChanB)) return true;
   return false;
 }  // controlled

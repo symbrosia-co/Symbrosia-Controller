@@ -8,6 +8,9 @@
   27Jun2024 v2.6 A. Cooper
   - revised ToD logic to change behavior, ToD active will reflect ToD enable
   - cleaned up code in TofDay
+  08Oct2024 v2.7 A. Cooper
+  - change logic to ensure ToD does not enable a channel if any controller is'
+  using it, whether the controller is enabled or not
 
 --------------------------------------------------------------------------------
 

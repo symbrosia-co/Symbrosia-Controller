@@ -1,7 +1,10 @@
 <!--
 
   Modbus Monitor  Configuration File
-  - monitor any ModbusTCP device and log the data to a CSV file
+
+  - Monitor a list of logfiles for recent activity
+  - Restart stoppped processes if needed
+  - Provide a dashboard of data server health
 
   Symbrosia Inc
 
@@ -11,33 +14,34 @@
 
 <configuration>
   <scanInterval>1</scanInterval>
-  <logInterval>300</logInterval>
+  <logInterval>120</logInterval>
   <logName>Weather</logName>
   <device>
     <name>Weather</name>
     <ipAddr>192.168.9.202</ipAddr>
     <port>502</port>
+    <type>Weather</type>
     <datum>
-      <name>Precipitation</name>
-      <addr>151</addr>
-      <type>long</type>
-      <unit></unit>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>PAR</name>
-      <addr>20</addr>
-      <type>float</type>
-      <unit>mol/m²/sec</unit>
-      <precision>1</precision>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>Outdoor Temp</name>
+      <name>Ambient Temp</name>
       <addr>22</addr>
       <type>float</type>
       <unit>°C</unit>
       <precision>2</precision>
+      <log>True</log>
+    </datum>
+    <datum>
+      <name>Temp</name>
+      <addr>24</addr>
+      <type>float</type>
+      <unit>°C</unit>
+      <precision>2</precision>
+      <log>True</log>
+    </datum>
+    <datum>
+      <name>Rain Gauge</name>
+      <addr>151</addr>
+      <type>long</type>
+      <unit></unit>
       <log>True</log>
     </datum>
   </device>
