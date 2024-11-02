@@ -129,11 +129,11 @@
   - concat SymbCtrl to unit name to make network name
   08Oct2024 v2.7 A. Cooper
   - major re-write of userCtrl to clean up the methods for handling user
-  input such as calibration and WiFi credential input, it needed it
+    input such as calibration and WiFi credential input, it needed it
   - solved WiFi.scanNetworks bug, would not initiate a scan when the
-  previous network connection or connection attempt was not fully
-  terminated, use WiFi.disconnect with a wifioff=true to fully
-  disconnect and shutdown the conection before an SSID scan
+    previous network connection or connection attempt was not fully
+    terminated, use WiFi.disconnect with a wifioff=true to fully
+    disconnect and shutdown the conection before an SSID scan
   - change memory.save to memory.saveFloat in calibration routines
   - change memory.save to memory.saveWiFi in credential entry routine
   - restart userSetTime timeout on all encoder or button input
@@ -142,9 +142,11 @@
   - re-write pH calibration process to reduce putton pushing
   - add simple offset adjustment to WQ input when not used for pH
   - change ToD logic to not use direct mode as long as any controller
-  has the channel whether the controller is enabled or disabled
+    has the channel whether the controller is enabled or disabled
   - changed serial messages during EEPROM load
   - show sensor name on WQ screen
+  - do not use priority for sum or difference in processed reading, lose
+    any reading => invalid
 
   Known bugs...
   - none
