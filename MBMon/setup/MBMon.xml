@@ -2,10 +2,6 @@
 
   Modbus Monitor  Configuration File
 
-  - Monitor a list of logfiles for recent activity
-  - Restart stoppped processes if needed
-  - Provide a dashboard of data server health
-
   Symbrosia Inc
 
   29Nov2021 A. Cooper
@@ -15,14 +11,14 @@
 <configuration>
   <scanInterval>1</scanInterval>
   <logInterval>120</logInterval>
-  <logName>Weather</logName>
+  <logName>TankCtrl</logName>
   <device>
-    <name>Weather</name>
-    <ipAddr>192.168.9.202</ipAddr>
+    <name>Tank X02</name>
+    <ipAddr>192.168.0.244</ipAddr>
     <port>502</port>
-    <type>Weather</type>
+    <type>Tank Ctrl</type>
     <datum>
-      <name>Ambient Temp</name>
+      <name>Tank Temp 1</name>
       <addr>22</addr>
       <type>float</type>
       <unit>°C</unit>
@@ -30,7 +26,7 @@
       <log>True</log>
     </datum>
     <datum>
-      <name>Temp</name>
+      <name>Tank Temp 2</name>
       <addr>24</addr>
       <type>float</type>
       <unit>°C</unit>
@@ -38,10 +34,18 @@
       <log>True</log>
     </datum>
     <datum>
-      <name>Rain Gauge</name>
-      <addr>151</addr>
+      <name>Tank pH</name>
+      <addr>20</addr>
+      <type>float</type>
+      <unit>pH</unit>
+      <precision>2</precision>
+      <log>True</log>
+    </datum>
+    <datum>
+      <name>CO2 Time</name>
+      <addr>155</addr>
       <type>long</type>
-      <unit></unit>
+      <unit>s</unit>
       <log>True</log>
     </datum>
   </device>

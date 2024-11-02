@@ -1,0 +1,10 @@
+<!--
+  SyView Configuration File
+  - Installation specific information in XML format
+-->
+<configuration>
+  <ctrl name='Weather'>
+    <address>192.168.9.202</address>
+    <ref>Weather.xml</ref>
+  </ctrl>
+</configuration>
