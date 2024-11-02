@@ -46,6 +46,8 @@
   - modified loop condition messaging in control screen A, will show active
   if the loop is active for any reason, otherwise will show enable source
   - show sensor name on WQ screen
+  - do not use priority for sum or difference processed read, lose
+  any reading => invalid
 
 --------------------------------------------------------------------------------
 
