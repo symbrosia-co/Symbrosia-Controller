@@ -1,11 +1,11 @@
 {
   {
-    "type": "SymbCtrl-Mk3-S2",
+    "type": "SymbCtrl-Mk2-S2",
     "version": "2.8",
     "url": "https://github.com/symbrosia-co/Symbrosia-Controller/blob/main/update/SymbCtrl-28-S2.bin"
   },
   {
-    "type": "SymbCtrl-Mk3-S3",
+    "type": "SymbCtrl-Mk2-S3",
     "version": "2.8",
     "url": "https://github.com/symbrosia-co/Symbrosia-Controller/blob/main/update/SymbCtrl-28-S3.bin"
   }
