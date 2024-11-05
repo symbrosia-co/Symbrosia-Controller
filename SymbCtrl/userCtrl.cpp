@@ -48,6 +48,11 @@
   - show sensor name on WQ screen
   - do not use priority for sum or difference processed read, lose
   any reading => invalid
+  02Nov2024 v2.8 A. Cooper
+  - add screens for fixed data entry
+  - add screen for firmware update
+  - move reset function to status screen
+  - add firmware update to unit info screen
 
 --------------------------------------------------------------------------------
 
@@ -79,8 +84,10 @@
 #include "Memory.h"
 #include "timeCtrl.h"
 #include "modbusCtrl.h"
+#include "fotaCtrl.h"
 extern TimeCtrl timeCtrl;
 extern Memory memory;
+extern FOtACtrl fotaCtrl;
 
 //- instantiate ----------------------------------------------------------------
 LiquidCrystal lcd(hdwrLCDRS,hdwrLCDRW,hdwrLCDE,hdwrLCDD0,hdwrLCDD1,hdwrLCDD2,hdwrLCDD3,hdwrLCDD4,hdwrLCDD5,hdwrLCDD6,hdwrLCDD7);
@@ -154,12 +161,15 @@ void UserCtrl::service(){
 
 void UserCtrl::setScreen(int scr){
   if (scr>=scrSplash && scr<=scrLast) screen= scr;
-  if (scr==scrWiFiStart) screen= scr;
-  if (scr==scrWiFiDone) screen= scr;
+  if (scr>=scrWiFiStart && scr<=scrFirmware) screen= scr;
   newScr= true;
   userSetReq= 0;
   drawScreen();
 } // setScreen
+
+int  UserCtrl::getScreen(){
+  return screen;
+} // getScreen
 
 void UserCtrl::right(){
   if (debugUI) Serial.println("Right");
@@ -203,6 +213,10 @@ void UserCtrl::press(){
   userSetNext= false;
   userSetAcpt= false;
   switch (screen){
+    // reset unit
+    case scrStatus:
+      ESP.restart();
+      break;
     // WQ calibrate
     case scrWQSensor:
       if (userSetReq==0) userSetReq= 1;
@@ -250,15 +264,23 @@ void UserCtrl::press(){
     case scrTimer:
       memory.setLong(datTimer,0);
       break;
+    // fetch NTP time
     case scrTime:
       if (userSetReq==0) userSetReq= 1;
       break;
+    // enter WiFi credentials
     case scrWiFi:
       if (userSetReq==0) userSetReq= 1;
       else userSetNext= true;
       break;
+    // firmware update
     case scrUnit:
-      ESP.restart();
+      setScreen(scrFirmware);
+      break;
+    // approve firmware request
+    case scrFirmware:
+      if (userSetReq==0) userSetReq= 1;
+      else userSetNext= true;
       break;
   }
 }
@@ -591,6 +613,18 @@ void UserCtrl::drawScreen(){
       break;
     case scrWiFiDone:
       drawWiFiDone();
+      break;
+    case scrSerial:
+      drawSerial();
+      break;
+    case scrHardware:
+      drawHardware();
+      break;
+    case scrProcessor:
+      drawProcessor();
+      break;
+    case scrFirmware:
+      drawFirmware();
       break;
   }
 } // drawScreen
@@ -1149,7 +1183,7 @@ void UserCtrl::drawWiFi(){
       memory.setStr(datWifiPassword,wifiPass);
       memory.saveWiFi();
       userSetReq= 0;
-      newScr= true;
+      setScreen(scrStatus);
       return;
     }
   }
@@ -1217,7 +1251,7 @@ void UserCtrl::drawWiFiStart(){
     wifiStart= millis();
     newScr= false;
   }
-  int pos= (millis()-wifiStart)/1000;
+  int pos= (millis()-wifiStart)/1250; //tune to have progress bar across screen at timeout
   if (pos>15) pos=15;
   lcd.setCursor(pos,1);
   lcd.print(char(255));
@@ -1235,5 +1269,115 @@ void UserCtrl::drawWiFiDone(){
   // go to status screen after startup delay
   if (!memory.getBool(statStartup)) setScreen(1);
 } // drawWiFiStart
+
+void UserCtrl::drawSerial(){
+  if (newScr){
+    lcd.print("Enter serial");
+    userSelPos= serialNumMin;
+    userSelScroll= 0;
+    userSetReq= 1;
+    newScr= false;
+  }
+  userSelPos= userSelPos+userSelScroll;
+  if (userSelPos<serialNumMin) userSelPos= serialNumMax;
+  if (userSelPos>serialNumMax) userSelPos= serialNumMin;
+  lcd.setCursor(6,1);
+  lcd.print(userSelPos);
+  lcd.print("     ");
+  userSelScroll= 0;
+  if (userSetAcpt || userSetNext){
+    memory.setSerial(userSelPos);
+    memory.setUInt(datSerialNumber,userSelPos);
+    setScreen(scrHardware);
+  }
+} // drawSerial
+
+void UserCtrl::drawHardware(){
+  if (newScr){
+    lcd.print("Enter hardware");
+    userSelPos= hdwrMax;
+    userSelScroll= 0;
+    userSetReq= 1;
+    newScr= false;
+  }
+  userSelPos= userSelPos+userSelScroll;
+  if (userSelPos<hdwrMin) userSelPos= hdwrMax;
+  if (userSelPos>hdwrMax) userSelPos= hdwrMin;
+  lcd.setCursor(1,1);
+  if (userSelPos==hdwrIDmk1)      lcd.print("Mk1 rev A");
+  if (userSelPos==hdwrIDmk2revA)  lcd.print("Mk2 rev A");
+  if (userSelPos==hdwrIDmk2revB)  lcd.print("Mk2 rev B");
+  lcd.print("     ");
+  userSelScroll= 0;
+  if (userSetAcpt || userSetNext){
+    memory.setHardware(userSelPos);
+    memory.setUInt(datModelNumber,userSelPos);
+    setScreen(scrProcessor);
+  }
+} // drawHardware
+
+void UserCtrl::drawProcessor(){
+  if (newScr){
+    lcd.print("Enter processor");
+    userSelPos= procMax;
+    userSelScroll= 0;
+    userSetReq= 1;
+    newScr= false;
+  }
+  userSelPos= userSelPos+userSelScroll;
+  if (userSelPos<procMin) userSelPos= procMax;
+  if (userSelPos>procMax) userSelPos= procMin;
+  lcd.setCursor(1,1);
+  if (userSelPos==procIDS2Saola) lcd.print("ESP32 S2 Saola");
+  if (userSelPos==procIDS2Mini)  lcd.print("Lolin S2 Mini ");
+  if (userSelPos==procIDS3Mini)  lcd.print("Lolin S3 Mini ");
+  lcd.print("     ");
+  userSelScroll= 0;
+  if (userSetAcpt || userSetNext){
+    memory.setProcessor(userSelPos);
+    setScreen(scrStatus);
+  }
+} // drawProcessor
+
+void UserCtrl::drawFirmware(){
+  if (newScr){
+    lcd.print("Firmware update");
+    lcd.setCursor(3,1);
+    lcd.print("Confirm?");
+    timeCtrl.printTime();
+    Serial.println("Firmware update request...");
+    userSetNext= false;
+    userSetAcpt= false;
+    userSelScroll= 0;
+    userSetReq= 1;
+    if (!wifiStat) userSetReq= 3;
+    newScr= false;
+  }
+  if (userSetReq==1){
+    if (userSetNext){
+      Serial.println("  Confirmed!");
+      userSetNext= false;
+      userSetAcpt= false;
+      userSelScroll= 0;
+      userSetReq= 2;
+    }
+    if (userSetAcpt || userSelScroll!=0){
+      Serial.println("  Aborted!");
+      setScreen(scrUnit);
+    }
+  }
+  if (userSetReq==2){
+    lcd.setCursor(3,1);
+    lcd.print("Updating");
+    fotaCtrl.update();
+    setScreen(scrUnit);
+    //ESP.restart();
+  }
+  if (userSetReq==3){
+    lcd.setCursor(0,1);
+    lcd.print("  No network!");
+    if (userSetAcpt || userSetNext || userSelScroll!=0) setScreen(scrUnit);
+  }
+} // drawFirmware
 
 //- End userCtrl ---------------------------------------------------------------

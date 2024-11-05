@@ -35,6 +35,11 @@
   - added control one-shot flag
   - added TofD to IO channel list
   - added a few new units
+  02Nov2024 v2.8 A. Cooper
+  - move LCD screen constants here from userCtrl.h
+  - add screen ID's for fixed data entry (92 to 94)
+  - add screen ID's for firmware update (95)
+  - add fixed data definitions (serial,hardware, processor)
 
 ------------------------------------------------------------------------------*/
 #pragma once
@@ -51,10 +56,10 @@
 #endif
 
 // unit ID 
-#define modelNumber   2
-#define serialNumber  221
+#define serialNumMin  200
+#define serialNumMax  999
 #define firmMajor     2
-#define firmMinor     7
+#define firmMinor     8
 #define modelNameStr  "SymbCtrl Mk2"
 #define timeZone      -10
 
@@ -71,13 +76,12 @@
 #define startupDelay  30 // startup lockout in seconds\p\order\detail.html
 
 // misc
-#define loadDefaults  false // force load of defaults on boot
+#define forceSerial   false // force load of fixed data (serial, hardware, etc)
+#define forceDefaults false // force load of defaults on boot
 
 //- WiFi credentials -----------------------------------------------------------
-#define defWiFi "Symbrosia 2.4HGz"
-#define defPass "LimuKohu19*"
-//#define defWiFi "Taylor-Staff"
-//#define defPass "Taylor1234"
+#define defWiFi "SSID"
+#define defPass "Pass"
 
 //- ntp server -----------------------------------------------------------------
 #define ntpServer1 "pool.ntp.org"
@@ -86,6 +90,20 @@
 // global variables and functions ----------------------------------------------
 extern bool      wifiStat;
 extern IPAddress wifiIPAddr;
+
+// hardware ID codes...
+#define hdwrIDmk1            0
+#define hdwrIDmk2revA        1
+#define hdwrIDmk2revB        2
+#define hdwrMin              0
+#define hdwrMax              2
+
+// processor ID codes...
+#define procIDS2Saola        1
+#define procIDS2Mini         2
+#define procIDS3Mini         3
+#define procMin              0
+#define procMax              3
 
 // Output control...
 #define ctrlOuts             4
@@ -470,5 +488,45 @@ const int ioAddr[]={
 #define resetHourly  1
 #define resetDaily   2
 #define resetMonthly 3
+
+// LCD screens
+#define scrSplash     0
+#define scrFirst      1
+#define scrStatus     1
+#define scrWQSensor   2
+#define scrTemps      3
+#define scrAnalog     4
+#define scrProc       5
+#define scrControl1a  6
+#define scrControl1b  7
+#define scrControl1c  8
+#define scrControl2a  9
+#define scrControl2b 10
+#define scrControl2c 11
+#define scrControl3a 12
+#define scrControl3b 13
+#define scrControl3c 14
+#define scrControl4a 15
+#define scrControl4b 16
+#define scrControl4c 17
+#define scrLogic     18
+#define scrOutputs   19
+#define scrToD       20
+#define scrToD2      21
+#define scrCounter   22
+#define scrTimer     23
+#define scrModbus    24
+#define scrTime      25
+#define scrWiFi      26
+#define scrWiFi2     27
+#define scrIntData   28
+#define scrUnit      29
+#define scrLast      29
+#define scrWiFiStart 90
+#define scrWiFiDone  91
+#define scrSerial    92
+#define scrHardware  93
+#define scrProcessor 94
+#define scrFirmware  95
 
 //- End globals.h --------------------------------------------------------------

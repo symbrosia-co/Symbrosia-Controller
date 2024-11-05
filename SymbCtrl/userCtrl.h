@@ -12,6 +12,9 @@
   - major re-write to clean up the methods for handling user input
   such as calibration and WiFi credential input, a number of private
   variables were added and deleted
+  02Nov2024 v2.8 A. Cooper
+  - move LCD screen constants to globals.h
+  - add getScreen
 
 --------------------------------------------------------------------------------
 
@@ -38,42 +41,6 @@
 //- Library includes -----------------------------------------------------------
 #include <Arduino.h>
 
-//- constants ------------------------------------------------------------------
-#define scrSplash     0
-#define scrFirst      1
-#define scrStatus     1
-#define scrWQSensor   2
-#define scrTemps      3
-#define scrAnalog     4
-#define scrProc       5
-#define scrControl1a  6
-#define scrControl1b  7
-#define scrControl1c  8
-#define scrControl2a  9
-#define scrControl2b 10
-#define scrControl2c 11
-#define scrControl3a 12
-#define scrControl3b 13
-#define scrControl3c 14
-#define scrControl4a 15
-#define scrControl4b 16
-#define scrControl4c 17
-#define scrLogic     18
-#define scrOutputs   19
-#define scrToD       20
-#define scrToD2      21
-#define scrCounter   22
-#define scrTimer     23
-#define scrModbus    24
-#define scrTime      25
-#define scrWiFi      26
-#define scrWiFi2     27
-#define scrIntData   28
-#define scrUnit      29
-#define scrLast      29
-#define scrWiFiStart 90
-#define scrWiFiDone  91
-
 //- a little class -------------------------------------------------------------
 class UserCtrl{
   public:
@@ -81,6 +48,7 @@ class UserCtrl{
     void init();
     void service();
     void setScreen(int scr);
+    int  getScreen();
     void left();
     void right();
     void click();
@@ -134,6 +102,10 @@ class UserCtrl{
     void drawUnit();
     void drawWiFiStart();
     void drawWiFiDone();
+    void drawSerial();
+    void drawHardware();
+    void drawProcessor();
+    void drawFirmware();
 };
 
 #endif
