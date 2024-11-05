@@ -4,3 +4,4 @@ MBMon.xml
 *.csv
 *.bak
 *.pyc
+SyView/cfg/configuration.xml
