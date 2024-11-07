@@ -77,7 +77,7 @@
 #define minProcess        0
 #define maxProcess        5
 #define minLogicFunc      0
-#define maxLogicFunc      6
+#define maxLogicFunc      7
 #define minResetIntv      0
 #define maxResetIntv      3
 #define minTemp         -40
