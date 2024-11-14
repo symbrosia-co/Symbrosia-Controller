@@ -1,4 +1,4 @@
-{
+[
   {
     "type": "SymbCtrl-Mk2-S2",
     "version": "2.8",
@@ -9,5 +9,5 @@
     "version": "2.8",
     "url": "https://raw.githubusercontent.com/symbrosia-co/Symbrosia-Controller/refs/heads/main/update/SymbCtrl-28-S3.bin"
   }
-}
+]
   
