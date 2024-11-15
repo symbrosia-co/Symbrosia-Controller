@@ -32,7 +32,6 @@
 #include "globals.h"
 #include "fotaCtrl.h"
 #include <esp32fota.h>
-#include <WiFi.h>
 
 //- constants ------------------------------------------------------------------
 const char* manifest= "https://raw.githubusercontent.com/symbrosia-co/Symbrosia-Controller/refs/heads/main/update/update.json";
@@ -42,20 +41,26 @@ const char* manifest= "https://raw.githubusercontent.com/symbrosia-co/Symbrosia-
 // Valid until: 1/18/38, 1:59:59 PM HST
 const char* root_ca= R"ROOT_CA(
 -----BEGIN CERTIFICATE-----
-MIICjzCCAhWgAwIBAgIQXIuZxVqUxdJxVt7NiYDMJjAKBggqhkjOPQQDAzCBiDEL
-MAkGA1UEBhMCVVMxEzARBgNVBAgTCk5ldyBKZXJzZXkxFDASBgNVBAcTC0plcnNl
-eSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxLjAsBgNVBAMT
-JVVTRVJUcnVzdCBFQ0MgQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkwHhcNMTAwMjAx
-MDAwMDAwWhcNMzgwMTE4MjM1OTU5WjCBiDELMAkGA1UEBhMCVVMxEzARBgNVBAgT
-Ck5ldyBKZXJzZXkxFDASBgNVBAcTC0plcnNleSBDaXR5MR4wHAYDVQQKExVUaGUg      
-VVNFUlRSVVNUIE5ldHdvcmsxLjAsBgNVBAMTJVVTRVJUcnVzdCBFQ0MgQ2VydGlm
-aWNhdGlvbiBBdXRob3JpdHkwdjAQBgcqhkjOPQIBBgUrgQQAIgNiAAQarFRaqflo
-I+d61SRvU8Za2EurxtW20eZzca7dnNYMYf3boIkDuAUU7FfO7l0/4iGzzvfUinng
-o4N+LZfQYcTxmdwlkWOrfzCjtHDix6EznPO/LlxTsV+zfTJ/ijTjeXmjQjBAMB0G
-A1UdDgQWBBQ64QmG1M8ZwpZ2dEl23OA1xmNjmjAOBgNVHQ8BAf8EBAMCAQYwDwYD
-VR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAwNoADBlAjA2Z6EWCNzklwBBHU6+4WMB
-zzuqQhFkoJ2UOQIReVx7Hfpkue4WQrO/isIJxOzksU0CMQDpKmFHjFJKS04YcPbW
-RNZu9YO6bVi9JNlWSOrvxKJGgYhqOkbRqZtNyWHa0V1Xahg=
+MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh
+MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
+d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBH
+MjAeFw0xMzA4MDExMjAwMDBaFw0zODAxMTUxMjAwMDBaMGExCzAJBgNVBAYTAlVT
+MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j
+b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IEcyMIIBIjANBgkqhkiG
+9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzfNNNx7a8myaJCtSnX/RrohCgiN9RlUyfuI
+2/Ou8jqJkTx65qsGGmvPrC3oXgkkRLpimn7Wo6h+4FR1IAWsULecYxpsMNzaHxmx
+1x7e/dfgy5SDN67sH0NO3Xss0r0upS/kqbitOtSZpLYl6ZtrAGCSYP9PIUkY92eQ
+q2EGnI/yuum06ZIya7XzV+hdG82MHauVBJVJ8zUtluNJbd134/tJS7SsVQepj5Wz
+tCO7TG1F8PapspUwtP1MVYwnSlcUfIKdzXOS0xZKBgyMUNGPHgm+F6HmIcr9g+UQ
+vIOlCsRnKPZzFBQ9RnbDhxSJITRNrw9FDKZJobq7nMWxM4MphQIDAQABo0IwQDAP
+BgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBhjAdBgNVHQ4EFgQUTiJUIBiV
+5uNu5g/6+rkS7QYXjzkwDQYJKoZIhvcNAQELBQADggEBAGBnKJRvDkhj6zHd6mcY
+1Yl9PMWLSn/pvtsrF9+wX3N3KjITOYFnQoQj8kVnNeyIv/iPsGEMNKSuIEyExtv4
+NeF22d+mQrvHRAiGfzZ0JFrabA0UWTW98kndth/Jsw1HKj2ZL7tcu7XUIOGZX1NG
+Fdtom/DzMNU+MeKNhJ7jitralj41E6Vf8PlwUHBHQRFXGU7Aj64GxJUTFy8bJZ91
+8rGOmaFvE7FBcf6IKshPECBV1/MUReXgRPTqh5Uykw7+U0b6LJ3/iyK5S9kJRaTe
+pLiaWN0bfVKfjllDiIGknibVb63dDcY3fe0Dkhvld1927jyNxF1WW6LZZm6zNTfl
+MrY=
 -----END CERTIFICATE-----
 )ROOT_CA";
 
@@ -63,39 +68,35 @@ RNZu9YO6bVi9JNlWSOrvxKJGgYhqOkbRqZtNyWHa0V1Xahg=
 FOtACtrl::FOtACtrl(){
 }
 
-void FOtACtrl::update(){
+int FOtACtrl::update(){
+  if (!wifiStat) return 1;
   Serial.println("  Updating firmware...");
   char version[12];
   char fwMaj[5];
   char fwMin[5];
-  const char dot[]= ".";
   ultoa(firmMajor,fwMaj,10);
   ultoa(firmMinor,fwMin,10);
   strcpy(version,fwMaj);
-  strcat(version,dot);
+  strcat(version,".");
   strcat(version,fwMin);
+  strcat(version,".0");
 #ifdef hardwareS2Mini
-  esp32FOTA esp32FOTA("SymbCtrl-Mk2-S2",version,false);
+  esp32FOTA esp32FOTA("SymbCtrl-Mk2-S2",version,false,false);
 #endif
 #ifdef hardwareS3Mini
-  esp32FOTA esp32FOTA("SymbCtrl-Mk2-S3",version,false);
+  esp32FOTA esp32FOTA("SymbCtrl-Mk2-S3",version,false,false);
 #endif
-  CryptoMemAsset *LocalRootCA= new CryptoMemAsset("Root CA",root_ca,strlen(root_ca)+1);
-  esp32FOTA.setRootCA(LocalRootCA);
   esp32FOTA.setManifestURL(manifest);
   esp32FOTA.useDeviceId(true);
-  //esp32FOTA.setProgressCb([](size_t progress, size_t size) {if(progress==size || progress==0) Serial.println(progress);Serial.print(".");});
-  //esp32FOTA.setUpdateEndCb([](int partition){Serial.printf("Update could not finish with %s partition\n", partition==U_SPIFFS ? "spiffs" : "firmware" );});
-  //esp32FOTA.setUpdateFinishedCb([](int partition, bool restart_after){Serial.printf("Update could not begin with %s partition\n", partition==U_SPIFFS ? "spiffs" : "firmware" );if( restart_after ){ESP.restart();}});
-  Serial.print("  Current: ");Serial.println(version);
-  Serial.print("  Update:  ");Serial.println(esp32FOTA.getPayloadVersion());
-  Serial.print("  Manifest:");Serial.println(esp32FOTA.getManifestURL());
-  Serial.print("  Firmware:");Serial.println(esp32FOTA.getFirmwareURL());
+  CryptoMemAsset *LocalRootCA= new CryptoMemAsset("Root CA",root_ca,strlen(root_ca)+1);
+  esp32FOTA.setRootCA(LocalRootCA);
   if (esp32FOTA.execHTTPcheck()){
     Serial.println("  Version checked, update required");
-    esp32FOTA.execOTA();
+    if (esp32FOTA.execOTA()) return 0;
+    return 1;
   }
-  else Serial.println("  No update required!");
+  Serial.println("  No update required!");
+  return 2;
 } // update
 
 //- End fotaCtrl ----------------------------------------------------------------

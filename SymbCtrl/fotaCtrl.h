@@ -34,7 +34,7 @@
 class FOtACtrl{
   public:
     FOtACtrl();
-    void update();
+    int update();
 };
 
 #endif

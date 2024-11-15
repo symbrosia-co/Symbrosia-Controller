@@ -189,6 +189,7 @@
 #include <SPI.h>
 #include <ESPRotary.h>
 #include <Button2.h>
+#include <esp32-hal-log.h>
 #include <Adafruit_NeoPixel.h>
 
 //- Local includes -------------------------------------------------------------
@@ -497,6 +498,8 @@ void setup() {
   encodeButton.setTripleClickHandler(encoderClick);
   //serial port init
   Serial.begin(115200);
+  Serial.setDebugOutput(true);
+  ESP_LOGD("EXAMPLE", "This doesn't show");
   delay(500);
   Serial.println("");
   Serial.println("");
