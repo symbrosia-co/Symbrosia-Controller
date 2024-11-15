@@ -1350,33 +1350,46 @@ void UserCtrl::drawFirmware(){
     userSetAcpt= false;
     userSelScroll= 0;
     userSetReq= 1;
-    if (!wifiStat) userSetReq= 3;
+    if (!wifiStat){
+      lcd.setCursor(0,1);
+      lcd.print("   No network!  ");
+      userSetReq= 3;
+    }
     newScr= false;
   }
-  if (userSetReq==1){
-    if (userSetNext){
-      Serial.println("  Confirmed!");
-      userSetNext= false;
-      userSetAcpt= false;
-      userSelScroll= 0;
-      userSetReq= 2;
-    }
+  if (userSetReq==1){ // confirm with long press
+    if (userSetNext) userSetReq= 2;
     if (userSetAcpt || userSelScroll!=0){
+      lcd.setCursor(0,1);
+      lcd.print("    Aborted!    ");
       Serial.println("  Aborted!");
-      setScreen(scrUnit);
+      userSetReq= 3;
     }
+    userSetNext= false;
+    userSetAcpt= false;
+    userSelScroll= 0;
   }
-  if (userSetReq==2){
-    lcd.setCursor(3,1);
-    lcd.print("Updating");
-    fotaCtrl.update();
-    setScreen(scrUnit);
-    //ESP.restart();
-  }
-  if (userSetReq==3){
+  if (userSetReq==2){ // get update
     lcd.setCursor(0,1);
-    lcd.print("  No network!");
+    lcd.print("    Updating    ");
+    int result= fotaCtrl.update();
+    userSetReq= 3;
+    lcd.setCursor(0,1);
+    if (result=0){
+      lcd.print("   Complete!    ");
+      userSetReq= 4;
+    }
+    else if (result=2) lcd.print("  Not required! ");
+    else lcd.print("    Failed!     ");
+    userSetNext= false;
+    userSetAcpt= false;
+    userSelScroll= 0;
+  }
+  if (userSetReq==3){ // final message
     if (userSetAcpt || userSetNext || userSelScroll!=0) setScreen(scrUnit);
+  }
+  if (userSetReq==4){ // final message with restart
+    if (userSetAcpt || userSetNext || userSelScroll!=0) ESP.restart();
   }
 } // drawFirmware
 
