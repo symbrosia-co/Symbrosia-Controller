@@ -1295,14 +1295,14 @@ void UserCtrl::drawSerial(){
 void UserCtrl::drawHardware(){
   if (newScr){
     lcd.print("Enter hardware");
-    userSelPos= hdwrMax;
+    userSelPos= hdwrIDMax;
     userSelScroll= 0;
     userSetReq= 1;
     newScr= false;
   }
   userSelPos= userSelPos+userSelScroll;
-  if (userSelPos<hdwrMin) userSelPos= hdwrMax;
-  if (userSelPos>hdwrMax) userSelPos= hdwrMin;
+  if (userSelPos<hdwrIDMin) userSelPos= hdwrIDMax;
+  if (userSelPos>hdwrIDMax) userSelPos= hdwrIDMin;
   lcd.setCursor(1,1);
   if (userSelPos==hdwrIDmk1)      lcd.print("Mk1 rev A");
   if (userSelPos==hdwrIDmk2revA)  lcd.print("Mk2 rev A");
@@ -1319,14 +1319,14 @@ void UserCtrl::drawHardware(){
 void UserCtrl::drawProcessor(){
   if (newScr){
     lcd.print("Enter processor");
-    userSelPos= procMax;
+    userSelPos= procIDMax;
     userSelScroll= 0;
     userSetReq= 1;
     newScr= false;
   }
   userSelPos= userSelPos+userSelScroll;
-  if (userSelPos<procMin) userSelPos= procMax;
-  if (userSelPos>procMax) userSelPos= procMin;
+  if (userSelPos<procIDMin) userSelPos= procIDMax;
+  if (userSelPos>procIDMax) userSelPos= procIDMin;
   lcd.setCursor(1,1);
   if (userSelPos==procIDS2Saola) lcd.print("ESP32 S2 Saola");
   if (userSelPos==procIDS2Mini)  lcd.print("Lolin S2 Mini ");

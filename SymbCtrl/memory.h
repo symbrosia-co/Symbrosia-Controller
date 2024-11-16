@@ -129,7 +129,7 @@ class Memory{
     void     setWQInstalled(bool WQInst);
     void     service();
   private:
-    uint16_t fixed[fixedSize];
+    uint16_t fixed[fixedSize/2];
     uint16_t data[dataSize];
     boolean  stat[statSize];
     boolean  checkLimits;

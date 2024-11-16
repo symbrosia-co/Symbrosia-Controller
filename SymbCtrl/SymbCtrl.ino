@@ -178,6 +178,8 @@
   - Button2, pushbutton support by Lennart Hennigs v1.6.5
   - Adafruit Neopixel, support for the ESP32 RGB neopixel LED v1.10.4
   - MCP3208 AtoD handled by MCP_ADC by Rob Tillaart v0.5.0
+  - esp32FOTA, support for over-the-air firmware update by Chris Joyce v0.2.9
+  - ArduinoJSON, JSON file used in firmware update by Benoit Blanchon v7.2.1
 
 ------------------------------------------------------------------------------*/
 
@@ -498,8 +500,6 @@ void setup() {
   encodeButton.setTripleClickHandler(encoderClick);
   //serial port init
   Serial.begin(115200);
-  Serial.setDebugOutput(true);
-  ESP_LOGD("EXAMPLE", "This doesn't show");
   delay(500);
   Serial.println("");
   Serial.println("");

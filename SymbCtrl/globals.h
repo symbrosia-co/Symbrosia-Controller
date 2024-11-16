@@ -59,7 +59,7 @@
 #define serialNumMin  200
 #define serialNumMax  999
 #define firmMajor     2
-#define firmMinor     8
+#define firmMinor     7
 #define modelNameStr  "SymbCtrl Mk2"
 #define timeZone      -10
 
@@ -92,18 +92,18 @@ extern bool      wifiStat;
 extern IPAddress wifiIPAddr;
 
 // hardware ID codes...
-#define hdwrIDmk1            0
-#define hdwrIDmk2revA        1
-#define hdwrIDmk2revB        2
-#define hdwrMin              0
-#define hdwrMax              2
+#define hdwrIDmk1            1
+#define hdwrIDmk2revA        2
+#define hdwrIDmk2revB        3
+#define hdwrIDMin            1
+#define hdwrIDMax            3
 
 // processor ID codes...
 #define procIDS2Saola        1
 #define procIDS2Mini         2
 #define procIDS3Mini         3
-#define procMin              0
-#define procMax              3
+#define procIDMin            1
+#define procIDMax            3
 
 // Output control...
 #define ctrlOuts             4

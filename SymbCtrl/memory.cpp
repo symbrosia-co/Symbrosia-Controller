@@ -433,14 +433,15 @@ void Memory::setWQInstalled(bool WQInst){
 
 uint16_t Memory::readOne(uint16_t addr){
   EEPROM.begin((dataSize*2)+statSize+fixedSize);
-  uint16_t result= EEPROM.read(addr);
+  uint16_t result= EEPROM.read(addr*2)+EEPROM.read(addr*2+1)*256;
   EEPROM.end();
   return result;
 } // readOne
 
 void Memory::saveOne(uint16_t addr,uint16_t data){
   EEPROM.begin((dataSize*2)+statSize+fixedSize);
-  EEPROM.write(addr,data);
+  EEPROM.write(addr*2,lowByte(data));
+  EEPROM.write(addr*2+1,highByte(data));
   EEPROM.commit();
   EEPROM.end();
 } // saveOne
