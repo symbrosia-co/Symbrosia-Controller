@@ -56,7 +56,7 @@
 #endif
 
 // unit ID 
-#define serialNumMin  200
+#define serialNumMin  250
 #define serialNumMax  999
 #define firmMajor     2
 #define firmMinor     7

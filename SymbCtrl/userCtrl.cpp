@@ -146,11 +146,15 @@ void UserCtrl::service(){
     if (millis()-screenTime>screenStatDelay*1000) setScreen(scrStatus); 
     userSetNext= false;
     userSetAcpt= false;
+    userSetReq= 0;
+    newScr= true;
   }
   // timeout of setting request
   else{
     if (millis()<userSetTime) userSetTime= 0;
     if (millis()-userSetTime> 30000){
+      userSetNext= false;
+      userSetAcpt= false;
       userSetReq= 0;
       newScr= true;
     }
@@ -1223,7 +1227,7 @@ void UserCtrl::drawIntData(){
   lcd.setCursor(9,0);
   printRead(memory.getFloat(datIntTemp),7,1,memory.getUInt(datIntTempUnits),memory.getBool(statIntTempValid));
   lcd.setCursor(9,1);
-  printRead(memory.getFloat(datSupplyVoltage),7,2,memory.getUInt(datSupVoltUnits),memory.getBool(statSupVoltValid));
+  printRead(memory.getFloat(datSupplyVoltage),7,1,memory.getUInt(datSupVoltUnits),memory.getBool(statSupVoltValid));
 } // drawIntData
 
 void UserCtrl::drawUnit(){
@@ -1379,7 +1383,7 @@ void UserCtrl::drawFirmware(){
       lcd.print("   Complete!    ");
       userSetReq= 4;
     }
-    else if (result=2) lcd.print("  Not required! ");
+    else if (result==2) lcd.print("  Not required! ");
     else lcd.print("    Failed!     ");
     userSetNext= false;
     userSetAcpt= false;
