@@ -56,11 +56,11 @@
 #endif
 
 // unit ID 
-#define serialNumMin  250
-#define serialNumMax  999
 #define firmMajor     2
 #define firmMinor     7
 #define modelNameStr  "SymbCtrl Mk2"
+
+// default time zone
 #define timeZone      -10
 
 // alarm points
@@ -90,6 +90,11 @@
 // global variables and functions ----------------------------------------------
 extern bool      wifiStat;
 extern IPAddress wifiIPAddr;
+
+// serial number
+#define serialNumMin       100
+#define serialNumStart     250
+#define serialNumMax       999
 
 // hardware ID codes...
 #define hdwrIDmk1            1

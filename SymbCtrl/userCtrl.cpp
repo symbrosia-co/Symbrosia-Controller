@@ -143,16 +143,13 @@ void UserCtrl::service(){
   // timeout return to status screen
   if (userSetReq==0){
     if (millis()<screenTime) screenTime= 0;
-    if (millis()-screenTime>screenStatDelay*1000) setScreen(scrStatus); 
-    userSetNext= false;
-    userSetAcpt= false;
-    userSetReq= 0;
-    newScr= true;
+    if (millis()-screenTime>screenStatDelay*1000) setScreen(scrStatus);
   }
   // timeout of setting request
   else{
     if (millis()<userSetTime) userSetTime= 0;
     if (millis()-userSetTime> 30000){
+      screenTime= millis();
       userSetNext= false;
       userSetAcpt= false;
       userSetReq= 0;
@@ -167,7 +164,10 @@ void UserCtrl::setScreen(int scr){
   if (scr>=scrSplash && scr<=scrLast) screen= scr;
   if (scr>=scrWiFiStart && scr<=scrFirmware) screen= scr;
   newScr= true;
+  screenTime= millis();
   userSetReq= 0;
+  userSetNext= false;
+  userSetAcpt= false;
   drawScreen();
 } // setScreen
 
@@ -1277,7 +1277,7 @@ void UserCtrl::drawWiFiDone(){
 void UserCtrl::drawSerial(){
   if (newScr){
     lcd.print("Enter serial");
-    userSelPos= serialNumMin;
+    userSelPos= serialNumStart;
     userSelScroll= 0;
     userSetReq= 1;
     newScr= false;

@@ -350,7 +350,7 @@ void Memory::limitCheck(){
 
 void Memory::readFixed(){
   EEPROM.begin((dataSize*2)+statSize+fixedSize);
-  for (int addr=0;addr<fixedSize;addr++) fixed[addr]= EEPROM.read(addr);
+  for (int addr=0;addr<fixedSize/2;addr++) fixed[addr]= EEPROM.read(addr*2)+EEPROM.read(addr*2+1)*256;
   EEPROM.end();
 } // readFixed
 
@@ -412,7 +412,9 @@ bool Memory::getWQInstalled(){
 }
 
 void Memory::setSerial(uint16_t serial){
-  saveOne(addrSerial,serial);
+  for (int addr=0;addr<8;addr++)
+    if (addr==addrSerial) saveOne(addr,serial);
+    else saveOne(addr,0); // clear the rest of fixed memory
   fixed[addrSerial]= serial;
 }
 
