@@ -1,10 +1,7 @@
 /*------------------------------------------------------------------------------
   Memory - Symbrosia Controller
-  - load defaults and store in EEPROM
-  - if model number is zero load defaults
-  - store data and states to EEPROM when requested
-
-  - Written for the ESP32
+  - maintain primary data structure, echoed to modbus registers
+  - keep configuration in flash memory
 
   02Jan2022 A. Cooper
   - initial version
@@ -19,6 +16,13 @@
   - add saveFloat to allow storing of calibration values without global save
   - add saveWiFi to allow storing credentials without global save
   - changed serial messages during EEPROM load
+  02Nov2024 v2.8 A. Cooper
+  - reserve 16 bytes at start of flash for fixed information including
+  serial number and hardware information
+  - add setSerial, setHdwr, and getProcessor methods
+  - add getSerial, getHdwr, and getProcessor methods
+  - add readOne and saveOne methods for use on fixed memory
+  - add readFixed to read and buffer fixed memory in fixed[]
 
 --------------------------------------------------------------------------------
 
@@ -55,8 +59,6 @@ extern bool isAnalog(int chan);
 //- functions ------------------------------------------------------------------
 Memory::Memory(){
   stat[0]= false;
-  data[datSerialNumber]= 0;
-  data[datModelNumber]=  0;
   checkLimits= false;
 }
 
@@ -202,8 +204,8 @@ void Memory::defaults(){
   for (int i=0;i<datSizeClear;i++) data[i]=0; //do not clear wifi credentials
   for (int i=0;i<statSize;i++) stat[i]=false;
   // set specific items
-  setInt  (datModelNumber,modelNumber);
-  setInt  (datSerialNumber,serialNumber);
+  setInt  (datModelNumber,fixed[addrHardware]);
+  setInt  (datSerialNumber,fixed[addrSerial]);
   setStr  (datModelName,modelNameStr);
   setStr  (datWifiAPName,defWiFi);
   setStr  (datWifiPassword,defPass);
@@ -346,39 +348,37 @@ void Memory::limitCheck(){
   checkLimits= true;
 }
 
+void Memory::readFixed(){
+  EEPROM.begin((dataSize*2)+statSize+fixedSize);
+  for (int addr=0;addr<fixedSize/2;addr++) fixed[addr]= EEPROM.read(addr*2)+EEPROM.read(addr*2+1)*256;
+  EEPROM.end();
+} // readFixed
+
 void Memory::load(){
   // check for initialized EEPROM memory, model and serial must match
-  EEPROM.begin((dataSize+statSize)*2);
+  EEPROM.begin((dataSize*2)+statSize+fixedSize);
   Serial.println("  Retrieve parameters...");
   // read EEPROM
-  for (int addr=0;addr<dataSize*2;addr++) ((byte *)data)[addr]= EEPROM.read(addr);
-  for (int addr=0;addr<statSize;addr++) stat[addr]= EEPROM.read(addr+(dataSize*2))==1;
+  for (int addr=0;addr<dataSize*2;addr++) ((byte *)data)[addr]= EEPROM.read(addr+fixedSize);
+  for (int addr=0;addr<statSize;addr++) stat[addr]= EEPROM.read(addr+(dataSize*2)+fixedSize)==1;
   Serial.println("    Loaded parameters from flash");
-  if ((getInt(datModelNumber)!=modelNumber) ||
-      (getInt(datSerialNumber)!=serialNumber  ||
-      loadDefaults)){
-    defaults();
-    Serial.println("    Flash uninitialized!! Defaults loaded.");
-    save();
-  }
-  else Serial.println("    Flash parameters valid");
   EEPROM.end();
 } // load
 
 void Memory::save(){
   limit();
-  EEPROM.begin((dataSize*2)+statSize);
-  for (int addr=0;addr<dataSize*2;addr++) EEPROM.write(addr,((byte *)data)[addr]);
-  for (int addr=0;addr<statSize;addr++) EEPROM.write(addr+(dataSize*2),int(stat[addr]));
+  EEPROM.begin((dataSize*2)+statSize+fixedSize);
+  for (int addr=0;addr<dataSize*2;addr++) EEPROM.write(addr+fixedSize,((byte *)data)[addr]);
+  for (int addr=0;addr<statSize;addr++) EEPROM.write(addr+(dataSize*2)+fixedSize,int(stat[addr]));
   EEPROM.commit();
   EEPROM.end();
-  Serial.println("    Parameters save in flash");
+  Serial.println("    Parameters saved in flash");
 } // save
 
 void Memory::saveFloat(uint16_t addr){
   if (addr>=0 || addr<dataSize){
-    EEPROM.begin((dataSize*2)+statSize);
-    for (int off=0;off<4;off++) EEPROM.write(addr*2+off,((byte *)data)[addr*2+off]);
+    EEPROM.begin((dataSize*2)+statSize+fixedSize);
+    for (int off=0;off<4;off++) EEPROM.write(addr*2+off+fixedSize,((byte *)data)[addr*2+off]);
     EEPROM.commit();
     EEPROM.end();
     Serial.println("    Value saved in flash");
@@ -387,13 +387,66 @@ void Memory::saveFloat(uint16_t addr){
 } // saveFloat
 
 void Memory::saveWiFi(){
-  EEPROM.begin((dataSize*2)+statSize);
+  EEPROM.begin((dataSize*2)+statSize+fixedSize);
   for (int off=0;off<32;off++)
-    EEPROM.write(datWifiAPName*2+off,((byte *)data)[datWifiAPName*2+off]);
+    EEPROM.write(datWifiAPName*2+off+fixedSize,((byte *)data)[datWifiAPName*2+off]);
   EEPROM.commit();
   EEPROM.end();
   Serial.println("    WiFi credentials saved in flash");
 } // saveWiFi
+
+uint16_t Memory::getSerial(){
+  return fixed[addrSerial];
+}
+
+uint16_t Memory::getHardware(){
+  return fixed[addrHardware];
+}
+
+uint16_t Memory::getProcessor(){
+  return fixed[addrProcessor];
+}
+
+bool Memory::getWQInstalled(){
+  return fixed[addrWQInstalled]==1;
+}
+
+void Memory::setSerial(uint16_t serial){
+  for (int addr=0;addr<8;addr++)
+    if (addr==addrSerial) saveOne(addr,serial);
+    else saveOne(addr,0); // clear the rest of fixed memory
+  fixed[addrSerial]= serial;
+}
+
+void Memory::setHardware(uint16_t hdwr){
+  saveOne(addrHardware,hdwr);
+  fixed[addrHardware]= hdwr;
+}
+
+void Memory::setProcessor(uint16_t proc){
+  saveOne(addrProcessor,proc);
+  fixed[addrProcessor]= proc;
+}
+
+void Memory::setWQInstalled(bool WQInst){
+  saveOne(addrWQInstalled,WQInst);
+  fixed[addrWQInstalled]= WQInst;
+}
+
+uint16_t Memory::readOne(uint16_t addr){
+  EEPROM.begin((dataSize*2)+statSize+fixedSize);
+  uint16_t result= EEPROM.read(addr*2)+EEPROM.read(addr*2+1)*256;
+  EEPROM.end();
+  return result;
+} // readOne
+
+void Memory::saveOne(uint16_t addr,uint16_t data){
+  EEPROM.begin((dataSize*2)+statSize+fixedSize);
+  EEPROM.write(addr*2,lowByte(data));
+  EEPROM.write(addr*2+1,highByte(data));
+  EEPROM.commit();
+  EEPROM.end();
+} // saveOne
 
 void Memory::service(){
   // check for save settings bit

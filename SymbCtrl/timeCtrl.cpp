@@ -81,6 +81,13 @@ bool TimeCtrl::setTime(){
       rtc.setTimeStruct(timeinfo);
       timeLast= rtc.getLocalEpoch();
       Serial.println("    NTP fetch successful");
+      // move RTC time to modBus registers   
+      memory.setUInt(datSecond,rtc.getSecond());
+      memory.setUInt(datMinute,rtc.getMinute());
+      memory.setUInt(datHour,  rtc.getHour(true));
+      memory.setUInt(datDay,   rtc.getDay());
+      memory.setUInt(datMonth, rtc.getMonth());
+      memory.setUInt(datYear,  rtc.getYear());
       Serial.print("    ");printTime();Serial.println(" ");
       return true;
     }

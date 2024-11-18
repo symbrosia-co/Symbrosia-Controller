@@ -20,13 +20,15 @@
 #  - Added status display value selection to status stab
 #  31Oct2024 v1.2 A. Cooper
 #  - Fix analog channels numbers for time
+#  31Nov2024 v1.3 A. Cooper
+#  - add manual IP address selection
 #
 # Known issues:
 # - missing units for internal temp on status screen
 # - current reading not displayed for some inputs on control tab
 #
 #------------------------------------------------------------------------------
-verStr= 'SyView v1.2'
+verStr= 'SyView v1.3'
 
 #-- constants -----------------------------------------------------------------
 configFile= 'configuration.xml'
@@ -44,6 +46,7 @@ import string
 import sys
 import os
 import time
+import ipaddress
 import datetime as dt
 import tkinter as tk
 from   tkinter import ttk, messagebox, filedialog
@@ -106,19 +109,31 @@ class Application(tk.Frame):
     self.logoImage=      tk.PhotoImage(file=os.path.join(localDir,'img',logoImageFile))
     # side frame
     self.scanButton=     tk.Button(self,text="Scanning",bg=colOff,width=10,command=self.scanToggle,font=('Helvetica','12'))
-    self.scanButton.grid (column=1,row=1,padx=spaceX,pady=spaceY)
+    self.scanButton.grid (column=1,row=2,padx=spaceX,pady=spaceY)
     self.loadButton=     tk.Button(self,text="Load Cfg",width=10,command=self.loadCfgFile,font=('Helvetica','12'))
-    self.loadButton.grid (column=1,row=2,padx=spaceX,pady=spaceY)
+    self.loadButton.grid (column=1,row=3,padx=spaceX,pady=spaceY)
     self.sendButton=     tk.Button(self,text="Send Cfg",width=10,command=self.sendCfg,font=('Helvetica','12'))
-    self.sendButton.grid (column=1,row=3,padx=spaceX,pady=spaceY)
+    self.sendButton.grid (column=1,row=4,padx=spaceX,pady=spaceY)
     self.saveButton=     tk.Button(self,text="Save Cfg",width=10,command=self.saveCfgFile,font=('Helvetica','12'))
-    self.saveButton.grid (column=1,row=4,padx=spaceX,pady=spaceY)
-    #self.logButton=      tk.Button(self,text="Logging",width=10,command=self.done,font=('Helvetica','12'))
-    #self.logButton.grid  (column=1,row=6,padx=spaceX,pady=spaceY)
+    self.saveButton.grid (column=1,row=5,padx=spaceX,pady=spaceY)
     self.quitButton=     tk.Button(self,text="Quit",width=10,command=self.done,font=('Helvetica','12'))
     self.quitButton.grid (column=1,row=7,padx=spaceX,pady=spaceY)
     self.logoButton=     tk.Button(self,image=self.logoImage,width=104,height=104,relief=tk.FLAT)
     self.logoButton.grid (column=1,row=8,rowspan=2,padx=spaceX,pady=spaceY)
+    # controller menu
+    self.ctrlList= ['Manual']
+    for ctrl in self.config['ctrlList']:
+      self.ctrlList.append(ctrl['name'])
+    self.ctrlStr= tk.StringVar()
+    self.ctrlStr.set(self.ctrlList[0])
+    self.ctrlMenu= tk.OptionMenu(self,self.ctrlStr,*self.ctrlList,command=self.changeControl)
+    self.ctrlMenu.config (width=14,font=('Helvetica','10'))
+    self.ctrlMenu.grid(column=0,row=0,columnspan=3,padx=spaceX,pady=spaceY,sticky=tk.W)
+    # IP entry box
+    self.IPaddr=        tk.Entry(self,width=14,justify="center",font=('Helvetica','12'))
+    self.IPaddr.grid    (column=1,row=1,padx=spaceX,pady=spaceY)
+    self.IPaddr.delete  (0,tk.END)
+    self.IPaddr.insert  (0,"192.168.0.xxx")
     # tabbing system
     self.allTabs=        ttk.Notebook(self,height=tabSizeY,width=tabSizeX)
     self.allTabs.tk.call ('font', 'configure', 'TkDefaultFont', '-size', '12')
@@ -143,15 +158,6 @@ class Application(tk.Frame):
     self.eventsTab=      events.Events(self.allTabs)
     self.allTabs.add     (self.eventsTab, text=' Events  ')
     self.allTabs.grid(column=3,row=1,columnspan=9,rowspan=9)
-    # controller menu
-    self.ctrlList= []
-    for ctrl in self.config['ctrlList']:
-      self.ctrlList.append(ctrl['name'])
-    self.ctrlStr= tk.StringVar()
-    self.ctrlStr.set(self.ctrlList[0])
-    self.ctrlMenu= tk.OptionMenu(self,self.ctrlStr,*self.ctrlList,command=self.changeControl)
-    self.ctrlMenu.config (width=14,font=('Helvetica','10'))
-    self.ctrlMenu.grid(column=0,row=0,columnspan=3,padx=spaceX,pady=spaceY,sticky=tk.W)
     # status labels
     self.commLabel= tk.Label(self,text='Communication',font=('Helvetica','9'),bg=colOff,relief=tk.GROOVE)
     self.commLabel.grid (column=3,row=0,pady=spaceY,sticky=tk.E+tk.W)
@@ -270,9 +276,22 @@ class Application(tk.Frame):
     if len(self.config['ctrlList'])<1:
       self.eventsTab.log('No controllers in config!',True)
       return
-    for ctrl in self.config['ctrlList']:
-      if ctrl['name']==self.ctrlStr.get():
-        self.currCtrl= ctrl
+    if self.ctrlStr.get()=='Manual':
+      try:
+        ipaddress.ip_address(self.IPaddr.get())
+      except ValueError:
+        messagebox.showerror(title='Error...', message='Invalid IP address!!')
+        self.scanning= False
+        self.scanButton.config(text='Scan Off',bg=colOff)
+        return
+      self.config['ctrlList'][0]['address']= self.IPaddr.get()
+      self.currCtrl= self.config['ctrlList'][0]
+    else:
+      for ctrl in self.config['ctrlList']:
+        if ctrl['name']==self.ctrlStr.get():
+          self.currCtrl= ctrl
+          self.IPaddr.delete (0,tk.END)
+          self.IPaddr.insert (0,self.currCtrl['address'])
     self.ipLabel.config(text=self.currCtrl['address'])
     self.controller.start(self.currCtrl['address'],502)
     if self.controller.error():

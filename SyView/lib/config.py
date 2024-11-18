@@ -8,7 +8,9 @@
 #  Copyright 2021, all rights reserved
 #
 # 30Jan2022 A. Cooper v0.1
-#  - Initial version
+# - initial version
+# 13Nov2024 A. Cooper v1.3
+# - add manual controller entry
 #
 #------------------------------------------------------------------------------
 
@@ -30,18 +32,13 @@ def loadConfig(configPath,configFile):
     return None
   #process config
   root= tree.getroot()
-  config= {'ctrlList':[],'alertList':[]}
+  config= {'ctrlList':[{'name':'Manual','model':'SyCtrl Mk2','address':'192.168.0.0'}]}
   for section in root:
     if section.tag=='ctrl':
       ctrl= {'name':section.get('name')}
       for item in section:
         ctrl[item.tag]= item.text
       config['ctrlList'].append(ctrl)
-    elif section.tag=='alert':
-      alert= {'name':section.get('name')}
-      for item in section:
-        alert[item.tag]= item.text
-      config['alertList'].append(alert)
     else:
       config[section.tag]= section.text
   return config

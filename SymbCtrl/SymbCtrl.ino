@@ -147,6 +147,20 @@
   - show sensor name on WQ screen
   - do not use priority for sum or difference in processed reading, lose
     any reading => invalid
+  02Nov2024 v2.8 A. Cooper
+  - Set up code for fota using esp32FOTA by Chris Joyce
+  - new serial number assignment method at first boot on new unit
+  - reserve bytes at start of flash for fixed information including
+  serial number and hardware information
+  - add setSerial, setHardware, and setProcessor methods to memory
+  - add getSerial, getHardware, and getProcessor methods to memory
+  - add getWQInstalled and setWQInstalled methods to memory
+  - modify setup to handle fixed memory entry if needed on startup,
+  setup will block while looping userCtrl.service, encoder, and button
+  - in userCtrl add screens for fixed data entry
+  - in userCtrl add screen for firmware update
+  - in userCtrl move reset function to status screen
+  - in userCtrl add firmware update to unit info screen
 
   Known bugs...
   - none
@@ -164,6 +178,8 @@
   - Button2, pushbutton support by Lennart Hennigs v1.6.5
   - Adafruit Neopixel, support for the ESP32 RGB neopixel LED v1.10.4
   - MCP3208 AtoD handled by MCP_ADC by Rob Tillaart v0.5.0
+  - esp32FOTA, support for over-the-air firmware update by Chris Joyce v0.2.9
+  - ArduinoJSON, JSON file used in firmware update by Benoit Blanchon v7.2.1
 
 ------------------------------------------------------------------------------*/
 
@@ -175,6 +191,7 @@
 #include <SPI.h>
 #include <ESPRotary.h>
 #include <Button2.h>
+#include <esp32-hal-log.h>
 #include <Adafruit_NeoPixel.h>
 
 //- Local includes -------------------------------------------------------------
@@ -189,7 +206,7 @@
 #include "logicCtrl.h"
 #include "todCtrl.h"
 #include "countCtrl.h"
-
+#include "fotaCtrl.h"
 
 //- Instantiate Local Libraries ------------------------------------------------
 Memory     memory;
@@ -201,6 +218,7 @@ Control    control;
 LogicCtrl  logic;
 ToDCtrl    todCtrl;
 CountCtrl  countCtrl;
+FOtACtrl   fotaCtrl;
 
 //- Instantiate IO Libraries ---------------------------------------------------
 ESPRotary  encodeRot;
@@ -416,7 +434,7 @@ void wifiConnect(){
   strcpy(hostName,"SymbCtrl");
   for (int i=0;i<strlen(name);i++) if (!isAlphaNumeric(name[i])) name[i]= char(45);
   if (strlen(name)>1) {strcat(hostName,"-");strcat(hostName,name);} 
-  else  {strcat(hostName,"-");ultoa(serialNumber,serNum,10);strcat(hostName,serNum);}
+  else  {strcat(hostName,"-");ultoa(memory.getSerial(),serNum,10);strcat(hostName,serNum);}
   Serial.print("    Name:");Serial.println(hostName);
   WiFi.mode(WIFI_STA);
   WiFi.setHostname(hostName);  
@@ -444,6 +462,7 @@ void wifiConnect(){
     Serial.println(ssid);
     WiFi.disconnect(true);
     }
+  wifiTime= millis();
   userCtrl.setScreen(scrWiFiDone);
 } //wifiConnect
 
@@ -457,7 +476,9 @@ void setup() {
   digitalWrite(hdwrRelay1,LOW);
   digitalWrite(hdwrRelay2,LOW);
   digitalWrite(hdwrOutput1,LOW);
-  digitalWrite(hdwrOutput2,LOW);  
+  digitalWrite(hdwrOutput2,LOW);
+  // get fixed data (serial number, hardware, etc)
+  memory.readFixed();
   // control setup
   for (int i=0;i<ctrlOuts;i++)
     for (int j=0;j<ctrlSrcs;j++)
@@ -465,7 +486,8 @@ void setup() {
   //start display
   userCtrl.init();
   userCtrl.setScreen(scrSplash);
-  delay(500);
+  userCtrl.service();  
+  delay(1000);
   //start user IO hardware
   encodeRot.begin(hdwrEncB,hdwrEncA,4);
   encodeRot.setLeftRotationHandler(encoderLeft);
@@ -482,9 +504,10 @@ void setup() {
   Serial.println("");
   Serial.println("");
   Serial.println("--------------------------------------------");
-  Serial.println("Symbrosia Controller");
+  Serial.print("Symbrosia Controller                 sn: ");
+  Serial.println(memory.getSerial());
   Serial.print(modelNameStr);
-  Serial.print("    Firmware: v");
+  Serial.print("                  Firmware: v");
   Serial.print(firmMajor); Serial.print("."); Serial.println(firmMinor);
   Serial.println("--------------------------------------------");
   Serial.println("Controller startup...");
@@ -506,11 +529,30 @@ void setup() {
   pixel.show();
   pixelTime= 0;
 #endif
-  // read EEPROM saved settings
+  // first time run? if so, enter fixed data
+  bool loadDef= false;
+  Serial.println("  Check flash memory...");
+  if (memory.getSerial()<serialNumMin || memory.getSerial()>serialNumMax || forceSerial){
+    userCtrl.setScreen(scrSerial);
+    while(userCtrl.getScreen()!=scrStatus){
+      userCtrl.service();
+      encodeRot.loop();
+      encodeButton.loop();
+    }
+    Serial.println("    Flash uninitialized!! Fixed data entered");
+    loadDef= true;
+  }
+  // force load of defaults
+  if (forceDefaults) Serial.println("    Force load defaults!! (see globals.h)");
+  if (loadDef || forceDefaults){
+    memory.defaults();
+    Serial.println("    Flash defaults loaded");
+    memory.save();
+  }
   memory.load();
   // set defaults on some memory locations
-  memory.setInt(datSerialNumber,serialNumber);
-  memory.setInt(datModelNumber,modelNumber);
+  memory.setInt(datSerialNumber,memory.getSerial());
+  memory.setInt(datModelNumber,memory.getHardware());
   memory.setStr(datModelName,modelNameStr);
   memory.setInt(datFirmwareRev,firmMajor*256+firmMinor);
   memory.setBool(statStatus,true);
