@@ -110,10 +110,10 @@ char wifiPass[16];         // password entry buffer
 const char pwChars[]= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$@^`,|%;.()/{}:?[]=-+_#!*";
 
 //- constants ------------------------------------------------------------------
-#define lcdUpdate  250      // screen update interval in milliseconds
-#define chanOffset  16      // spacing of channel data in setup registers
+#define lcdUpdate       250 // screen update interval in milliseconds
+#define chanOffset       16 // spacing of channel data in setup registers
 #define screenStatDelay 600 // time to return to status screen in seconds
-#define wifiTimeout 60000   // timeout for WiFi scanNetworks
+#define wifiTimeout   60000 // timeout for WiFi scanNetworks
 
 #define debugUI false
 
@@ -125,14 +125,9 @@ UserCtrl::UserCtrl(){
 void UserCtrl::init(){
   lcd.begin(16,2);
   lcd.clear();
-  screen= 0;
+  screen= scrSplash;
   newScr= true;
   drawScreen();
-  lastUpdate= millis();
-  userSetReq=  0;
-  userSetNext= false;
-  userSetAcpt= false;
-  userSetTime= millis();
 } // init
 
 void UserCtrl::service(){
@@ -149,11 +144,8 @@ void UserCtrl::service(){
   else{
     if (millis()<userSetTime) userSetTime= 0;
     if (millis()-userSetTime> 30000){
-      screenTime= millis();
-      userSetNext= false;
-      userSetAcpt= false;
-      userSetReq= 0;
       newScr= true;
+      if (screen==scrFirmware) screen= scrUnit;
     }
   }
   // refresh the screen
@@ -162,12 +154,9 @@ void UserCtrl::service(){
 
 void UserCtrl::setScreen(int scr){
   if (scr>=scrSplash && scr<=scrLast) screen= scr;
-  if (scr>=scrWiFiStart && scr<=scrFirmware) screen= scr;
+  else if (scr>=scrWiFiStart && scr<=scrFirmware) screen= scr;
+  else screen= scrStatus;
   newScr= true;
-  screenTime= millis();
-  userSetReq= 0;
-  userSetNext= false;
-  userSetAcpt= false;
   drawScreen();
 } // setScreen
 
@@ -535,6 +524,7 @@ void UserCtrl::drawScreen(){
     userSetReq= 0;
     userSetNext= false;
     userSetAcpt= false;
+    userSelScroll= 0;
     userSetTime= millis();
     screenTime= millis();
   }

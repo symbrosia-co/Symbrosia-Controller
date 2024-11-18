@@ -57,7 +57,7 @@
 
 // unit ID 
 #define firmMajor     2
-#define firmMinor     7
+#define firmMinor     8
 #define modelNameStr  "SymbCtrl Mk2"
 
 // default time zone
