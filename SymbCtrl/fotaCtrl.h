@@ -30,6 +30,11 @@
 //- Library includes -----------------------------------------------------------
 #include <Arduino.h>
 
+//- Return codes ---------------------------------------------------------------
+#define fotaComplete 0
+#define fotaFailed   1
+#define fotaNotReq   2
+
 //- a little class -------------------------------------------------------------
 class FOtACtrl{
   public:

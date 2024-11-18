@@ -1369,11 +1369,11 @@ void UserCtrl::drawFirmware(){
     int result= fotaCtrl.update();
     userSetReq= 3;
     lcd.setCursor(0,1);
-    if (result=0){
+    if (result==fotaComplete){
       lcd.print("   Complete!    ");
       userSetReq= 4;
     }
-    else if (result==2) lcd.print("  Not required! ");
+    else if (result==fotaNotReq) lcd.print("  Not required! ");
     else lcd.print("    Failed!     ");
     userSetNext= false;
     userSetAcpt= false;

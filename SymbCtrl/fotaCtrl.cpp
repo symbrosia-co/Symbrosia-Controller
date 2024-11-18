@@ -92,11 +92,11 @@ int FOtACtrl::update(){
   esp32FOTA.setRootCA(LocalRootCA);
   if (esp32FOTA.execHTTPcheck()){
     Serial.println("  Version checked, update required");
-    if (esp32FOTA.execOTA()) return 0;
-    return 1;
+    if (esp32FOTA.execOTA()) return fotaComplete;
+    return fotaFailed;
   }
   Serial.println("  No update required!");
-  return 2;
+  return fotaNotReq;
 } // update
 
 //- End fotaCtrl ----------------------------------------------------------------
