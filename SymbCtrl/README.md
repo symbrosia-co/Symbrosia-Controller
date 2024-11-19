@@ -5,6 +5,8 @@ Two processor modules are supported, the Lolin ESP32 S2 Mini and the ESP32 S3 Mi
 
 While the initial programming of a new processor module must be done with a direct cabled download, subsequent firmware upgrades can be handled easily using an over-the-air firmware update.  The updated firmware binary files are hosted here on Github.
 
+![SymbCtrl PCB assembly top](/res/SymbCtrlPCB.png)
+
 ## Aurduino IDE 2.x setup
 
 SymbCtrl is to be compiled and downloaded to the controller using the Arduino IDE. If you do not already have it, download and install the latest Arduino IDE 2.x at [Arduino Software](https://www.arduino.cc/en/software)
