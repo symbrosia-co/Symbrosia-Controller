@@ -1368,6 +1368,8 @@ void UserCtrl::drawFirmware(){
     lcd.print("    Updating    ");
     int result= fotaCtrl.update();
     userSetReq= 3;
+    userSetTime= millis();
+    screenTime= millis();
     lcd.setCursor(0,1);
     if (result==fotaComplete){
       lcd.print("   Complete!    ");
