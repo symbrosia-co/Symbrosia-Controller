@@ -14,8 +14,27 @@
 
   You should have received a copy of the GNU General Public License along with
   this program.  If not, see <https://www.gnu.org/licenses/>.
+  
+-- required libraries ---------------------------------------------------------
 
---- revision record ------------------------------------------------------------
+  Library list...   (the following are required for the project)
+  - Arduino
+  - WiFi, v1.2.7
+  - Wire, v2.0.0
+  - SPI, v2.0.0
+  - EEPROM, v2.0.0
+  - LiquidCrystal, v1.0.7
+  - ESP32Time, ESP32 RTC time support by Felix Biego v2.0.6
+  - ModbusTCP, Modbus TCP support by Alexander Emelianov v4.1.0
+  - ESP Rotary, rotary encoder support by Lennart Hennigs v2.1.1
+  - Button2, pushbutton support by Lennart Hennigs v2.3.3
+  - Adafruit Neopixel, support for the ESP32 RGB neopixel LED v1.12.3
+  - MCP_ADC, handling for the MCP3208 AtoD by Rob Tillaart v0.5.1
+  - MCP3X21, handling for the MCP3021 AtoD by Pavel Slama v1.0.1
+  - esp32FOTA, support for over-the-air firmware update by Chris Joyce v0.2.9
+  - ArduinoJSON, JSON file used in firmware update by Benoit Blanchon v7.2.1
+
+-- revision record ------------------------------------------------------------
 
   24Dec2021 v0.1 A. Cooper
   - initial version, based on Genesis controller
@@ -161,25 +180,9 @@
   - in userCtrl add screen for firmware update
   - in userCtrl move reset function to status screen
   - in userCtrl add firmware update to unit info screen
-
+  
   Known bugs...
   - none
-
-  Library list...   (the following are required for the project)
-  - Arduino
-  - WiFi, v1.2.7
-  - Wire, v2.0.0
-  - SPI, v2.0.0
-  - EEPROM, v2.0.0
-  - LiquidCrystal, v1.0.7
-  - ESP32Time, ESP32 RTC time support by Felix Biego v2.0.6
-  - ModbusTCP, Modbus TCP support by Alexander Emelianov v4.0.0
-  - ESP Rotary, rotary encoder support by Lennart Hennigs v1.4.2
-  - Button2, pushbutton support by Lennart Hennigs v1.6.5
-  - Adafruit Neopixel, support for the ESP32 RGB neopixel LED v1.10.4
-  - MCP3208 AtoD handled by MCP_ADC by Rob Tillaart v0.5.0
-  - esp32FOTA, support for over-the-air firmware update by Chris Joyce v0.2.9
-  - ArduinoJSON, JSON file used in firmware update by Benoit Blanchon v7.2.1
 
 ------------------------------------------------------------------------------*/
 
