@@ -1,12 +1,12 @@
 # The Symbrosia Controller
-The Symbrosia Controller is a low cost, robust, controller designed for aquaculture.  Initially developed to support on-shore seaweed farming operations in Kailua Kona, Hawai'i, the Symbrosia Controller features a customized, low-cost sensor suite and integrated control functions tailored to meet the unique demands of these environments. 
+As originally designed, the Symbrosia Controller is a low cost, robust, controller designed for aquaculture.  Initially developed to support on-shore seaweed farming operations in Kailua Kona, Hawai'i, the Symbrosia Controller features a customized, low-cost sensor suite and integrated control functions tailored to meet the unique demands of these environments. 
 
-In addition to commercial use we envision the Symbrosia Controller as a powerful educational tool. By promoting literacy in electronics, programming, and agricultural management, we hope to empower individuals and communities to innovate and thrive in the agricultural sector. Our goal is to create a community where knowledge and technology are shared to drive sustainable agricultural practices and food security worldwide.
+In addition to commercial use, we envision the Symbrosia Controller as a powerful educational tool. By promoting literacy in electronics, programming, and agricultural management, we hope to empower individuals and communities to innovate and thrive in the agricultural sector. Our goal is to create a community where knowledge and technology are shared to drive sustainable agricultural practices and food security worldwide.
 
 ![A tank controller using SymbCtrl](/res/CL46-47-24138-DC.jpg)
 
 ## Background
-The Symbrosia controller was developed for in-house use as a lower cost alternative to the PLC based and commercial off-the-shelf systems we use for algae tank and bioreactor control.  In addition to controlling the tanks there were a few other needs, places where a little remote control and monitoring is invaluable.  With the availability of WiFi processors like the ESP32 automating these functions was a practical option.
+The Symbrosia controller was developed for in-house use as a lower-cost alternative to the PLC-based and commercial off-the-shelf systems we use for algae tank and bioreactor control.  In addition to controlling the tanks there were a few other needs, places where a little remote control and monitoring is invaluable.  With the availability of WiFi processors like the ESP32 automating these functions was a practical option.
 
 Thus the Symbrosia Controller was born…  An ESP32 wedded to a circuit board that contains the most commonly needed interfaces. A water quality sensor amplifier, some temperature inputs, a couple analog inputs, along with some relays and transistor outputs for controlling external devices like valves and pumps. 
 
