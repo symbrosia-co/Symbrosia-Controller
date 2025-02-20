@@ -1313,7 +1313,11 @@ void UserCtrl::drawHardware(){
 void UserCtrl::drawProcessor(){
   if (newScr){
     lcd.print("Enter processor");
+    #ifdef hardwareS2Mini
+    userSelPos= procIDS2Mini;
+    #else
     userSelPos= procIDMax;
+    #endif
     userSelScroll= 0;
     userSetReq= 1;
     newScr= false;
