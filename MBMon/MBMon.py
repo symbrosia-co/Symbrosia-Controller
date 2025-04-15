@@ -77,17 +77,30 @@ class Application(tk.Frame):
   def createWidgets(self):
     spaceX= 5
     spaceY= 1
-    #data fields
-    row= 1
+    # scrollable frame for data
+    canvas= tk.Canvas(self,width=600,height=400)
+    canvas.grid(column=1,row=1,columnspan=5)
+    scrollbar= ttk.Scrollbar(self,orient=tk.VERTICAL,command=canvas.yview)
+    scrollbar.grid(column=6,row=1,sticky=tk.N+tk.S)
+    canvas.configure(yscrollcommand=scrollbar.set)
+    frame= ttk.Frame(canvas)
+    canvas.create_window((0,0),window=frame,anchor=tk.NW)
+    def configure_scroll_region(event):
+      canvas.configure(scrollregion=canvas.bbox("all"))
+    frame.bind("<Configure>", configure_scroll_region)
+    # data fields
+    row= 0
     for device in self.config['devices']:
-      label= tk.Label(self,text=device['name'],width=50,anchor=tk.W,font=("Helvetica","12"),bg=colDev)
-      label.grid(column=1,row=row,columnspan=4,sticky=tk.W)
-      label= tk.Label(self,text=device['ipAddr'],width=40,anchor=tk.E,font=("Helvetica","12"),bg=colDev)
-      label.grid(column=4,row=row,columnspan=3,sticky=tk.W)
+      label= tk.Label(frame,text=device['name'],width=46,anchor=tk.W,font=("Helvetica","12"),bg=colDev)
+      label.grid(column=0,row=row,columnspan=3,sticky=tk.W)
+      label= tk.Label(frame,text=device['ipAddr'],width=20,anchor=tk.E,font=("Helvetica","12"),bg=colDev)
+      label.grid(column=3,row=row,columnspan=2,sticky=tk.W)
       row+= 1
       for dat in device['data']:
+        label= tk.Label(frame,text=' ',width=4,font=("Helvetica","10"))
+        label.grid    (column=0,row=row,pady=spaceY,sticky=tk.E)
         datum= {}
-        label= tk.Label(self,text=dat['name'],font=("Helvetica","10"))
+        label= tk.Label(frame,text=dat['name'],width=32,font=("Helvetica","10"))
         label.grid    (column=1,row=row,pady=spaceY,sticky=tk.E)
         datum['ipAddr']=  device['ipAddr']
         datum['port']=    device['port']
@@ -107,38 +120,38 @@ class Application(tk.Frame):
           if dat['log']== 'True': datum['log']= True
           else: datum['log']= False
         else: datum['log']= False
-        label= tk.Label(self,text='---',font=("Helvetica","12"))
-        label.grid     (column=2,row=row,sticky=tk.E)
+        label= tk.Label(frame,text='---',width=10,font=("Helvetica","12"))
+        label.grid(column=1,row=row,sticky=tk.E)
         datum['valueDisp']= label
         if 'unit' in dat:
-          label= tk.Label(self,text=dat['unit'],anchor=tk.W,font=("Helvetica","10"))
-          label.grid     (column=3,row=row,sticky=tk.W)
+          label= tk.Label(frame,text=dat['unit'],width=10,anchor=tk.W,font=("Helvetica","10"))
+          label.grid(column=2,row=row,sticky=tk.W)
         if 'write' in dat:
-          button=  tk.Button(self,text='Write',width=10,command=self.write,font=("Helvetica", "12"))
-          button.grid     (column=5,row=row)
+          button=  tk.Button(frame,text='Write',width=10,command=self.write,font=("Helvetica", "12"))
+          button.grid(column=4,row=row)
           datum['button']=  button
           datum['write']=   True
         row+= 1
         self.data.append(datum)
-    #log window
-    self.eventLog=         tk.Text(self,width=80,height=8,bg=colBack)
-    self.eventLog.grid     (column=1,row=row,padx=0,pady=spaceY,columnspan=5,sticky=tk.E+tk.W)
+    # log window
+    self.eventLog=         tk.Text(self,width=80,height=5,bg=colBack)
+    self.eventLog.grid     (column=1,row=2,padx=0,pady=spaceY,columnspan=5,sticky=tk.E+tk.W)
     self.scrollbar=        tk.Scrollbar(self)
     self.scrollbar.config  (command=self.eventLog.yview)
     self.eventLog.config   (yscrollcommand=self.scrollbar.set)
-    self.scrollbar.grid    (column=6,row=row,padx=0,pady=8,sticky=tk.N+tk.S+tk.W)
+    self.scrollbar.grid    (column=6,row=2,padx=0,pady=8,sticky=tk.N+tk.S+tk.W)
     #buttons
     self.startButton=      tk.Button(self,text="Stopped",width=10,command=self.startStop,font=("Helvetica", "12"),bg=colOff)
-    self.startButton.grid  (column=1,row=row+1,padx=spaceX,pady=spaceY)
+    self.startButton.grid  (column=1,row=3,padx=spaceX,pady=spaceY)
     self.logButton=        tk.Button(self,text="No Log",width=10,command=self.startLog,font=("Helvetica", "12"),bg=colOff)
-    self.logButton.grid    (column=2,row=row+1,padx=spaceX,pady=spaceY)
+    self.logButton.grid    (column=2,row=3,padx=spaceX,pady=spaceY)
     self.quitButton=       tk.Button(self,text="Quit",width=10,command=self.done,font=("Helvetica", "12"))
-    self.quitButton.grid   (column=5,row=row+1,padx=spaceX,pady=spaceY)
+    self.quitButton.grid   (column=5,row=3,padx=spaceX,pady=spaceY)
     #spacers
     self.spacer1=          tk.Label(self,text=' ')
     self.spacer1.grid      (column=0,row=0)
     self.spacer2=          tk.Label(self,text=' ')
-    self.spacer2.grid      (column=7,row=row+2)
+    self.spacer2.grid      (column=3,row=4)
 
   def loadConfig(self,configPath,configFile):
     #try:
