@@ -13,39 +13,16 @@
   <logInterval>120</logInterval>
   <logName>TankCtrl</logName>
   <device>
-    <name>Tank X02</name>
-    <ipAddr>192.168.0.244</ipAddr>
+    <name>Pond 1</name>
+    <ipAddr>192.168.0.203</ipAddr>
     <port>502</port>
     <type>Tank Ctrl</type>
     <datum>
-      <name>Tank Temp 1</name>
-      <addr>22</addr>
+      <name>Water Level</name>
+      <addr>26</addr>
       <type>float</type>
-      <unit>°C</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>Tank Temp 2</name>
-      <addr>24</addr>
-      <type>float</type>
-      <unit>°C</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>Tank pH</name>
-      <addr>20</addr>
-      <type>float</type>
-      <unit>pH</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>CO2 Time</name>
-      <addr>155</addr>
-      <type>long</type>
-      <unit>s</unit>
+      <unit>mm</unit>
+      <precision>1</precision>
       <log>True</log>
     </datum>
   </device>

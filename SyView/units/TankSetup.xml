@@ -7,7 +7,7 @@
 -->
 
 <configuration>
-  <register name="ControlName">TankD26</register>
+  <register name="ControlName">Setup</register>
   <register name="WQName">pH</register>
   <register name="Temp1Name">Tank Temp</register>
   <register name="Temp2Name"></register>

@@ -5,3 +5,5 @@ MBMon.xml
 *.bak
 *.pyc
 MBMon/setup/MBMon.xml
+/MBMon/setup
+/SyView/units
