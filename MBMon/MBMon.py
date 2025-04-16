@@ -1,17 +1,18 @@
 #------------------------------------------------------------------------------
-#  Monitor
+#  ModbusTCP Monitor
 #
 #  - Monitor a set of Modbus addresses
-#  - written for Python v3.9
 #
 #  Symbrosia
-#  Copyright 2021, all rights reserved
+#  Copyright 2021-2025, all rights reserved
 #
 # 29Nov2021 A. Cooper v0.1
 #  - initial version
+# 29Nov2025 A. Cooper v0.2
+#  - make data frame scrollable
 #
 #------------------------------------------------------------------------------
-verStr= 'MBMon v1.0'
+verStr= 'MBMon v0.2'
 
 #-- constants -----------------------------------------------------------------
 cfgFileName= 'MBMon.xml'
@@ -22,7 +23,6 @@ colBack=     '#BBBBBB'
 colDev=      '#999999'
 colOn=       '#ADFF8C'
 colOff=      '#FFADAD'
-
 verbose=     False;
 
 #-- library -------------------------------------------------------------------
@@ -73,7 +73,7 @@ class Application(tk.Frame):
     self.logEvent('{} started'.format(verStr),True)
     self.device= ModbusClient(debug=verbose)
     print('{} running...'.format(verStr))
-
+ 
   def createWidgets(self):
     spaceX= 5
     spaceY= 1
@@ -87,7 +87,10 @@ class Application(tk.Frame):
     canvas.create_window((0,0),window=frame,anchor=tk.NW)
     def configure_scroll_region(event):
       canvas.configure(scrollregion=canvas.bbox("all"))
-    frame.bind("<Configure>", configure_scroll_region)
+    def on_mousewheel(event):
+      canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+    frame.bind("<Configure>",configure_scroll_region)
+    canvas.bind_all("<MouseWheel>",on_mousewheel)
     # data fields
     row= 0
     for device in self.config['devices']:
