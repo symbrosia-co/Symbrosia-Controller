@@ -18,7 +18,7 @@ verStr= 'SyCheck v0.2'
 #-- constants -----------------------------------------------------------------
 cfgFileName= 'configuration.xml'
 cfgFilePath= 'cfg'
-rptFilePath= 'rpt'
+rptFilePath= 'reports'
 refFilePath= 'ref'
 libFilePath= 'lib'
 colBack=     '#BBBBBB'
@@ -255,8 +255,7 @@ class Application(tk.Frame):
   def saveReport(self):
       type= [('Text', '*.txt')]
       name= 'SyCheck{:%Y%m%d}'.format(dt.datetime.now())
-      file= filedialog.asksaveasfilename(title='Save report...',initialfile=name,filetypes=type,defaultextension=type,initialdir=localDir)
-      print(file)
+      file= filedialog.asksaveasfilename(title='Save report...',initialfile=name,filetypes=type,defaultextension=type,initialdir=rptPath)
       if file=='': return
       if file==None: return
       try:
