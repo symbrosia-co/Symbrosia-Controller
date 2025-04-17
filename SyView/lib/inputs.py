@@ -5,6 +5,8 @@
 #
 #  1Jul2022 A. Cooper
 #  - initial version
+#  06Jan2025 v1.4 A. Cooper
+#  - fix justification in input units dropdown menu
 
 #-- includes ------------------------------------------------------------------
 import os
@@ -58,7 +60,7 @@ class Inputs(tk.Frame):
     {'reg':'WQOffset',      'form':'float', 'conf':False,'col':6, 'row':2, 'padx':5,'span':1,'width':6, 'font':1,'just':'f','value':0.0                },
     {'reg':'WQOffset',      'form':'entry', 'conf':False,'col':7, 'row':2, 'padx':5,'span':1,'width':10,'font':1,'just':'f','value':''                 },
     {'reg':'WQOffset',      'form':'send',  'conf':False,'col':8, 'row':2, 'padx':0,'span':1,'width':6, 'font':1,'just':'l','value':None               },
-    {'reg':'WQSensorUnits', 'form':'unitwq','conf':False,'col':9, 'row':1, 'padx':9,'span':1,'width':4, 'font':1,'just':'l','value':0                  },
+    {'reg':'WQSensorUnits', 'form':'unitwq','conf':False,'col':9, 'row':1, 'padx':9,'span':1,'width':4, 'font':1,'just':'c','value':0                  },
     {'reg':None,            'form':'label', 'conf':False,'col':10,'row':1, 'padx':5,'span':1,'width':6, 'font':1,'just':'c','value':'Valid'            },
     {'reg':'WQSensorValid', 'form':'indtf', 'conf':False,'col':10,'row':2, 'padx':5,'span':1,'width':6, 'font':0,'just':'c','value':False              },
     # Temperature 1
@@ -76,7 +78,7 @@ class Inputs(tk.Frame):
     {'reg':'Temp1Offset',   'form':'float', 'conf':False,'col':6, 'row':4, 'padx':5,'span':1,'width':6, 'font':1,'just':'f','value':0.0                },
     {'reg':'Temp1Offset',   'form':'entry', 'conf':False,'col':7, 'row':4, 'padx':5,'span':1,'width':10,'font':1,'just':'f','value':''                 },
     {'reg':'Temp1Offset',   'form':'send',  'conf':False,'col':8, 'row':4, 'padx':0,'span':1,'width':6, 'font':1,'just':'l','value':''                 },
-    {'reg':'Temp1Units',    'form':'unitt', 'conf':False,'col':9, 'row':3, 'padx':9,'span':1,'width':4, 'font':1,'just':'r','value':0                  },
+    {'reg':'Temp1Units',    'form':'unitt', 'conf':False,'col':9, 'row':3, 'padx':9,'span':1,'width':4, 'font':1,'just':'c','value':0                  },
     {'reg':None,            'form':'label', 'conf':False,'col':10,'row':3, 'padx':5,'span':1,'width':6, 'font':1,'just':'c','value':'Valid'            },
     {'reg':'Temp1Valid',    'form':'indtf', 'conf':False,'col':10,'row':4, 'padx':5,'span':1,'width':6, 'font':0,'just':'c','value':False              },
     # Temperature 2
@@ -94,7 +96,7 @@ class Inputs(tk.Frame):
     {'reg':'Temp2Offset',   'form':'float', 'conf':False,'col':6, 'row':6, 'padx':5,'span':1,'width':6, 'font':1,'just':'f','value':0.0                },
     {'reg':'Temp2Offset',   'form':'entry', 'conf':False,'col':7, 'row':6, 'padx':5,'span':1,'width':10,'font':1,'just':'f','value':''                 },
     {'reg':'Temp2Offset',   'form':'send',  'conf':False,'col':8, 'row':6, 'padx':0,'span':1,'width':6, 'font':1,'just':'l','value':''                 },
-    {'reg':'Temp2Units',    'form':'unitt', 'conf':False,'col':9, 'row':5, 'padx':9,'span':1,'width':4, 'font':1,'just':'r','value':0                  },
+    {'reg':'Temp2Units',    'form':'unitt', 'conf':False,'col':9, 'row':5, 'padx':9,'span':1,'width':4, 'font':1,'just':'c','value':0                  },
     {'reg':None,            'form':'label', 'conf':False,'col':10,'row':5, 'padx':5,'span':1,'width':6, 'font':1,'just':'c','value':'Valid'            },
     {'reg':'Temp2Valid',    'form':'indtf', 'conf':False,'col':10,'row':6, 'padx':5,'span':1,'width':6, 'font':0,'just':'c','value':False              },
     # Input 1
@@ -113,7 +115,7 @@ class Inputs(tk.Frame):
     {'reg':'Analog1Offset', 'form':'float', 'conf':False,'col':6, 'row':8, 'padx':5,'span':1,'width':6, 'font':1,'just':'f','value':0.0                },
     {'reg':'Analog1Offset', 'form':'entry', 'conf':False,'col':7, 'row':8, 'padx':5,'span':1,'width':10,'font':1,'just':'f','value':''                 },
     {'reg':'Analog1Offset', 'form':'send',  'conf':False,'col':8, 'row':8, 'padx':0,'span':1,'width':6, 'font':1,'just':'l','value':None               },
-    {'reg':'Analog1Units',  'form':'units', 'conf':False,'col':9, 'row':7, 'padx':9,'span':1,'width':4, 'font':1,'just':'r','value':0                  },
+    {'reg':'Analog1Units',  'form':'units', 'conf':False,'col':9, 'row':7, 'padx':9,'span':1,'width':4, 'font':1,'just':'c','value':0                  },
     {'reg':None,            'form':'label', 'conf':False,'col':10,'row':7, 'padx':5,'span':1,'width':6, 'font':1,'just':'c','value':'Valid'            },
     {'reg':'Analog1Valid',  'form':'indtf', 'conf':False,'col':10,'row':8, 'padx':5,'span':1,'width':6, 'font':0,'just':'c','value':False              },
     # Input 2
@@ -132,7 +134,7 @@ class Inputs(tk.Frame):
     {'reg':'Analog2Offset', 'form':'float', 'conf':False,'col':6, 'row':10,'padx':5,'span':1,'width':6, 'font':1,'just':'f','value':0.0                },
     {'reg':'Analog2Offset', 'form':'entry', 'conf':False,'col':7, 'row':10,'padx':5,'span':1,'width':10,'font':1,'just':'f','value':''                 },
     {'reg':'Analog2Offset', 'form':'send',  'conf':False,'col':8, 'row':10,'padx':0,'span':1,'width':6, 'font':1,'just':'l','value':None               },
-    {'reg':'Analog2Units',  'form':'units', 'conf':False,'col':9, 'row':9, 'padx':9,'span':1,'width':4, 'font':1,'just':'r','value':0                  },
+    {'reg':'Analog2Units',  'form':'units', 'conf':False,'col':9, 'row':9, 'padx':9,'span':1,'width':4, 'font':1,'just':'c','value':0                  },
     {'reg':None,            'form':'label', 'conf':False,'col':10,'row':9, 'padx':5,'span':1,'width':6, 'font':1,'just':'c','value':'Valid'            },
     {'reg':'Analog2Valid',  'form':'indtf', 'conf':False,'col':10,'row':10,'padx':5,'span':1,'width':6, 'font':0,'just':'c','value':False              },
     # supply and int temp

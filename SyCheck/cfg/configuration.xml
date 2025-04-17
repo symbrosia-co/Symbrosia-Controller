@@ -1,9 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
+<!-- 
   SyCheck Configuration File
   - Installation specific information
+  
+  17Apr2025 A. Cooper
+  - updated for all existing controllers
+  
 -->
 <configuration>
+  <!-- C Pad Tanks -->
+  <ctrl name='Tank C01'>
+    <address>192.168.0.60</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C02'>
+    <address>192.168.0.226</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C03'>
+    <address>192.168.0.227</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C04'>
+    <address>192.168.0.55</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C08'>
+    <address>192.168.0.228</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C09'>
+    <address>192.168.0.59</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C10'>
+    <address>192.168.0.56</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C11'>
+    <address>192.168.0.61</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C12'>
+    <address>192.168.0.220</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C13'>
+    <address>192.168.0.216</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C14'>
+    <address>192.168.0.213</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C15'>
+    <address>192.168.0.214</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C16'>
+    <address>192.168.0.241</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank C17'>
+    <address>192.168.0.61</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <!-- D Pad Tanks -->
   <ctrl name='Tank D01'>
     <address>192.168.0.218</address>
     <ref>TankRef.xml</ref>
@@ -24,4 +86,160 @@
     <address>192.168.0.234</address>
     <ref>TankRef.xml</ref>
   </ctrl>
+  <ctrl name='Tank D06'>
+    <address>192.168.0.219</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D07'>
+    <address>192.168.0.208</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D08'>
+    <address>192.168.0.201</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D09'>
+    <address>192.168.0.211</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D10'>
+    <address>192.168.0.240</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D11'>
+    <address>192.168.0.249</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D12'>
+    <address>192.168.0.247</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D13'>
+    <address>192.168.0.239</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D14'>
+    <address>192.168.0.233</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D15'>
+    <address>192.168.0.215</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D16'>
+    <address>192.168.0.89</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D17'>
+    <address>192.168.0.217</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D18'>
+    <address>192.168.0.230</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D19'>
+    <address>192.168.0.229</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D20'>
+    <address>192.168.0.236</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D21'>
+    <address>192.168.0.253</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D22'>
+    <address>192.168.0.212</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D23'>
+    <address>192.168.0.250</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D24'>
+    <address>192.168.0.209</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D25'>
+    <address>192.168.0.210</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank D26'>
+    <address>192.168.0.206</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <!-- E Pad Tanks -->
+  <ctrl name='Tank E06'>
+    <address>192.168.0.218</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank E07'>
+    <address>192.168.0.4</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank E08'>
+    <address>192.168.0.205</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank E09'>
+    <address>192.168.0.193</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank E10'>
+    <address>192.168.0.73</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank E11'>
+    <address>192.168.0.214</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank E12'>
+    <address>192.168.0.200</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank E13'>
+    <address>192.168.0.238</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank E14'>
+    <address>192.168.0.202</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <!-- X Pad Tanks -->
+  <ctrl name='Tank X01'>
+    <address>192.168.0.254</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank X02'>
+    <address>192.168.0.244</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank X03'>
+    <address>192.168.0.3</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <ctrl name='Tank X04'>
+    <address>192.168.0.251</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>
+  <!-- Indoor PBRs -->
+  <ctrl name='Tank L01'>
+    <address>192.168.0.237</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>  
+  <ctrl name='Tank L02'>
+    <address>192.168.0.225</address>
+    <ref>TankRef.xml</ref>
+  </ctrl>  
+  <!-- Other Controllers -->
+  <ctrl name='CO2 Monitor'>
+    <address>192.168.0.235</address>
+    <ref>CO2Monitor.xml</ref>
+  </ctrl>  
+  <ctrl name='BrewTank'>
+    <address>192.168.0.108</address>
+    <ref>BrewTank.xml</ref>
+  </ctrl>  
 </configuration>

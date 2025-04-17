@@ -22,13 +22,17 @@
 #  - Fix analog channels numbers for time
 #  31Nov2024 v1.3 A. Cooper
 #  - add manual IP address selection
+#  06Jan2025 v1.4 A. Cooper
+#  - fix menu issue for manual IP address
+#  - fix justification in input units dropdown menu
+#
 #
 # Known issues:
 # - missing units for internal temp on status screen
 # - current reading not displayed for some inputs on control tab
 #
 #------------------------------------------------------------------------------
-verStr= 'SyView v1.3'
+verStr= 'SyView v1.4'
 
 #-- constants -----------------------------------------------------------------
 configFile= 'configuration.xml'
@@ -121,7 +125,7 @@ class Application(tk.Frame):
     self.logoButton=     tk.Button(self,image=self.logoImage,width=104,height=104,relief=tk.FLAT)
     self.logoButton.grid (column=1,row=8,rowspan=2,padx=spaceX,pady=spaceY)
     # controller menu
-    self.ctrlList= ['Manual']
+    self.ctrlList= []
     for ctrl in self.config['ctrlList']:
       self.ctrlList.append(ctrl['name'])
     self.ctrlStr= tk.StringVar()

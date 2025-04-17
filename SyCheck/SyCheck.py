@@ -124,12 +124,12 @@ class Application(tk.Frame):
     self.ctrlMenu.grid(column=1,row=1,padx=spaceX,pady=spaceY,sticky=tk.W)
 
   def loadConfig(self,configPath,configFile):
-    #try:
-    tree = xml.parse(os.path.join(configPath,configFile))
-    #except:
-    #  messagebox.showerror(title='Startup error...',message='Unable to load configuration file {}\{}'.format(configPath,configFile))
-    #  return False
-    #process top level
+    try:
+      tree = xml.parse(os.path.join(configPath,configFile))
+    except:
+      messagebox.showerror(title='Startup error...',message='Unable to load configuration file {}\{}'.format(cfgFilePath,configFile))
+      return False
+    # process top level
     self.units= []
     root= tree.getroot()
     for ctrl in root:
@@ -148,7 +148,7 @@ class Application(tk.Frame):
         try:
           tree = xml.parse(os.path.join(refPath,unit['ref']))
         except:
-          messagebox.showerror(title='Startup error...',message='Unable to load refernce file {}\{}'.format(configPath,unit['ref']))
+          messagebox.showerror(title='Startup error...',message='Unable to load reference file {}\{}'.format(cfgFilePath,unit['ref']))
           return False
         #process top level
         new= []
