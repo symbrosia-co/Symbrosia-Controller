@@ -1,14 +1,9 @@
 *.csv
 *.bak
 *.pyc
-<<<<<<< Updated upstream
-MBMon/setup/MBMon.xml
-/MBMon/setup
-=======
 /MBMon/logs
 /MBMon/setup
 /SyCheck/ref
 /SyCheck/cfg
 /SyView/cfg
->>>>>>> Stashed changes
 /SyView/units
