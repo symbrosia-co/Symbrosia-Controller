@@ -69,6 +69,9 @@ class Application(tk.Frame):
   report=[]
   lastLog=  dt.datetime.now()
   eventNow= dt.datetime.min
+  unitCount= 0
+  commCount= 0
+  failCount= 0
 
   def __init__(self, master=None):
     tk.Frame.__init__(self, master)
@@ -176,13 +179,24 @@ class Application(tk.Frame):
       
   def scanAll(self):
     self.report= []
+    self.unitCount= 0
+    self.commCount= 0
+    self.failCount= 0
     self.report.append('SyCheck Report')
     self.report.append('  {:%Y-%m-%d %H:%M:%S}'.format(dt.datetime.now()))
     self.report.append('')
     for unit in self.units:
       self.scanUnit(unit)
+      self.eventLog.update_idletasks()
+    self.logEvent('{:d} units scanned'.format(self.unitCount),False)
+    self.logEvent('{:d} units with communications errors'.format(self.commCount),False)
+    self.logEvent('{:d} units with configuration differences'.format(self.failCount),False)
     self.logEvent('Scan all complete',True)
-
+    self.report.append('{:d} units scanned'.format(self.unitCount))
+    self.report.append('{:d} units with communications errors'.format(self.commCount))
+    self.report.append('{:d} units with configuration differences'.format(self.failCount))
+    self.report.append('Scan all complete')
+    
   def scanUnit(self,unit):
       header= '  Register               Controller   Reference        Description'
       headline= '  -------------------------------------------------------------------------------------------'
@@ -191,6 +205,7 @@ class Application(tk.Frame):
       diffs= 0
       valid= False
       tries= 0
+      self.unitCount+= 1
       while tries<5:
         if self.controller.start(unit['address'],502):
           self.controller.service()
@@ -201,6 +216,7 @@ class Application(tk.Frame):
             self.logEvent('  {} configuration read'.format(unit['name']),True)
             break
         self.logEvent('  Communications error with {}'.format(unit['name']),True)
+        self.report.append('  Communications error with {}'.format(unit['name']))
         tries+= 1
       if valid:
         firstErr= True
@@ -253,11 +269,14 @@ class Application(tk.Frame):
         elif diffs==1:
           self.logEvent('  {:d} difference found'.format(diffs),True)
           self.report.append('  {:d} difference found'.format(diffs))
+          self.failCount+= 1
         else:
           self.logEvent('  {:d} differences found'.format(diffs),True)
           self.report.append('  {:d} differences found'.format(diffs))
+          self.failCount+= 1
         self.report.append('')
       else:
+        self.commCount+= 1
         self.logEvent('  Error!! Unable to open {}'.format(unit['name']),True)
         self.report.append('  Error!! Unable to open {}'.format(unit['name']))
         self.report.append('')
