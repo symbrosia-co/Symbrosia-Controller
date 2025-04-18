@@ -227,11 +227,11 @@
   <!-- Indoor PBRs -->
   <ctrl name='Tank L01'>
     <address>192.168.0.237</address>
-    <ref>TankRef.xml</ref>
+    <ref>IndoorPBRRef.xml</ref>
   </ctrl>  
   <ctrl name='Tank L02'>
     <address>192.168.0.225</address>
-    <ref>TankRef.xml</ref>
+    <ref>IndoorPBRRef.xml</ref>
   </ctrl>  
   <!-- Other Controllers -->
   <ctrl name='CO2 Monitor'>

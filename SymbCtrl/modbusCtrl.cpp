@@ -306,8 +306,8 @@ const char mbCoilRWMode[statSize]= {
   'w', //  56 statRstCtrl2Max
   'w', //  57 statRstCtrl3Max
   'w', //  58 statRstCtrl4Max
-  '+', //  59 statCounterEnable
-  '+', //  60 statTimerEnable
+  '+', //  59 nc
+  '+', //  60 nc
   '+', //  61 statToDEnable
   'r', //  62 statToDActive
   'w', //  63 statResetCounter

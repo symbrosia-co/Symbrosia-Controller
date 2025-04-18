@@ -40,6 +40,8 @@
   - add screen ID's for fixed data entry (92 to 94)
   - add screen ID's for firmware update (95)
   - add fixed data definitions (serial,hardware, processor)
+  11Apr2025 v2.9 A. Cooper
+  - remove unused timer and counter enable
 
 ------------------------------------------------------------------------------*/
 #pragma once
@@ -57,7 +59,7 @@
 
 // unit ID 
 #define firmMajor     2
-#define firmMinor     8
+#define firmMinor     9
 #define modelNameStr  "SymbCtrl Mk2"
 
 // default time zone
@@ -367,8 +369,6 @@ extern IPAddress wifiIPAddr;
 #define statRstCtrl2Max     56
 #define statRstCtrl3Max     57
 #define statRstCtrl4Max     58
-#define statCounterEnable   59
-#define statTimerEnable     60
 #define statToDEnable       61
 #define statToDActive       62
 #define statResetCounter    63

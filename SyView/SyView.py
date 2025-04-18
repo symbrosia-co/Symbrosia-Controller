@@ -307,7 +307,8 @@ class Application(tk.Frame):
       self.online= True
   
   def changeControl(self,param):
-    self.openControl()  
+    if self.controller.connected():
+      self.openControl()  
   
   def update(self):
     # read all values from the controller

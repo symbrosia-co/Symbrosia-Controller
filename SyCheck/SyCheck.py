@@ -2,18 +2,20 @@
 #  SyCheck
 #
 #  - Ensure correct configuration of controllers on the network
-#  - written for Python v3.9
 #
 #  Symbrosia
-#  Copyright 2024, all rights reserved
+#  Copyright 2024-2025, all rights reserved
 #
 # 23Oct2024 A. Cooper v0.1
 # - initial version
 # 23Oct2024 A. Cooper v0.2
 # - test version released to cultivation
+# 17Apr2025 A. Cooper v0.3
+# - removed counter enable and timer enable bits, never used
+# - now performs multiple tries to read a controller's data
 #
 #------------------------------------------------------------------------------
-verStr= 'SyCheck v0.2'
+verStr= 'SyCheck v0.3'
 
 #-- constants -----------------------------------------------------------------
 cfgFileName= 'configuration.xml'
@@ -187,70 +189,78 @@ class Application(tk.Frame):
       self.logEvent('Check config for {} against {}...'.format(unit['name'],unit['ref']),True)
       self.report.append('Check config for {} against {}...'.format(unit['name'],unit['ref']))
       diffs= 0
-      if self.controller.start(unit['address'],502):
-        self.controller.service()
-        if self.controller.error():
-          self.logEvent('  Communications error with {}'.format(unit['name']),True)
-          self.report.append('  Communications error with {}'.format(unit['name']))
-        else:
-          self.logEvent('  {} configuration read'.format(unit['name']),True)
-          firstErr= True
-          for reg in self.refs[unit['ref']]:
-            regValue= self.controller.value(reg['reg'])
-            refValue= self.controller.convert(reg['reg'],reg['value'])
-            if reg['type']=='str':
-              if regValue!=refValue:
-                if firstErr:
-                  self.report.append(header)
-                  self.report.append(headline)
-                  firstErr= False
-                self.logEvent('  {}:\'{}\' ≠ \'{}\' in reference'.format(reg['reg'],regValue,refValue),True)
-                self.report.append('  {:<16} {:>16} ≠ {:<16} {}'.format(reg['reg'],regValue,refValue,self.controller.description(reg['reg'])))
-                diffs+=1
-            if reg['type']=='int' or reg['reg']=='uint':
-              if regValue!=refValue:
-                if firstErr:
-                  self.report.append(header)
-                  self.report.append(headline)
-                  firstErr= False
-                self.logEvent('  {}:{:d} ≠ {:d} in reference'.format(reg['reg'],regValue,refValue),True)
-                self.report.append('  {:<16} {:>16d} ≠ {:<16d} {}'.format(reg['reg'],regValue,refValue,self.controller.description(reg['reg'])))
-                diffs+=1
-            if reg['type']=='float':
-              if round(regValue,4)!=round(refValue,4):
-                if firstErr:
-                  self.report.append(header)
-                  self.report.append(headline)
-                  firstErr= False
-                self.logEvent('  {}:{:.2f} ≠ {:.2f} in reference'.format(reg['reg'],regValue,refValue),True)
-                self.report.append('  {:<16} {:>16.2f} ≠ {:<16.2f} {}'.format(reg['reg'],regValue,refValue,self.controller.description(reg['reg'])))
-                diffs+=1
-            if reg['type']=='bool':
-              if regValue!=refValue:
-                if firstErr:
-                  self.report.append(header)
-                  self.report.append(headline)
-                  firstErr= False
-                self.logEvent('  {}:{} ≠ {} in reference'.format(reg['reg'],regValue,refValue),True)
-                if regValue: regValue='On'
-                else: regValue= 'Off'
-                if refValue: refValue='On'
-                else: refValue= 'Off'
-                self.report.append('  {:<16} {:>16} ≠ {:<16} {}'.format(reg['reg'],regValue,refValue,self.controller.description(reg['reg'])))
-                diffs+=1
-          if diffs==0:
-            self.logEvent('  No differences found'.format(diffs),True)
-            self.report.append('  No differences found'.format(diffs))
-          elif diffs==1:
-            self.logEvent('  {:d} difference found'.format(diffs),True)
-            self.report.append('  {:d} difference found'.format(diffs))
+      valid= False
+      tries= 0
+      while tries<5:
+        if self.controller.start(unit['address'],502):
+          self.controller.service()
+          if self.controller.error():
+            self.logEvent('  Device read error with {}'.format(unit['name']),True)      
           else:
-            self.logEvent('  {:d} differences found'.format(diffs),True)
-            self.report.append('  {:d} differences found'.format(diffs))
-          self.report.append('')
+            valid= True
+            self.logEvent('  {} configuration read'.format(unit['name']),True)
+            break
+        self.logEvent('  Communications error with {}'.format(unit['name']),True)
+        tries+= 1
+      if valid:
+        firstErr= True
+        for reg in self.refs[unit['ref']]:
+          regValue= self.controller.value(reg['reg'])
+          refValue= self.controller.convert(reg['reg'],reg['value'])
+          if reg['type']=='str':
+            if regValue!=refValue:
+              if firstErr:
+                self.report.append(header)
+                self.report.append(headline)
+                firstErr= False
+              self.logEvent('  {}:\'{}\' ≠ \'{}\' in reference'.format(reg['reg'],regValue,refValue),True)
+              self.report.append('  {:<16} {:>16} ≠ {:<16} {}'.format(reg['reg'],regValue,refValue,self.controller.description(reg['reg'])))
+              diffs+=1
+          if reg['type']=='int' or reg['reg']=='uint':
+            if regValue!=refValue:
+              if firstErr:
+                self.report.append(header)
+                self.report.append(headline)
+                firstErr= False
+              self.logEvent('  {}:{:d} ≠ {:d} in reference'.format(reg['reg'],regValue,refValue),True)
+              self.report.append('  {:<16} {:>16d} ≠ {:<16d} {}'.format(reg['reg'],regValue,refValue,self.controller.description(reg['reg'])))
+              diffs+=1
+          if reg['type']=='float':
+            if round(regValue,4)!=round(refValue,4):
+              if firstErr:
+                self.report.append(header)
+                self.report.append(headline)
+                firstErr= False
+              self.logEvent('  {}:{:.2f} ≠ {:.2f} in reference'.format(reg['reg'],regValue,refValue),True)
+              self.report.append('  {:<16} {:>16.2f} ≠ {:<16.2f} {}'.format(reg['reg'],regValue,refValue,self.controller.description(reg['reg'])))
+              diffs+=1
+          if reg['type']=='bool':
+            if regValue!=refValue:
+              if firstErr:
+                self.report.append(header)
+                self.report.append(headline)
+                firstErr= False
+              self.logEvent('  {}:{} ≠ {} in reference'.format(reg['reg'],regValue,refValue),True)
+              if regValue: regValue='On'
+              else: regValue= 'Off'
+              if refValue: refValue='On'
+              else: refValue= 'Off'
+              self.report.append('  {:<16} {:>16} ≠ {:<16} {}'.format(reg['reg'],regValue,refValue,self.controller.description(reg['reg'])))
+              diffs+=1
+        if diffs==0:
+          self.logEvent('  No differences found'.format(diffs),True)
+          self.report.append('  No differences found'.format(diffs))
+        elif diffs==1:
+          self.logEvent('  {:d} difference found'.format(diffs),True)
+          self.report.append('  {:d} difference found'.format(diffs))
+        else:
+          self.logEvent('  {:d} differences found'.format(diffs),True)
+          self.report.append('  {:d} differences found'.format(diffs))
+        self.report.append('')
       else:
         self.logEvent('  Error!! Unable to open {}'.format(unit['name']),True)
-        self.report.append('  Error!! Unable to open {}'.format(unit['name']))    
+        self.report.append('  Error!! Unable to open {}'.format(unit['name']))
+        self.report.append('')
 
   def saveReport(self):
       type= [('Text', '*.txt')]
