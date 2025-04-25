@@ -10,182 +10,43 @@
 
 <configuration>
   <scanInterval>1</scanInterval>
-  <logInterval>120</logInterval>
-  <logName>TankCtrl</logName>
+  <logInterval>5</logInterval>
+  <logName>LabCtrl</logName>
   <device>
-    <name>Tank X01</name>
-    <ipAddr>192.168.0.254</ipAddr>
+    <name>Middle Shelf</name>
+    <ipAddr>192.168.0.114</ipAddr>
     <port>502</port>
-    <type>Tank Ctrl</type>
+    <type>Lab Ctrl</type>
     <datum>
-      <name>Tank Temp 1</name>
-      <addr>22</addr>
-      <type>float</type>
-      <unit>°C</unit>
-      <precision>2</precision>
+      <name>CO2 Valve</name>
+      <addr>10</addr>
+      <type>coil</type>
       <log>True</log>
     </datum>
     <datum>
-      <name>Tank pH</name>
-      <addr>20</addr>
-      <type>float</type>
-      <unit>pH</unit>
-      <precision>2</precision>
+      <name>Startup</name>
+      <addr>4</addr>
+      <type>coil</type>
+      <log>True</log>
+    </datum>
+    <datum>
+      <name>Hour</name>
+      <addr>14</addr>
+      <type>hold</type>
+      <log>True</log>
+    </datum>
+    <datum>
+      <name>Minute</name>
+      <addr>15</addr>
+      <type>hold</type>
+      <log>True</log>
+    </datum>
+    <datum>
+      <name>Second</name>
+      <addr>16</addr>
+      <type>hold</type>
       <log>True</log>
     </datum>
   </device>
-  <device>
-    <name>Tank X02</name>
-    <ipAddr>192.168.0.244</ipAddr>
-    <port>502</port>
-    <type>Tank Ctrl</type>
-    <datum>
-      <name>Tank Temp 1</name>
-      <addr>22</addr>
-      <type>float</type>
-      <unit>°C</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>Tank pH</name>
-      <addr>20</addr>
-      <type>float</type>
-      <unit>pH</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-  </device>
-  <device>
-    <name>Tank X03</name>
-    <ipAddr>192.168.0.3</ipAddr>
-    <port>502</port>
-    <type>Tank Ctrl</type>
-    <datum>
-      <name>Tank Temp 1</name>
-      <addr>22</addr>
-      <type>float</type>
-      <unit>°C</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>Tank pH</name>
-      <addr>20</addr>
-      <type>float</type>
-      <unit>pH</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-  </device>
-  <device>
-    <name>Tank X04</name>
-    <ipAddr>192.168.0.251</ipAddr>
-    <port>502</port>
-    <type>Tank Ctrl</type>
-    <datum>
-      <name>Tank Temp 1</name>
-      <addr>22</addr>
-      <type>float</type>
-      <unit>°C</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>Tank pH</name>
-      <addr>20</addr>
-      <type>float</type>
-      <unit>pH</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-  </device>
-  <device>
-    <name>Tank X01</name>
-    <ipAddr>192.168.0.254</ipAddr>
-    <port>502</port>
-    <type>Tank Ctrl</type>
-    <datum>
-      <name>Tank Temp 1</name>
-      <addr>22</addr>
-      <type>float</type>
-      <unit>°C</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>Tank pH</name>
-      <addr>20</addr>
-      <type>float</type>
-      <unit>pH</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-  </device>
-  <device>
-    <name>Tank X02</name>
-    <ipAddr>192.168.0.244</ipAddr>
-    <port>502</port>
-    <type>Tank Ctrl</type>
-    <datum>
-      <name>Tank Temp 1</name>
-      <addr>22</addr>
-      <type>float</type>
-      <unit>°C</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>Tank pH</name>
-      <addr>20</addr>
-      <type>float</type>
-      <unit>pH</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-  </device>
-  <device>
-    <name>Tank X03</name>
-    <ipAddr>192.168.0.3</ipAddr>
-    <port>502</port>
-    <type>Tank Ctrl</type>
-    <datum>
-      <name>Tank Temp 1</name>
-      <addr>22</addr>
-      <type>float</type>
-      <unit>°C</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>Tank pH</name>
-      <addr>20</addr>
-      <type>float</type>
-      <unit>pH</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-  </device>
-  <device>
-    <name>Tank X04</name>
-    <ipAddr>192.168.0.251</ipAddr>
-    <port>502</port>
-    <type>Tank Ctrl</type>
-    <datum>
-      <name>Tank Temp 1</name>
-      <addr>22</addr>
-      <type>float</type>
-      <unit>°C</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-    <datum>
-      <name>Tank pH</name>
-      <addr>20</addr>
-      <type>float</type>
-      <unit>pH</unit>
-      <precision>2</precision>
-      <log>True</log>
-    </datum>
-  </device>
+
 </configuration>

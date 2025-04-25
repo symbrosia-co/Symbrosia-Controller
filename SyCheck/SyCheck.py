@@ -200,8 +200,8 @@ class Application(tk.Frame):
   def scanUnit(self,unit):
       header= '  Register               Controller   Reference        Description'
       headline= '  -------------------------------------------------------------------------------------------'
-      self.logEvent('Check config for {} against {}...'.format(unit['name'],unit['ref']),True)
-      self.report.append('Check config for {} against {}...'.format(unit['name'],unit['ref']))
+      self.logEvent('{} reconciled against {}...'.format(unit['name'],unit['ref']),True)
+      self.report.append('{} reconciled against {}...'.format(unit['name'],unit['ref']))
       diffs= 0
       valid= False
       tries= 0
