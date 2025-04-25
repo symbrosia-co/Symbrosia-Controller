@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-  Weather configuration file
-  2024Oct30 19:27:47
+  Manual configuration file
+  2025Apr17 08:56:53
 
 -->
 
 <configuration>
-  <register name="ControlName">Weather</register>
-  <register name="WQName">PAR</register>
-  <register name="Temp1Name">Outdoor Temp</register>
+  <register name="ControlName">CO2</register>
+  <register name="WQName"></register>
+  <register name="Temp1Name">Ambient</register>
   <register name="Temp2Name"></register>
-  <register name="Input1Name">Rain Gauge</register>
+  <register name="Input1Name">CO2</register>
   <register name="Input2Name"></register>
   <register name="Relay1Name"></register>
   <register name="Relay2Name"></register>
@@ -21,37 +21,37 @@
   <register name="Control2Name"></register>
   <register name="Control3Name"></register>
   <register name="Control4Name"></register>
-  <register name="HeartbeatIn">16</register>
-  <register name="StatusDisp1">2</register>
-  <register name="StatusDisp2">1</register>
+  <register name="HeartbeatIn">1902</register>
+  <register name="StatusDisp1">4</register>
+  <register name="StatusDisp2">2</register>
   <register name="TimeZone">-10</register>
-  <register name="WQSensorUnits">4</register>
+  <register name="WQSensorUnits">3</register>
   <register name="Temp1Units">1</register>
   <register name="Temp2Units">1</register>
-  <register name="Analog1Units">5</register>
+  <register name="Analog1Units">16</register>
   <register name="Analog2Units">5</register>
   <register name="IntTempUnits">1</register>
   <register name="SupVoltUnits">5</register>
   <register name="pHTempComp">0</register>
   <register name="WQOffset">0.00</register>
-  <register name="Temp1Offset">7.20</register>
-  <register name="Temp2Offset">0.00</register>
-  <register name="Analog1Offset">0.00</register>
+  <register name="Temp1Offset">-1.00</register>
+  <register name="Temp2Offset">-6.60</register>
+  <register name="Analog1Offset">-0.53</register>
   <register name="Analog2Offset">0.00</register>
   <register name="WQGain">1.00</register>
   <register name="Temp1Gain">1.00</register>
   <register name="Temp2Gain">1.00</register>
-  <register name="Analog1Gain">1.00</register>
+  <register name="Analog1Gain">27.02</register>
   <register name="Analog2Gain">1.00</register>
-  <register name="Ctrl1Input">0</register>
+  <register name="Ctrl1Input">4</register>
   <register name="Ctrl1Output">0</register>
-  <register name="Ctrl1Setpoint">7.00</register>
+  <register name="Ctrl1Setpoint">10.00</register>
   <register name="Ctrl1Hysteresis">1.00</register>
-  <register name="Ctrl1AlarmPtLow">6.00</register>
-  <register name="Ctrl1AlarmPtHigh">8.00</register>
+  <register name="Ctrl1AlarmPtLow">15.00</register>
+  <register name="Ctrl1AlarmPtHigh">50.00</register>
   <register name="Ctrl1EnbSource">0</register>
   <register name="Ctrl1MinOnTime">0</register>
-  <register name="Ctrl2Input">0</register>
+  <register name="Ctrl2Input">2</register>
   <register name="Ctrl2Output">0</register>
   <register name="Ctrl2Setpoint">20.00</register>
   <register name="Ctrl2Hysteresis">5.00</register>
@@ -59,7 +59,7 @@
   <register name="Ctrl2AlarmPtHigh">30.00</register>
   <register name="Ctrl2EnbSource">0</register>
   <register name="Ctrl2MinOnTime">0</register>
-  <register name="Ctrl3Input">0</register>
+  <register name="Ctrl3Input">3</register>
   <register name="Ctrl3Output">0</register>
   <register name="Ctrl3Setpoint">20.00</register>
   <register name="Ctrl3Hysteresis">5.00</register>
@@ -75,9 +75,9 @@
   <register name="Ctrl4AlarmPtHigh">2.00</register>
   <register name="Ctrl4EnbSource">0</register>
   <register name="Ctrl4MinOnTime">0</register>
-  <register name="LogicInA">0</register>
-  <register name="LogicInB">0</register>
-  <register name="LogicFunction">0</register>
+  <register name="LogicInA">26</register>
+  <register name="LogicInB">34</register>
+  <register name="LogicFunction">1</register>
   <register name="ToDStartHour">6</register>
   <register name="ToDStartMin">0</register>
   <register name="ToDStopHour">18</register>
@@ -86,8 +86,8 @@
   <register name="ToDOutput2">0</register>
   <register name="ToDOutput3">0</register>
   <register name="ToDOutput4">0</register>
-  <register name="CountSource">9</register>
-  <register name="CountRstIntv">2</register>
+  <register name="CountSource">0</register>
+  <register name="CountRstIntv">0</register>
   <register name="TimerSource">0</register>
   <register name="TimerRstIntv">0</register>
   <register name="LogInterval">10</register>
@@ -106,7 +106,7 @@
   <register name="Dout2Request">False</register>
   <register name="VirtualIO1">False</register>
   <register name="VirtualIO2">False</register>
-  <register name="Ctrl1Enable">False</register>
+  <register name="Ctrl1Enable">True</register>
   <register name="Ctrl2Enable">False</register>
   <register name="Ctrl3Enable">False</register>
   <register name="Ctrl4Enable">False</register>

@@ -282,6 +282,9 @@ class Application(tk.Frame):
         self.report.append('')
 
   def saveReport(self):
+      # create reports directory if not present
+      os.makedirs(rptPath,exist_ok=True)
+      # selected report file
       type= [('Text', '*.txt')]
       name= 'SyCheck{:%Y%m%d}'.format(dt.datetime.now())
       file= filedialog.asksaveasfilename(title='Save report...',initialfile=name,filetypes=type,defaultextension=type,initialdir=rptPath)
@@ -292,6 +295,7 @@ class Application(tk.Frame):
       except:
         messagebox.showwarning(title='File error...', message='Unable to open file {}'.format(file))
         return
+      # write the report
       for line in self.report:
         reportFile.write(line)
         reportFile.write('\n')
