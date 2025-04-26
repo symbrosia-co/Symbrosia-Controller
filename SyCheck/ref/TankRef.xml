@@ -80,10 +80,10 @@
   <register name="ToDOutput2">0</register>
   <register name="ToDOutput3">0</register>
   <register name="ToDOutput4">0</register>
-  <register name="CountSource">0</register>
-  <register name="CountRstIntv">0</register>
-  <register name="TimerSource">0</register>
-  <register name="TimerRstIntv">0</register>
+  <register name="CountSource">13</register>
+  <register name="CountRstIntv">2</register>
+  <register name="TimerSource">13</register>
+  <register name="TimerRstIntv">2</register>
   <register name="LogInterval">10</register>
   <register name="LogNumber">0</register>
   <register name="LogItem">0</register>

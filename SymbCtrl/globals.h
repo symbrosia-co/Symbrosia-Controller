@@ -59,7 +59,7 @@
 
 // unit ID 
 #define firmMajor     2
-#define firmMinor     9
+#define firmMinor     8
 #define modelNameStr  "SymbCtrl Mk2"
 
 // default time zone
@@ -257,7 +257,6 @@ extern IPAddress wifiIPAddr;
 #define datCtrl4MinOnTime  129
 #define datCtrl4Minimum    130
 #define datCtrl4Maximum    132
-
 // logic gate
 #define datLogicInA        136
 #define datLogicInB        137

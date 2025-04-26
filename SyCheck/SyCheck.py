@@ -219,6 +219,9 @@ class Application(tk.Frame):
         self.report.append('  Communications error with {}'.format(unit['name']))
         tries+= 1
       if valid:
+        fwHigh= (self.controller.value('FirmwareRev') >> 8) & 0xFF
+        fwLow=  self.controller.value('FirmwareRev') & 0xFF
+        self.report.append('  Name: {}  Model: {}  SN: {:d}  FW ver: {:d}.{:d}'.format(self.controller.value('ControlName'),self.controller.value('ModelName'),self.controller.value('SerialNumber'),fwHigh,fwLow))
         firstErr= True
         for reg in self.refs[unit['ref']]:
           regValue= self.controller.value(reg['reg'])
@@ -232,7 +235,7 @@ class Application(tk.Frame):
               self.logEvent('  {}:\'{}\' ≠ \'{}\' in reference'.format(reg['reg'],regValue,refValue),True)
               self.report.append('  {:<16} {:>16} ≠ {:<16} {}'.format(reg['reg'],regValue,refValue,self.controller.description(reg['reg'])))
               diffs+=1
-          if reg['type']=='int' or reg['reg']=='uint':
+          if reg['type']=='int' or reg['type']=='uint':
             if regValue!=refValue:
               if firstErr:
                 self.report.append(header)

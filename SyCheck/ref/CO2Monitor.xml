@@ -21,7 +21,6 @@
   <register name="Control2Name"></register>
   <register name="Control3Name"></register>
   <register name="Control4Name"></register>
-  <register name="HeartbeatIn">1902</register>
   <register name="StatusDisp1">4</register>
   <register name="StatusDisp2">2</register>
   <register name="TimeZone">-10</register>

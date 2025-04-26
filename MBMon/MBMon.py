@@ -314,7 +314,7 @@ class Application(tk.Frame):
       self.logEvent('Unable to set IP port {}@{}:{}'.format(device@ipAddr,port),True)
       return False
     if not self.device.open():
-      self.logEvent('Unable to open device {}@{}:{}'.format(device,ipAddr,port),True)
+      self.logEvent('Unable to open {}@{}:{}'.format(device,ipAddr,port),True)
       return False
     return True
     
@@ -402,12 +402,12 @@ class Application(tk.Frame):
     for datum in self.data:
       if ip==None or ip!=datum['ipAddr']:
         ip= datum['ipAddr']
-        if not self.mbOpen(datum['name'],ip,datum['port']):
+        if not self.mbOpen(datum['devName'],ip,datum['port']):
           ip= None
           continue
       if ip!=datum['ipAddr']:
         self.mbClose()
-        if not self.mbOpen(datum['name'],ip,datum['port']):
+        if not self.mbOpen(datum['devName'],ip,datum['port']):
           ip= None
           continue
         ip=datum['ipAddr']

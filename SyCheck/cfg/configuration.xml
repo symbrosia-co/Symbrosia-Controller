@@ -11,15 +11,15 @@
   <!-- C Pad Tanks -->
   <ctrl name='Tank C01'>
     <address>192.168.0.60</address>
-    <ref>TankRef.xml</ref>
+    <ref>TankRefExtEnb.xml</ref>
   </ctrl>
   <ctrl name='Tank C02'>
     <address>192.168.0.226</address>
-    <ref>TankRef.xml</ref>
+    <ref>TankRefExtEnb.xml</ref>
   </ctrl>
   <ctrl name='Tank C03'>
     <address>192.168.0.227</address>
-    <ref>TankRef.xml</ref>
+    <ref>TankRefExtEnb.xml</ref>
   </ctrl>
   <ctrl name='Tank C04'>
     <address>192.168.0.55</address>
@@ -31,15 +31,15 @@
   </ctrl>
   <ctrl name='Tank C09'>
     <address>192.168.0.59</address>
-    <ref>TankRef.xml</ref>
+    <ref>TankRefExtEnb.xml</ref>
   </ctrl>
   <ctrl name='Tank C10'>
     <address>192.168.0.56</address>
-    <ref>TankRef.xml</ref>
+    <ref>TankRefExtEnb.xml</ref>
   </ctrl>
   <ctrl name='Tank C11'>
-    <address>192.168.0.61</address>
-    <ref>TankRef.xml</ref>
+    <address>192.168.0.62</address>
+    <ref>TankRefExtEnb.xml</ref>
   </ctrl>
   <ctrl name='Tank C12'>
     <address>192.168.0.220</address>
@@ -54,8 +54,8 @@
     <ref>TankRef.xml</ref>
   </ctrl>
   <ctrl name='Tank C15'>
-    <address>192.168.0.214</address>
-    <ref>TankRef.xml</ref>
+    <address>192.168.0.66</address>
+    <ref>TankRefExtEnb.xml</ref>
   </ctrl>
   <ctrl name='Tank C16'>
     <address>192.168.0.241</address>
@@ -67,7 +67,7 @@
   </ctrl>
   <!-- D Pad Tanks -->
   <ctrl name='Tank D01'>
-    <address>192.168.0.218</address>
+    <address>192.168.0.245</address>
     <ref>TankRef.xml</ref>
   </ctrl>
   <ctrl name='Tank D02'>
@@ -151,8 +151,8 @@
     <ref>TankRef.xml</ref>
   </ctrl>
   <ctrl name='Tank D22'>
-    <address>192.168.0.212</address>
-    <ref>TankRef.xml</ref>
+    <address>192.168.0.58</address>
+    <ref>TankRefExtEnb.xml</ref>
   </ctrl>
   <ctrl name='Tank D23'>
     <address>192.168.0.250</address>
@@ -189,11 +189,11 @@
   </ctrl>
   <ctrl name='Tank E10'>
     <address>192.168.0.73</address>
-    <ref>TankRef.xml</ref>
+    <ref>TankRefExtEnb.xml</ref>
   </ctrl>
   <ctrl name='Tank E11'>
     <address>192.168.0.214</address>
-    <ref>TankRef.xml</ref>
+    <ref>TankRefExtEnb.xml</ref>
   </ctrl>
   <ctrl name='Tank E12'>
     <address>192.168.0.200</address>
@@ -225,11 +225,11 @@
     <ref>TankRef.xml</ref>
   </ctrl>
   <!-- Indoor PBRs -->
-  <ctrl name='Tank L01'>
+  <ctrl name='PBR L01'>
     <address>192.168.0.237</address>
     <ref>IndoorPBRRef.xml</ref>
   </ctrl>  
-  <ctrl name='Tank L02'>
+  <ctrl name='PBR L02'>
     <address>192.168.0.225</address>
     <ref>IndoorPBRRef.xml</ref>
   </ctrl>  
