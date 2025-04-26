@@ -247,14 +247,14 @@ class Application(tk.Frame):
     self.logButton.config(text="Logging",bg=colOn)
     now= dt.datetime.now()
     interval= int(self.config['logInterval'])
-    if interval<10: interval=10
-    if (now-self.lastLog)<dt.timedelta(seconds=(interval-5)):
+    if interval<5: interval=5
+    if (now-self.lastLog)<dt.timedelta(seconds=(interval-4)):
       return
     if interval%60==0:
       if now.second!=0:
         return
-    elif interval%10==0:
-      if now.second%10!=0:
+    elif interval%5==0:
+      if now.second%5!=0:
         return
     else:
       if now-self.lastLog<dt.timedelta(seconds=interval):
