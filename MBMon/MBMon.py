@@ -8,11 +8,15 @@
 #
 # 29Nov2021 A. Cooper v0.1
 #  - initial version
-# 29Nov2025 A. Cooper v0.2
+# 29Mar2025 A. Cooper v0.2
 #  - make data frame scrollable
+# 30Apr2025 A. Cooper v0.3
+#  - add snapshot button
+#  - clean up formatting of data window
+#  - autoscale size of data window
 #
 #------------------------------------------------------------------------------
-verStr= 'MBMon v0.2'
+verStr= 'MBMon v0.3'
 
 #-- constants -----------------------------------------------------------------
 cfgFileName= 'MBMon.xml'
@@ -55,6 +59,7 @@ cfgPath=  os.path.join(localDir,cfgFilePath)
 class Application(tk.Frame):
   config=       {}
   data=         []
+  dataFields=   0
   logFile=      None
   lastLog=      dt.datetime.now()
   eventNow=     dt.datetime.min
@@ -76,12 +81,15 @@ class Application(tk.Frame):
  
   def createWidgets(self):
     spaceX= 5
-    spaceY= 1
+    spaceY= 5
     # scrollable frame for data
-    canvas= tk.Canvas(self,width=600,height=400)
-    canvas.grid(column=1,row=1,columnspan=5)
+    datWinSize= self.dataFields*20
+    if datWinSize<100: datWinSize= 100
+    if datWinSize>800: datWinSize= 500
+    canvas= tk.Canvas(self,width=580,height=datWinSize)
+    canvas.grid(column=1,row=1,pady=spaceY,columnspan=4)
     scrollbar= ttk.Scrollbar(self,orient=tk.VERTICAL,command=canvas.yview)
-    scrollbar.grid(column=6,row=1,sticky=tk.N+tk.S)
+    scrollbar.grid(column=5,row=1,sticky=tk.N+tk.S)
     canvas.configure(yscrollcommand=scrollbar.set)
     frame= ttk.Frame(canvas)
     canvas.create_window((0,0),window=frame,anchor=tk.NW)
@@ -94,17 +102,17 @@ class Application(tk.Frame):
     # data fields
     row= 0
     for device in self.config['devices']:
-      label= tk.Label(frame,text=device['name'],width=46,anchor=tk.W,font=("Helvetica","12"),bg=colDev)
+      label= tk.Label(frame,text=device['name'],width=40,anchor=tk.W,font=("Helvetica","12"),bg=colDev)
       label.grid(column=0,row=row,columnspan=3,sticky=tk.W)
-      label= tk.Label(frame,text=device['ipAddr'],width=20,anchor=tk.E,font=("Helvetica","12"),bg=colDev)
-      label.grid(column=3,row=row,columnspan=2,sticky=tk.W)
+      label= tk.Label(frame,text=device['ipAddr'],width=32,justify=tk.RIGHT,font=("Helvetica","12"),bg=colDev)
+      label.grid(column=3,row=row)
       row+= 1
       for dat in device['data']:
         label= tk.Label(frame,text=' ',width=4,font=("Helvetica","10"))
-        label.grid    (column=0,row=row,pady=spaceY,sticky=tk.E)
+        label.grid(column=0,row=row,pady=2)
         datum= {}
-        label= tk.Label(frame,text=dat['name'],width=32,font=("Helvetica","10"))
-        label.grid    (column=1,row=row,pady=spaceY,sticky=tk.E)
+        label= tk.Label(frame,text=dat['name'],width=24,font=("Helvetica","10"))
+        label.grid    (column=1,row=row,pady=2,sticky=tk.W)
         datum['ipAddr']=  device['ipAddr']
         datum['port']=    device['port']
         datum['devName']= device['name']
@@ -124,37 +132,34 @@ class Application(tk.Frame):
           else: datum['log']= False
         else: datum['log']= False
         label= tk.Label(frame,text='---',width=10,font=("Helvetica","12"))
-        label.grid(column=1,row=row,sticky=tk.E)
+        label.grid(column=2,row=row,sticky=tk.E)
         datum['valueDisp']= label
         if 'unit' in dat:
           label= tk.Label(frame,text=dat['unit'],width=10,anchor=tk.W,font=("Helvetica","10"))
-          label.grid(column=2,row=row,sticky=tk.W)
-        if 'write' in dat:
-          button=  tk.Button(frame,text='Write',width=10,command=self.write,font=("Helvetica", "12"))
-          button.grid(column=4,row=row)
-          datum['button']=  button
-          datum['write']=   True
+          label.grid(column=3,row=row,sticky=tk.W)
         row+= 1
         self.data.append(datum)
     # log window
-    self.eventLog=         tk.Text(self,width=80,height=5,bg=colBack)
-    self.eventLog.grid     (column=1,row=2,padx=0,pady=spaceY,columnspan=5,sticky=tk.E+tk.W)
+    self.eventLog=         tk.Text(self,width=72,height=5,bg=colBack)
+    self.eventLog.grid     (column=1,row=2,padx=0,pady=spaceY,columnspan=4,sticky=tk.E+tk.W)
     self.scrollbar=        tk.Scrollbar(self)
     self.scrollbar.config  (command=self.eventLog.yview)
     self.eventLog.config   (yscrollcommand=self.scrollbar.set)
-    self.scrollbar.grid    (column=6,row=2,padx=0,pady=8,sticky=tk.N+tk.S+tk.W)
+    self.scrollbar.grid    (column=5,row=2,padx=0,pady=spaceY,sticky=tk.N+tk.S+tk.W)
     #buttons
     self.startButton=      tk.Button(self,text="Stopped",width=10,command=self.startStop,font=("Helvetica", "12"),bg=colOff)
     self.startButton.grid  (column=1,row=3,padx=spaceX,pady=spaceY)
     self.logButton=        tk.Button(self,text="No Log",width=10,command=self.startLog,font=("Helvetica", "12"),bg=colOff)
     self.logButton.grid    (column=2,row=3,padx=spaceX,pady=spaceY)
+    self.snapButton=        tk.Button(self,text="Snapshot",width=10,command=self.snapshot,font=("Helvetica", "12"))
+    self.snapButton.grid    (column=3,row=3,padx=spaceX,pady=spaceY)
     self.quitButton=       tk.Button(self,text="Quit",width=10,command=self.done,font=("Helvetica", "12"))
-    self.quitButton.grid   (column=5,row=3,padx=spaceX,pady=spaceY)
+    self.quitButton.grid   (column=4,row=3,padx=spaceX,pady=spaceY)
     #spacers
     self.spacer1=          tk.Label(self,text=' ')
-    self.spacer1.grid      (column=0,row=0)
+    self.spacer1.grid      (column=0,row=1,padx=spaceX,pady=spaceY)
     self.spacer2=          tk.Label(self,text=' ')
-    self.spacer2.grid      (column=3,row=4)
+    self.spacer2.grid      (column=6,row=4,padx=spaceX,pady=spaceY)
 
   def loadConfig(self,configPath,configFile):
     #try:
@@ -174,37 +179,47 @@ class Application(tk.Frame):
             for dat in dev:
               datum[dat.tag]= dat.text
             device['data'].append(datum)
+            self.dataFields+= 1
           else:
             device[dev.tag]= dev.text
         self.config['devices'].append(device)
+        self.dataFields+= 1
       else:
         self.config[item.tag]= item.text
     return True
 
   #- GUI event handling -------------------------------------------------------
 
-  def write(self):
-    pass
-    
   def startStop(self):
     if self.mbActive:
       self.mbActive= False
       self.logging= False
       root.after_cancel(self.mbEvent)
       self.startButton.config(text="Stopped",bg=colOff)
+      self.logEvent('Scanning stopped',True)
     else:
       self.mbActive= True
       self.update();
       self.startButton.config(text="Running",bg=colOn)
+      self.logEvent('Scanning started',True)
       
   def startLog(self):
     if self.logging:
       self.logging= False
       self.logButton.config(text="No Log",bg=colOff)
+      self.logEvent('Logging stopped',True)
     else:
       if self.mbActive:
         self.logging= True
         self.logButton.config(text="Logging",bg=colOn)
+        self.logEvent('Logging started',True)
+
+  def snapshot(self):
+    if self.mbActive:
+      self.logWrite()
+      self.logEvent('Snapshot saved to {}'.format(self.config['logName']),True)
+    else:
+      messagebox.showwarning("Advise", "Must be running to save a snapshot")
 
   # handle the quit button
   def done(self):
@@ -216,7 +231,7 @@ class Application(tk.Frame):
 
   def update(self):
     self.scanModbus();
-    self.logWrite();
+    self.logTimer();
     if self.mbActive:
       self.mbEvent= root.after(int(self.config['scanInterval'])*1000,self.update)
 
@@ -240,7 +255,7 @@ class Application(tk.Frame):
 
   #- Log File -----------------------------------------------------------------
 
-  def logWrite(self):
+  def logTimer(self):
     if not self.logging:
       self.logButton.config(text="No Log",bg=colOff)
       return
@@ -259,6 +274,10 @@ class Application(tk.Frame):
     else:
       if now-self.lastLog<dt.timedelta(seconds=interval):
         return
+    self.logWrite()
+  
+  def logWrite(self):
+    now= dt.datetime.now()
     self.lastLog= now
     # write log file
     if 'logName' in self.config:
@@ -273,7 +292,7 @@ class Application(tk.Frame):
       outFile.write('Date and Time')
       for item in self.data:
         if item['log']:
-          outFile.write(', {}'.format(item['name']))
+          outFile.write(', {} {}'.format(item['devName'],item['name']))
       outFile.write('\n')
       self.logEvent('New log file {} created'.format(logName),True)
     else:
