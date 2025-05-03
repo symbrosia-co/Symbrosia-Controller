@@ -62,6 +62,7 @@ class Application(tk.Frame):
   dataFields=   0
   logFile=      None
   lastLog=      dt.datetime.now()
+  needLog=      False
   eventNow=     dt.datetime.min
   mbActive=     False
   logging=      False
@@ -83,7 +84,7 @@ class Application(tk.Frame):
     spaceX= 5
     spaceY= 5
     # scrollable frame for data
-    datWinSize= self.dataFields*20
+    datWinSize= self.dataFields*26
     if datWinSize<100: datWinSize= 100
     if datWinSize>800: datWinSize= 500
     canvas= tk.Canvas(self,width=580,height=datWinSize)
@@ -233,7 +234,7 @@ class Application(tk.Frame):
     self.scanModbus();
     self.logTimer();
     if self.mbActive:
-      self.mbEvent= root.after(int(self.config['scanInterval'])*1000,self.update)
+      self.mbEvent= root.after(int(self.config['scanInterval'])*500,self.update)
 
   #- Event reporting ----------------------------------------------------------
 
@@ -256,29 +257,31 @@ class Application(tk.Frame):
   #- Log File -----------------------------------------------------------------
 
   def logTimer(self):
+    #check if logging
     if not self.logging:
       self.logButton.config(text="No Log",bg=colOff)
-      return
-    self.logButton.config(text="Logging",bg=colOn)
-    now= dt.datetime.now()
-    interval= int(self.config['logInterval'])
-    if interval<5: interval=5
-    if (now-self.lastLog)<dt.timedelta(seconds=(interval-4)):
-      return
-    if interval%60==0:
-      if now.second!=0:
-        return
-    elif interval%5==0:
-      if now.second%5!=0:
-        return
     else:
-      if now-self.lastLog<dt.timedelta(seconds=interval):
-        return
-    self.logWrite()
+      self.logButton.config(text="Logging",bg=colOn)
+    # constrain interval
+    interval= int(self.config['logInterval'])
+    if interval<10: interval=10
+    if interval>3600: interval= 3600
+    # check interval
+    now= dt.datetime.now()
+    self.needLog= (now-self.lastLog)<dt.timedelta(seconds=(interval-9))
+    # sync interval to round time units 
+    if interval%600==0 and now.second!=0 and now.minute!=0:
+      return
+    if interval%60==0 and now.second!=0:
+      return
+    # if time -> log!
+    if self.needLog:
+      self.logWrite()
+      self.lastLog= now
+      self.needLog= False
   
   def logWrite(self):
     now= dt.datetime.now()
-    self.lastLog= now
     # write log file
     if 'logName' in self.config:
       logName= '{}{}.csv'.format(self.config['logName'],now.strftime('%Y%m%d'))
