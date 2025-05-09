@@ -11,8 +11,8 @@
 
 <configuration>
   <scanInterval>5</scanInterval>
-  <logInterval>120</logInterval>
-  <logName>Processing</logName>
+  <logInterval>300</logInterval>
+  <logName>LogData</logName>
   <device>
     <name>Processing</name>
     <ipAddr>192.168.0.108</ipAddr>
