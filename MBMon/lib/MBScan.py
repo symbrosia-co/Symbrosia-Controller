@@ -2,24 +2,24 @@
 #  ModbusTCP Scanner
 #
 #  - Maintain a data structure from a set of Modbus devices
-#  - Use a multiprocess to spawn a subprocesses to get data
-#  - data is stored in a list of dicts with a list of IP addresses and registers
+#  - Use multiprocess to spawn a subprocesses to get data asychronously
+#  - data is stored in a dict of dicts with a list of IP addresses and registers
 #
-#    [{'ipAddr':<IP Address>,
-#      'port':<port number>,
-#      'name':<data name>,
-#      'register':<register number>,
-#      'type':<data type>,
-#      'value':<current value>,
-#      'valid':<data valid?>,
-#      'error':<error code>}]
+#    {<ipAddr>:{'port':<port number>,
+#               'name':<data name>,
+#               'register':<register number>,
+#               'type':<data type>,
+#               'value':<current value>,
+#               'valid':<data valid?>,
+#               'error':<error code>}]
 #
 #  - the data list will be compiled into a device and register list that
 #  uses one or two transactions per modbus device, one for holding and one
 #  for coil registers
-#  - start should be called once to initiate scanning
-#  - scan should be called regularly to keep data fresh
-#  - close will kill all subprocesses
+#  - start() should be called once to initiate scanning
+#  - close() will kill all subprocesses
+#  - status() indicates the last status, True for good
+#  - errText() give the error reason in human readable text
 #  - communication with the subprocess takes place through an array on integers
 #
 #    0:  message to subprocess, 0:none, -1:kill
@@ -107,12 +107,12 @@ class mbScanner():
           if datum['type']=='coil':
             if device['coilStart']==None:
               newDev['coilStart']= datum['register']
-              newDev['holdStop']= datum['register']
+              newDev['coilStop']= datum['register']
             else:
               if datum['register']<device['coilStart']:
                 device['coilStart']= datum['register']
               if datum['register']>device['coilStop']:
-                device['holdStop']= datum['register']
+                device['coilStop']= datum['register']
       if not found:
         newDev= {'port':datum['port'],'holdStart':None,'holdStop':None,'coilStart':None,'coilStop':None,'proc':None}
         if datum['type']=='int' or datum['type']=='uint':
@@ -126,7 +126,7 @@ class mbScanner():
           device['holdStop']= datum['register']+datum['length']
         if datum['type']=='coil':
           newDev['coilStart']= datum['register']
-          newDev['holdStop']= datum['register']
+          newDev['coilStop']= datum['register']
         self.devList[datum['ipAddr']]= newDev
       # generate internal data list
       self.datList['{}{}'.format(datum['ipAddr'],datum['name'])]= {'register':datum['register'],'type':datum['type']}
@@ -172,7 +172,6 @@ class mbScanner():
       #span the process
       dev['proc']= Process(target=self.scanSub,args=(dev['data'],))
       dev['proc'].start()
-      print(dev['proc'])
       
   def scanSub(self,shared):
     comGood= False
@@ -188,9 +187,9 @@ class mbScanner():
     scan=      shared[11]
     last= dt.datetime.now()
     while True:
-      #recieve poison pill
+      #swallow poison pill and die
       if shared[1]==-1: 
-        print('Subprocess {} terminating'.format(ipAddr))
+        print('Scanner for {} terminating'.format(ipAddr))
         break
       now= dt.datetime.now()
       if (now-last)>dt.timedelta(seconds=scan):
@@ -199,9 +198,9 @@ class mbScanner():
           shared[1]= 0 #no error
           # holding registers
           if holdStart!=-1:
-            print('Read holding regs for {}'.format(ipAddr))
+            #print('Read holding regs for {}'.format(ipAddr))
             values= device.read_holding_registers(holdStart,holdStop-holdStart+1)
-            print(values)
+            #print(values)
             if values!=None: # place data in shared
               for i,val in enumerate(values):
                 shared[12+i]= val
@@ -209,12 +208,18 @@ class mbScanner():
               shared[1]= 2 #set com error flag
           # coils
           if coilStart!=-1:
-            print('Read coils for {}'.format(ipAddr))
+            #print('Read coils for {}'.format(ipAddr))
             values= device.read_coils(coilStart,coilStop-coilStart+1)
-            print(values)
             if values!=None: # place data in shared
+              if holdStart==-1:
+                coils= 12
+              else:
+                coils= (holdStop-holdStart)+13
               for i,val in enumerate(values):
-                shared[13+(holdStop-holdStart)+i]= val
+                if val:
+                  shared[coils+i]= 1
+                else:
+                  shared[coils+i]= 0
             else:
               shared[1]= 2 #set com error flag
           device.close()
@@ -226,23 +231,28 @@ class mbScanner():
     self.stat= True
     self.errTxt= 'No error'
     print('Get value...')
-    print(self.datList)
-    print(self.devList)
-    dev= '{}{}'.format(ipAddr,name)
-    if dev in self.datList:
-      reg= self.datList[dev]['register']
-      typ= self.datList[dev]['type']
-      print(self.datList[dev])
-      if '{}{}'.format(ipAddr,name) in self.devList:
-        
+    dat= '{}{}'.format(ipAddr,name)
+    if dat in self.datList:
+      reg= self.datList[dat]['register']
+      typ= self.datList[dat]['type']
+      if ipAddr in self.devList:
+        self.printShared(self.devList[ipAddr]['data'])
+        holdFirst= None
+        if self.devList[ipAddr]['holdStart']!=None:
+          holdFirst= -self.devList[ipAddr]['holdStart']+12
+        coilFirst= None
+        if self.devList[ipAddr]['coilStart']!= None:
+          coilFirst= -self.devList[ipAddr]['coilStart']+12
+          if holdFirst!=None:
+            coilFirst= coilFirst+(self.devList[ipAddr]['holdStop']-self.devList[ipAddr]['holdStart'])+1
         if typ=='float':
-          val= [[0],[0]]
+          val= [self.devList[ipAddr]['data'][reg+holdFirst],self.devList[ipAddr]['data'][reg+holdFirst]+1]
           val= utils.word_list_to_long(val,big_endian=False)
           val= utils.decode_ieee(val[0])
-          print(val)
+          print('  Float',val)
           return val
 
-        if varType=='hold':
+        if typ=='hold':
           val= self.device.read_holding_registers(mbAddr,1)
           if val==None:
             if verbose: print ('  No data returned')
@@ -250,7 +260,7 @@ class mbScanner():
             return None
           else:
             return val[0]
-        if varType=='long':
+        if typ=='long':
           valL= self.device.read_holding_registers(mbAddr,1)
           valH= self.device.read_holding_registers(mbAddr+1,1)
           if valL!=None and valH!= None:
@@ -261,17 +271,11 @@ class mbScanner():
             self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
             return None
           return val
-        if varType=='coil':
-          val= self.device.read_coils(mbAddr,1)
-          if val==None:
-            if verbose: print ('  No data returned')
-            self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-            return None
-          else:
-            if val[0]==1:
-              return True
-            else:
-              return False
+        if typ=='coil':
+          val= self.devList[ipAddr]['data'][reg-coilFirst]
+          print('  Coil',val)
+          if val==1: return True
+          else: return False
       else:
         self.stat= False
         self.errTxt= ''
@@ -280,6 +284,25 @@ class mbScanner():
       self.stat= False
       self.errTxt= ''
       return None
+      
+  def printShared(self,shared):
+    print('  IP Addr: {:d}.{:d}.{:d}.{:d}'.format(shared[2],shared[3],shared[4],shared[5]))
+    print('  Port:    {:d}'.format(shared[6]))
+    print('  Scan:    {:d}s'.format(shared[11]))
+    if shared[7]!=-1:
+      print('  Hold:    {:d} to {:d}'.format(shared[7],shared[8]))
+      for i in range(shared[8]-shared[7]+1):
+        print('    {:2d}:{:5d}'.format(i+shared[7],shared[i+12]))
+    else:
+      print('  No holding regs')
+    if shared[9]!= -1:
+      print('  Coil:    {:d} to {:d}'.format(shared[9],shared[10]))
+      fc= 12
+      if shared[7]!=-1: fc= shared[8]-shared[7]+13
+      for i in range(shared[10]-shared[9]+1):
+        print('    {:2d}:{:5d}'.format(i+shared[9],shared[i+fc]))
+    else:
+      print('  No coils')
 
   def close(self):
     for ip,dev in self.devList.items():
@@ -295,37 +318,98 @@ class mbScanner():
     if errorCode==4: return 'Illegal value'
 
 #- test -----------------------------------------------------------------------
-testList1= []
-testList2= [{'ipAddr':'192.168.200.60',
+testList1= [{'ipAddr':'192.168.9.66',
              'port':'502',
-             'name':'Temperature',
+             'name':'Din2',
+             'register':9,
+             'type':'coil',
+             'length': 1,
+             'value':False,
+             'valid':True,
+             'error':0},
+             {'ipAddr':'192.168.9.66',
+             'port':'502',
+             'name':'Flash',
+             'register':29,
+             'type':'coil',
+             'length': 1,
+             'value':False,
+             'valid':True,
+             'error':0}]
+             
+testList2= [{'ipAddr':'192.168.9.66',
+             'port':'502',
+             'name':'pH',
              'register':20,
              'type':'float',
              'length': 2,
              'value':0.0,
              'valid':True,
              'error':0},
-             {'ipAddr':'192.168.200.60',
+             {'ipAddr':'192.168.9.66',
              'port':'502',
-             'name':'Ambient',
-             'register':22,
+             'name':'Internal',
+             'register':30,
              'type':'float',
              'length': 2,
              'value':0.0,
              'valid':True,
              'error':0}]
+                      
+testList3= [{'ipAddr':'192.168.9.66',
+             'port':'502',
+             'name':'pH',
+             'register':20,
+             'type':'float',
+             'length': 2,
+             'value':0.0,
+             'valid':True,
+             'error':0},
+             {'ipAddr':'192.168.9.66',
+             'port':'502',
+             'name':'Internal',
+             'register':30,
+             'type':'float',
+             'length': 2,
+             'value':0.0,
+             'valid':True,
+             'error':0},
+             {'ipAddr':'192.168.9.66',
+             'port':'502',
+             'name':'Din2',
+             'register':9,
+             'type':'coil',
+             'length': 1,
+             'value':False,
+             'valid':True,
+             'error':0},
+             {'ipAddr':'192.168.9.66',
+             'port':'502',
+             'name':'Flash',
+             'register':29,
+             'type':'coil',
+             'length': 1,
+             'value':False,
+             'valid':True,
+             'error':0}]
 
 if __name__=='__main__':
   mb= mbScanner();
-  mb.start(testList2,2)
+  mb.start(testList3,2)
   count= 0
   while count<6:
     time.sleep(5)
-    val= mb.get('192.168.200.60','Temperature')
+    val= mb.get('192.168.9.66','pH')
     if val!=None:
       print(val)
     else:
       print('Read error!')
+    val= mb.get('192.168.9.66','Din2')
+    if val!=None:
+      print(val)
+    else:
+      print('Read error!')
+    count+=1
     count+=1
   mb.close()
 
