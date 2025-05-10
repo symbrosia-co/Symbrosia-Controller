@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-#  ModbusTCP Monitor
+#  ModbusTCP Monitor 2
 #
 #  - Monitor a set of Modbus addresses
 #
@@ -14,26 +14,41 @@
 #  - add snapshot button
 #  - clean up formatting of data window
 #  - autoscale size of data window
+# 05May2025 A. Cooper v2.0
+#  - create MBMon2 as a major upgrade
+#  - use MBScan library to perform subprocess reads of Modbus devices,
+#    the decouples the GUI from reading and avoids laggy operation on com
+#    errors
+#  - better handling of com errors
+#  - change color of device bar to indicate com status
+#  - remove scan and log buttons, now always on
+#  - allow aliases for hold/int and coil/bool
+#  - rename subdirectories to match SyView, logs to log, libs to lib
+#  - correct some CSV formatting for blank fields
+#  - split date and time in CSV file for better compatibility with CSV readers
 #
 #------------------------------------------------------------------------------
-verStr= 'MBMon v0.3'
+verStr= 'MBMon2 v2.0'
 
 #-- constants -----------------------------------------------------------------
-cfgFileName= 'MBMon.xml'
-logFileName= 'MBMon'
-logFilePath= 'log'
-libFilePath= 'lib'
-cfgFilePath= 'setup'
-colBack=     '#BBBBBB'
-colDev=      '#999999'
-colOn=       '#ADFF8C'
-colOff=      '#FFADAD'
-verbose=     False;
+cfgFileName=  'MBMon.xml'
+logFileName=  'MBMon'
+logFilePath=  'log'
+libFilePath=  'lib'
+cfgFilePath=  'setup'
+colBack=      '#BBBBBB'
+colDev=       '#999999'
+colOn=        '#ADFF8C'
+colOff=       '#FFADAD'
+verbose=      False;
+scanInterval= 2   #subprocess scanning interval in seconds
+errorInterval=600 #error message suppression duration in seconds
 
 #-- library -------------------------------------------------------------------
 import string
 import sys
 import os
+from pathlib import Path
 import time
 import urllib.request
 import datetime as     dt
@@ -46,8 +61,8 @@ localDir= os.path.dirname(os.path.realpath(__file__))
 logPath=  os.path.join(localDir,logFilePath)
 libPath=  os.path.join(localDir,libFilePath)
 cfgPath=  os.path.join(localDir,cfgFilePath)
-
-from MBScan import mbScanner
+sys.path.append(libPath)
+from MBScan import MBScanner
 
 #------------------------------------------------------------------------------
 #  MBMon GUI
@@ -64,22 +79,30 @@ class Application(tk.Frame):
   dataFields=   0
   logFile=      None
   lastLog=      dt.datetime.now()
-  needLog=      False
   eventNow=     dt.datetime.min
-  mbActive=     False
-  logging=      False
 
   def __init__(self, master=None):
+    # get configuration
     if not self.loadConfig(cfgPath,cfgFileName):
       sys.exit()
-    # print(self.config)
+    #print(self.config)
+    # create GUI
     tk.Frame.__init__(self, master)
     self.grid()
     self.createWidgets()
     root.resizable(width=False, height=False)
     root.protocol("WM_DELETE_WINDOW",self.done)
     self.logEvent('{} started'.format(verStr),True)
-    self.device= MBScanner()
+    # spawn subprocesses
+    self.devices= MBScanner()
+    regs= []
+    for device in self.config['devices']:
+      for datum in device['data']:
+        reg= {'ipAddr':device['ipAddr'],'port':device['port'],'name':datum['name'],'register':int(datum['addr']),'type':datum['type']}
+        regs.append(reg)
+    self.devices.start(regs,scanInterval)
+    #setup complete
+    self.mbEvent= root.after(int(self.config['scanInterval'])*500,self.update)
     print('{} running...'.format(verStr))
  
   def createWidgets(self):
@@ -105,10 +128,10 @@ class Application(tk.Frame):
     # data fields
     row= 0
     for device in self.config['devices']:
-      label= tk.Label(frame,text=device['name'],width=40,anchor=tk.W,font=("Helvetica","12"),bg=colDev)
-      label.grid(column=0,row=row,columnspan=3,sticky=tk.W)
-      label= tk.Label(frame,text=device['ipAddr'],width=32,justify=tk.RIGHT,font=("Helvetica","12"),bg=colDev)
-      label.grid(column=3,row=row)
+      nameLabel= tk.Label(frame,text=device['name'],width=40,anchor=tk.W,font=("Helvetica","12"),bg=colDev)
+      nameLabel.grid(column=0,row=row,columnspan=3,sticky=tk.W)
+      ipLabel= tk.Label(frame,text=device['ipAddr'],width=32,justify=tk.RIGHT,font=("Helvetica","12"),bg=colDev)
+      ipLabel.grid(column=3,row=row)
       row+= 1
       for dat in device['data']:
         label= tk.Label(frame,text=' ',width=4,font=("Helvetica","10"))
@@ -122,6 +145,9 @@ class Application(tk.Frame):
         datum['name']=    dat['name']
         datum['addr']=    dat['addr']
         datum['type']=    dat['type']
+        datum['ipLab']=   ipLabel
+        datum['nameLab']= nameLabel
+        datum['lastErr']= dt.datetime.now()-dt.timedelta(seconds=errorInterval)
         if 'log' in dat:
           datum['log']=   dat['log']
         else:
@@ -150,12 +176,6 @@ class Application(tk.Frame):
     self.eventLog.config   (yscrollcommand=self.scrollbar.set)
     self.scrollbar.grid    (column=5,row=2,padx=0,pady=spaceY,sticky=tk.N+tk.S+tk.W)
     #buttons
-    self.startButton=      tk.Button(self,text="Stopped",width=10,command=self.startStop,font=("Helvetica", "12"),bg=colOff)
-    self.startButton.grid  (column=1,row=3,padx=spaceX,pady=spaceY)
-    self.logButton=        tk.Button(self,text="No Log",width=10,command=self.startLog,font=("Helvetica", "12"),bg=colOff)
-    self.logButton.grid    (column=2,row=3,padx=spaceX,pady=spaceY)
-    self.snapButton=        tk.Button(self,text="Snapshot",width=10,command=self.snapshot,font=("Helvetica", "12"))
-    self.snapButton.grid    (column=3,row=3,padx=spaceX,pady=spaceY)
     self.quitButton=       tk.Button(self,text="Quit",width=10,command=self.done,font=("Helvetica", "12"))
     self.quitButton.grid   (column=4,row=3,padx=spaceX,pady=spaceY)
     #spacers
@@ -165,12 +185,12 @@ class Application(tk.Frame):
     self.spacer2.grid      (column=6,row=4,padx=spaceX,pady=spaceY)
 
   def loadConfig(self,configPath,configFile):
-    #try:
-    tree = xml.parse(os.path.join(configPath,configFile))
-    #except:
-    #  messagebox.showerror(title='Startup error...',message='Unable to load configuration file {}\{}'.format(configPath,configFile))
-    #  return False
-    #process top level
+    try:
+      tree = xml.parse(os.path.join(configPath,configFile))
+    except:
+      messagebox.showerror(title='Startup error...',message='Unable to load configuration file {}\{}'.format(configPath,configFile))
+      return False
+    #process XML
     self.config['devices']= []
     root= tree.getroot()
     for item in root:
@@ -193,50 +213,44 @@ class Application(tk.Frame):
 
   #- GUI event handling -------------------------------------------------------
 
-  def startStop(self):
-    if self.mbActive:
-      self.mbActive= False
-      self.logging= False
-      root.after_cancel(self.mbEvent)
-      self.startButton.config(text="Stopped",bg=colOff)
-      self.logEvent('Scanning stopped',True)
-    else:
-      self.mbActive= True
-      self.update();
-      self.startButton.config(text="Running",bg=colOn)
-      self.logEvent('Scanning started',True)
-      
-  def startLog(self):
-    if self.logging:
-      self.logging= False
-      self.logButton.config(text="No Log",bg=colOff)
-      self.logEvent('Logging stopped',True)
-    else:
-      if self.mbActive:
-        self.logging= True
-        self.logButton.config(text="Logging",bg=colOn)
-        self.logEvent('Logging started',True)
-
-  def snapshot(self):
-    if self.mbActive:
-      self.logWrite()
-      self.logEvent('Snapshot saved to {}'.format(self.config['logName']),True)
-    else:
-      messagebox.showwarning("Advise", "Must be running to save a snapshot")
-
   # handle the quit button
   def done(self):
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
-      if self.mbActive:
-        root.after_cancel(self.mbEvent)
-      #self.closeLogFile()
+      root.after_cancel(self.mbEvent)
+      self.devices.close()
       self.quit()
 
   def update(self):
-    self.scanModbus();
+    self.scanData();
     self.logTimer();
-    if self.mbActive:
-      self.mbEvent= root.after(int(self.config['scanInterval'])*500,self.update)
+    self.mbEvent= root.after(int(self.config['scanInterval'])*500,self.update)
+    
+  #- Data Handing -------------------------------------------------------------
+
+  def scanData(self):
+    for datum in self.data:
+      val= self.devices.get(datum['ipAddr'],datum['name'])
+      if not self.devices.error:
+        datum['value']= val
+        if datum['type']=='float':
+          datum['valueDisp'].config(text='{0:.{1}f}'.format(val,datum['prec']))
+        if datum['type']=='hold' or datum['type']=='long' or datum['type']=='int' or datum['type']=='uint':
+          datum['valueDisp'].config(text='{:d}'.format(val))
+        if datum['type']=='coil' or datum['type']=='bool':
+          if val:
+            datum['valueDisp'].config(text='On')
+          else:
+            datum['valueDisp'].config(text='Off')
+        datum['ipLab'].config(bg=colOn)
+        datum['nameLab'].config(bg=colOn)
+      else:
+        if dt.datetime.now()-datum['lastErr']>dt.timedelta(seconds=errorInterval):
+          datum['lastErr']= dt.datetime.now()
+          self.logEvent('Error! {}'.format(self.devices.errTxt),True)
+        datum['value']= None
+        datum['valueDisp'].config(text='---')
+        datum['ipLab'].config(bg=colOff)
+        datum['nameLab'].config(bg=colOff)
 
   #- Event reporting ----------------------------------------------------------
 
@@ -250,7 +264,7 @@ class Application(tk.Frame):
       self.eventLog.insert(tk.END,'{:%Y-%m-%d %H:%M:%S} '.format(self.eventNow))
     else:
       self.eventLog.insert(tk.END,'                    ')
-    self.eventLog.insert(tk.END,event+'\n')
+    self.eventLog.insert(tk.END,event[:52]+'\n')
     self.eventLog.see(tk.END)
 
   def clearEvents(self):
@@ -259,31 +273,27 @@ class Application(tk.Frame):
   #- Log File -----------------------------------------------------------------
 
   def logTimer(self):
-    #check if logging
-    if not self.logging:
-      self.logButton.config(text="No Log",bg=colOff)
-    else:
-      self.logButton.config(text="Logging",bg=colOn)
     # constrain interval
     interval= int(self.config['logInterval'])
     if interval<10: interval=10
     if interval>3600: interval= 3600
     # check interval
     now= dt.datetime.now()
-    self.needLog= (now-self.lastLog)<dt.timedelta(seconds=(interval-9))
+    if (now-self.lastLog)<dt.timedelta(seconds=interval):
+      return
     # sync interval to round time units 
     if interval%600==0 and now.second!=0 and now.minute!=0:
       return
     if interval%60==0 and now.second!=0:
       return
     # if time -> log!
-    if self.needLog:
-      self.logWrite()
-      self.lastLog= now
-      self.needLog= False
+    self.logWrite()
+    self.lastLog= now
   
   def logWrite(self):
     now= dt.datetime.now()
+    # check for directory
+    Path(logPath).mkdir(parents=True,exist_ok=True)
     # write log file
     if 'logName' in self.config:
       logName= '{}{}.csv'.format(self.config['logName'],now.strftime('%Y%m%d'))
@@ -294,7 +304,7 @@ class Application(tk.Frame):
     # write header if new file
     if new:
       outFile= open(filePath,'w')
-      outFile.write('Date and Time')
+      outFile.write('Date, Time')
       for item in self.data:
         if item['log']:
           outFile.write(', {} {}'.format(item['devName'],item['name']))
@@ -303,158 +313,25 @@ class Application(tk.Frame):
     else:
       outFile= open(filePath,'a')
     # write data line
-    outFile.write('{}'.format(dt.datetime.now().strftime('%Y%b%d %H:%M:%S')))
+    outFile.write('{}'.format(dt.datetime.now().strftime('%Y%b%d, %H:%M:%S')))
     for item in self.data:
       if verbose: print(item['name'],item['value'])
       if item['log']:
         if item['value']==None:
-          outFile.write(',')
+          outFile.write(',         ')
         else:
           if item['type']=='float':
             outFile.write(', {:8.2f}'.format(item['value']))
-          if item['type']=='hold':
+          if item['type']=='hold' or item['type']=='int' or item['type']=='uint' or item['type']=='long':
             outFile.write(', {:8d}'.format(int(item['value'])))
-          if item['type']=='long':
-            outFile.write(', {:8d}'.format(int(item['value'])))
-          if item['type']=='coil':
+          if item['type']=='coil' or item['type']=='bool':
             if item['value']:
-              outFile.write(',  True')
+              outFile.write(',     True')
             else:
-              outFile.write(', False')
+              outFile.write(',    False')
     outFile.write('\n')
     outFile.close()
     self.logEvent('Log file {} appended'.format(logName),True)
-
-  #- Modbus -------------------------------------------------------------------
-
-  def mbOpen(self,device,ipAddr,port):
-    if self.device.is_open():
-      self.device.close()
-    self.device.timeout(timeout=5)
-    if not self.device.host(ipAddr):
-      self.logEvent('Unable to set IP address {}@{}'.format(device,ipAddr),True)
-      return False
-    if not self.device.port(port):
-      self.logEvent('Unable to set IP port {}@{}:{}'.format(device@ipAddr,port),True)
-      return False
-    if not self.device.open():
-      self.logEvent('Unable to open {}@{}:{}'.format(device,ipAddr,port),True)
-      return False
-    return True
-    
-  def mbClose(self):
-    if self.device.is_open():
-      self.device.close()
-    
-  def mbRead(self,device,name,mbAddr,varType):
-    if not self.device.is_open():
-      self.logEvent('Modbus device {} not open for reading!!'.format(device),True)
-      return None
-    try:
-      mbAddr= int(mbAddr)
-    except:
-      return None
-    if verbose: print ('Attempt read of {}:{}:{:d} as {}...'.format(device,name,mbAddr,varType))
-    if varType=='float':
-      val= self.device.read_holding_registers(mbAddr,2)
-      if val==None:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      else:
-        val= utils.word_list_to_long(val,big_endian=False)
-        val= utils.decode_ieee(val[0])
-        return val
-    if varType=='hold':
-      val= self.device.read_holding_registers(mbAddr,1)
-      if val==None:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      else:
-        return val[0]
-    if varType=='long':
-      valL= self.device.read_holding_registers(mbAddr,1)
-      valH= self.device.read_holding_registers(mbAddr+1,1)
-      if valL!=None and valH!= None:
-        val= valL[0]+valH[0]*65536
-        return val
-      else:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      return val
-    if varType=='coil':
-      val= self.device.read_coils(mbAddr,1)
-      if val==None:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      else:
-        if val[0]==1:
-          return True
-        else:
-          return False
-    if varType=='discrete':
-      # if mbAddr<10000 or mbAddr>19999:
-        # self.logEvent('Bad modbus address {}:{:d} for discrete!!'.format(name,mbAddr),True)
-        # return False
-      val= self.device.read_discrete_inputs(mbAddr,1)
-      if val==None:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      else:
-        if val[0]==1:
-          return True
-        else:
-          return False
-    if varType=='input':
-      # if mbAddr<30000 or mbAddr>39999:
-        # self.logEvent('Bad modbus address {}:{:d} for input!!'.format(name,mbAddr),True)
-        # return False
-      val= self.device.read_input_registers(mbAddr,1)
-      if val==None:
-        if verbose: print ('  No data returned')
-        self.logEvent('No data returned from {}:{:d} - {}!!'.format(device,mbAddr,name),True)
-        return None
-      else:
-        return val[0]
-
-  def scanModbus(self):
-    ip= None
-    for datum in self.data:
-      if ip==None or ip!=datum['ipAddr']:
-        ip= datum['ipAddr']
-        if not self.mbOpen(datum['devName'],ip,datum['port']):
-          ip= None
-          continue
-      if ip!=datum['ipAddr']:
-        self.mbClose()
-        if not self.mbOpen(datum['devName'],ip,datum['port']):
-          ip= None
-          continue
-        ip=datum['ipAddr']
-      result= self.mbRead(datum['devName'],datum['name'],datum['addr'],datum['type'])
-      if result==None:
-        datum['value']= None
-        datum['valueDisp'].config(text='---')
-      else:
-        if datum['type']=='float':
-          val= float(result)
-          datum['valueDisp'].config(text='{0:.{1}f}'.format(val,datum['prec']))
-          datum['value']= val
-        if datum['type']=='hold' or datum['type']=='long':
-          val= int(result)
-          datum['valueDisp'].config(text='{:d}'.format(val))
-          datum['value']= val
-        if datum['type']=='coil':
-          if result:
-            datum['valueDisp'].config(text='On')
-          else:
-            datum['valueDisp'].config(text='Off')
-          datum['value']= result
-    self.mbClose()
 
 #------------------------------------------------------------------------------
 #  GUI Main
@@ -465,11 +342,12 @@ class Application(tk.Frame):
 #  - initial version
 #
 #------------------------------------------------------------------------------
-root= tk.Tk()
-app= Application(master=root)
-app.master.title(verStr)
-root.protocol("WM_DELETE_WINDOW",app.done)
-app.mainloop()
-root.destroy()
+if __name__=='__main__':
+  root= tk.Tk()
+  app= Application(master=root)
+  app.master.title(verStr)
+  root.protocol("WM_DELETE_WINDOW",app.done)
+  app.mainloop()
+  root.destroy()
 
 #-- End MBMon -----------------------------------------------------------------
