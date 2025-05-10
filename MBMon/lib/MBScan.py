@@ -5,10 +5,12 @@
 #  - Use multiprocess to spawn a subprocesses to get data asychronously
 #
 #  External notes...
-#  - mbScanner.start(map) should be called once to initiate scanning
-#  - mbScanner.close()    will kill all subprocesses
-#  - mbScanner.error      indicates the error status, 0=good, 1=com error, 2=read error
-#  - mbScanner.errText    give the error reason in human readable text
+#  - MBScanner.start(map) should be called once to initiate scanning
+#  - MBScanner.get(ipAddr,name) retrieve a specific piece of data, will be None
+#    if the get fails, check error or errText
+#  - MBScanner.close()    will kill all subprocesses
+#  - MBScanner.error      indicates the error status, 0=good, 1=com error, 2=read error
+#  - MBScanner.errText    give the error reason in human readable text
 #  - the register map is sent as a list of required devices and registers
 #        [{'ipAddr':   <device IP address>,
 #          'port':     <Modbus port>,
@@ -70,6 +72,7 @@
 #
 # Remaining to do:
 # - add input qualification
+# - add scanner heartbeat
 #
 #------------------------------------------------------------------------------
 
@@ -127,7 +130,7 @@ def scanSub(shared):
   while True:
     # swallow poison pill and die
     if shared[Share.SUBMSG]==-1: 
-      print('Scanner for {} terminating'.format(ipAddr))
+      print('    Scanner for {:15s} terminated!'.format(ipAddr))
       break
     # scan if time elapsed
     time.sleep(0.1)
@@ -172,7 +175,7 @@ class MBScanner():
   scanInt= 60
   lastScan= dt.datetime.now();
   stat= True
-  errTxt= 'No error'
+  errText= 'No error'
 
   def start(self,data,scanInt):
     self.devList= {}
@@ -180,6 +183,7 @@ class MBScanner():
     self.scanInt= scanInt
     if scanInt<1:   scanInt= 1
     if scanInt>600: scanInt= 600
+    print('  MBScan starting...')
     for datum in data:
       found= False
       for ipAddr,device in self.devList.items():
@@ -286,15 +290,16 @@ class MBScanner():
         data[Share.COILCOUNT]=  0
       data[Share.SCANTIME]= int(scanInt)
       # spawn the process
-      print('Starting subprocess for {}'.format(ipAddr))
+      print('    Starting subprocess for {}'.format(ipAddr))
       dev['proc']= Process(target=scanSub,args=(data,))
       dev['proc'].start()
+    print('    {:d} subprocesses started'.format(len(self.devList)))
 
   # get the latest value of a particular datum
   def get(self,ipAddr,name):
     debug= False
     self.error= False
-    self.errTxt= 'No error'
+    self.errText= 'No error'
     if debug: print('Get {}...'.format(name))
     dat= '{}{}'.format(ipAddr,name)
     if dat in self.datList:
@@ -306,17 +311,17 @@ class MBScanner():
         if shared[Share.ERROR]==1:
           if debug: print ('  Error! Unable to open {} for Modbus'.format(ipAddr))
           self.error= True
-          self.errTxt= 'Unable to open {} for Modbus'.format(ipAddr)
+          self.errText= 'Unable to open {} for Modbus'.format(ipAddr)
           return None
         if shared[Share.ERROR]==2:
           if debug: print ('  Error! Unable read {} from {}'.format(name,ipAddr))
           self.error= True
-          self.errTxt= 'Unable read {} from {}'.format(name,ipAddr)
+          self.errText= 'Unable read {} from {}'.format(name,ipAddr)
           return None
         if shared[Share.ERROR]!=0:
           if debug: print ('  Error! Unknown error from {}'.format(ipAddr))
           self.error= True
-          self.errTxt= 'Unknown error from {}'.format(ipAddr)
+          self.errText= 'Unknown error from {}'.format(ipAddr)
           return None
         if typ=='float':
           sharePos= reg+shared[Share.HOLDFIRST]-shared[Share.HOLDSTART]
@@ -352,17 +357,17 @@ class MBScanner():
           return val
         else:
           self.error= True
-          self.errTxt= 'No such type {}'.format(typ)
+          self.errText= 'No such type {}'.format(typ)
           if debug: print ('  Error! No such type {}'.format(typ))
           return None
       else:
         self.error= True
-        self.errTxt= 'No such device {}'.format(ipAddr)
+        self.errText= 'No such device {}'.format(ipAddr)
         if debug: print ('  Error! No such device {}'.format(ipAddr))
         return None
     else:
       self.error= True
-      self.errTxt= 'No such datum {}'.format(dat)
+      self.errText= 'No such datum {}'.format(dat)
       if debug: print ('  Error! No such datum {}'.format(dat))
       return None
       
@@ -388,9 +393,12 @@ class MBScanner():
 
   # close all subprocesses
   def close(self):
+    print('  Terminating all subprocesses..')
     for ip,dev in self.devList.items():
       dev['data'][Share.SUBMSG]= -1 #send poison pill
+    for ip,dev in self.devList.items():
       dev['proc'].join()
+    print('    {:d} subprocesses terminated!'.format(len(self.devList)))
 
 #- test -----------------------------------------------------------------------
 
@@ -523,7 +531,7 @@ if __name__=='__main__':
     for data in list:
       val= mb.get(data['ipAddr'],data['name'])
       if (mb.error)!=0:
-        print('Error! {}'.format(mb.errTxt))
+        print('Error! {}'.format(mb.errText))
       else:
         if data['type']=='float':
           print('  {}: {:.2f}'.format(data['name'],val))

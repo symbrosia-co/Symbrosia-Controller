@@ -26,6 +26,8 @@
 #  - rename subdirectories to match SyView, logs to log, libs to lib
 #  - correct some CSV formatting for blank fields
 #  - split date and time in CSV file for better compatibility with CSV readers
+#  - improved error reporting using messages from MBScan
+#  - only report sustained errors every 10 minutes
 #
 #------------------------------------------------------------------------------
 verStr= 'MBMon2 v2.0'
@@ -82,6 +84,7 @@ class Application(tk.Frame):
   eventNow=     dt.datetime.min
 
   def __init__(self, master=None):
+    print('{} starting...'.format(verStr))
     # get configuration
     if not self.loadConfig(cfgPath,cfgFileName):
       sys.exit()
@@ -103,7 +106,7 @@ class Application(tk.Frame):
     self.devices.start(regs,scanInterval)
     #setup complete
     self.mbEvent= root.after(int(self.config['scanInterval'])*500,self.update)
-    print('{} running...'.format(verStr))
+    print('  MBMon2 running...')
  
   def createWidgets(self):
     spaceX= 5
@@ -216,6 +219,8 @@ class Application(tk.Frame):
   # handle the quit button
   def done(self):
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
+      self.logEvent('Shutting down...',True)
+      self.update_idletasks()
       root.after_cancel(self.mbEvent)
       self.devices.close()
       self.quit()
@@ -246,7 +251,7 @@ class Application(tk.Frame):
       else:
         if dt.datetime.now()-datum['lastErr']>dt.timedelta(seconds=errorInterval):
           datum['lastErr']= dt.datetime.now()
-          self.logEvent('Error! {}'.format(self.devices.errTxt),True)
+          self.logEvent('Error! {}'.format(self.devices.errText),True)
         datum['value']= None
         datum['valueDisp'].config(text='---')
         datum['ipLab'].config(bg=colOff)
@@ -305,30 +310,31 @@ class Application(tk.Frame):
     if new:
       outFile= open(filePath,'w')
       outFile.write('Date, Time')
-      for item in self.data:
-        if item['log']:
-          outFile.write(', {} {}'.format(item['devName'],item['name']))
+      for datum in self.data:
+        if datum['log']:
+          outFile.write(', {} {}'.format(datum['devName'],datum['name']))
       outFile.write('\n')
       self.logEvent('New log file {} created'.format(logName),True)
     else:
       outFile= open(filePath,'a')
     # write data line
-    outFile.write('{}'.format(dt.datetime.now().strftime('%Y%b%d, %H:%M:%S')))
-    for item in self.data:
-      if verbose: print(item['name'],item['value'])
-      if item['log']:
-        if item['value']==None:
+    outFile.write('{}'.format(dt.datetime.now().strftime('%Y-%b-%d, %H:%M:%S')))
+    for datum in self.data:
+      if verbose: print(datum['name'],datum['value'])
+      if datum['log']:
+        if datum['value']==None:
           outFile.write(',         ')
         else:
-          if item['type']=='float':
-            outFile.write(', {:8.2f}'.format(item['value']))
-          if item['type']=='hold' or item['type']=='int' or item['type']=='uint' or item['type']=='long':
-            outFile.write(', {:8d}'.format(int(item['value'])))
-          if item['type']=='coil' or item['type']=='bool':
-            if item['value']:
-              outFile.write(',     True')
+          if datum['type']=='float':
+            print(datum['type'])
+            outFile.write(',{0:10.{1}f}'.format(datum['value'],datum['prec']))
+          if datum['type']=='hold' or datum['type']=='int' or datum['type']=='uint' or datum['type']=='long':
+            outFile.write(',{:10d}'.format(int(datum['value'])))
+          if datum['type']=='coil' or datum['type']=='bool':
+            if datum['value']:
+              outFile.write(',      True')
             else:
-              outFile.write(',    False')
+              outFile.write(',     False')
     outFile.write('\n')
     outFile.close()
     self.logEvent('Log file {} appended'.format(logName),True)
