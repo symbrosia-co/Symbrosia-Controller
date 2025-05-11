@@ -32,6 +32,7 @@
 #    specify the number of decimal places used in the display and in the log,
 #    <precision> still works if no log or display precision is specified, if
 #    none specified two decimal places used
+#  - Fix data box scrolling for mouse entry and exit
 #
 #------------------------------------------------------------------------------
 verStr= 'MBMon2 v2.0'
