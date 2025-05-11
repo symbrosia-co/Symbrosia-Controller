@@ -63,6 +63,8 @@
 #        15: scan time in seconds
 #        16 to n: holding reg data
 #        n+1 to m: coil reg data
+#  - pyModbusTCP can only read 125 holding registers at once, larger blocks must
+#    be broken up into several transactions... Done
 #
 #  Symbrosia
 #  Copyright 2021-2025, all rights reserved
@@ -141,7 +143,20 @@ def scanSub(shared):
         # holding registers
         if holdCount>0:
           if debug: print('Read holding regs for {}'.format(ipAddr))
-          values= device.read_holding_registers(holdStart,holdCount)
+          if (holdCount<100):  # pyModbusTCP can only do 125 registers at a time
+            values= device.read_holding_registers(holdStart,holdCount)
+          else:  # do 100 at a time
+            values= []
+            for pos in range(holdStart,holdStop,100):
+              if pos+100>=holdStop:
+                count= holdStop-pos+1
+              else:
+                count= 100
+              val= device.read_holding_registers(pos,count)
+              if val==None:
+                values= None
+                break
+              values= values+val
           if values!=None: # place data in shared
             for i,val in enumerate(values):
               shared[holdFirst+i]= val

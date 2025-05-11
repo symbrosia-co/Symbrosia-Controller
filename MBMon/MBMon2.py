@@ -165,8 +165,9 @@ class Application(tk.Frame):
           datum['log']=   dat['log']
         else:
           datum['log']=   False
-        if 'precision' in dat:
-          datum['prec']=  dat['precision']
+        if 'precision' in dat: datum['precision']= dat['precision']
+        if 'dispPrec'  in dat: datum['dispPrec']=  dat['dispPrec']
+        if 'logPrec'   in dat: datum['logPrec']=   dat['logPrec']
         datum['write']=   False
         datum['value']=   None
         if 'log' in dat:
@@ -309,6 +310,7 @@ class Application(tk.Frame):
     self.lastLog= now
   
   def logWrite(self):
+    print(self.data)
     now= dt.datetime.now()
     # check for directory
     Path(logPath).mkdir(parents=True,exist_ok=True)
@@ -336,7 +338,7 @@ class Application(tk.Frame):
       if verbose: print(datum['name'],datum['value'])
       if datum['log']:
         if datum['value']==None:
-          outFile.write(',         ')
+          outFile.write(',          ')
         else:
           if datum['type']=='float':
             prec= 2
