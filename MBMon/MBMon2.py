@@ -28,6 +28,10 @@
 #  - split date and time in CSV file for better compatibility with CSV readers
 #  - improved error reporting using messages from MBScan
 #  - only report sustained errors every 10 minutes
+#  - The configuration tag <precision> can now be <dispPrec> and <logPrec> to
+#    specify the number of decimal places used in the display and in the log,
+#    <precision> still works if no log or display precision is specified, if
+#    none specified two decimal places used
 #
 #------------------------------------------------------------------------------
 verStr= 'MBMon2 v2.0'
@@ -122,12 +126,17 @@ class Application(tk.Frame):
     canvas.configure(yscrollcommand=scrollbar.set)
     frame= ttk.Frame(canvas)
     canvas.create_window((0,0),window=frame,anchor=tk.NW)
-    def configure_scroll_region(event):
+    def onMousewheel(event):
+      canvas.yview_scroll(int(-1*(event.delta/120)),"units")
+    def boundToMousewheel(event):
+      canvas.bind_all("<MouseWheel>",onMousewheel)
+    def unboundToMousewheel(event):
+      canvas.unbind_all("<MouseWheel>")
+    def configureScrollRegion(event):
       canvas.configure(scrollregion=canvas.bbox("all"))
-    def on_mousewheel(event):
-      canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-    frame.bind("<Configure>",configure_scroll_region)
-    canvas.bind_all("<MouseWheel>",on_mousewheel)
+    frame.bind('<Enter>',boundToMousewheel)
+    frame.bind('<Leave>',unboundToMousewheel)
+    frame.bind("<Configure>",configureScrollRegion)
     # data fields
     row= 0
     for device in self.config['devices']:
@@ -185,7 +194,7 @@ class Application(tk.Frame):
     self.spacer1=          tk.Label(self,text=' ')
     self.spacer1.grid      (column=0,row=1,padx=spaceX,pady=spaceY)
     self.spacer2=          tk.Label(self,text=' ')
-    self.spacer2.grid      (column=6,row=4,padx=spaceX,pady=spaceY)
+    self.spacer2.grid      (column=6,row=3,padx=spaceX,pady=spaceY)
 
   def loadConfig(self,configPath,configFile):
     try:
@@ -238,7 +247,10 @@ class Application(tk.Frame):
       if not self.devices.error:
         datum['value']= val
         if datum['type']=='float':
-          datum['valueDisp'].config(text='{0:.{1}f}'.format(val,datum['prec']))
+          prec= 2
+          if 'precision' in datum: prec= datum['precision']
+          if 'dispPrec' in datum: prec= datum['dispPrec']
+          datum['valueDisp'].config(text='{0:.{1}f}'.format(val,prec))
         if datum['type']=='hold' or datum['type']=='long' or datum['type']=='int' or datum['type']=='uint':
           datum['valueDisp'].config(text='{:d}'.format(val))
         if datum['type']=='coil' or datum['type']=='bool':
@@ -326,8 +338,10 @@ class Application(tk.Frame):
           outFile.write(',         ')
         else:
           if datum['type']=='float':
-            print(datum['type'])
-            outFile.write(',{0:10.{1}f}'.format(datum['value'],datum['prec']))
+            prec= 2
+            if 'precision' in datum: prec= datum['precision']
+            if 'logPrec' in datum: prec= datum['logPrec']
+            outFile.write(',{0:10.{1}f}'.format(datum['value'],prec))
           if datum['type']=='hold' or datum['type']=='int' or datum['type']=='uint' or datum['type']=='long':
             outFile.write(',{:10d}'.format(int(datum['value'])))
           if datum['type']=='coil' or datum['type']=='bool':
