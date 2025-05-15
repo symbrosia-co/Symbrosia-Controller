@@ -211,8 +211,8 @@ const char mbHoldRWMode[dataSize]= {
   '+', // 145 datToDOutput2
   '+', // 146 datToDOutput3
   '+', // 147 datToDOutput4
-  '+', // 148 nc
-  '+', // 149 nc
+  '+', // 148 datTLCDuration
+  '+', // 149 datTLCOutput
   '+', // 150 datCountSource
   'r', // 151 datCounter
   'r', // 152
@@ -221,7 +221,7 @@ const char mbHoldRWMode[dataSize]= {
   'r', // 155 datTimer
   'r', // 156
   '+', // 157 datTimerRstIntv
-  '+', // 158 nc
+  '+', // 158 datFrequency
   '+', // 159 nc
   '+', // 160 datLogInterval
   'r', // 161 datLogRecords
@@ -316,7 +316,8 @@ const char mbCoilRWMode[statSize]= {
   '+', //  66 statCtrl1OneShot
   '+', //  67 statCtrl2OneShot
   '+', //  68 statCtrl3OneShot
-  '+'};//  69 statCtrl4OneShot
+  '+', //  69 statCtrl4OneShot
+  '+'};//  70 statTimeLimCmd
 
   bool mbActive;
   bool mbAvailable;

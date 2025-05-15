@@ -59,7 +59,7 @@
 
 // unit ID 
 #define firmMajor     2
-#define firmMinor     8
+#define firmMinor     9
 #define modelNameStr  "SymbCtrl Mk2"
 
 // default time zone
@@ -95,7 +95,7 @@ extern IPAddress wifiIPAddr;
 
 // serial number
 #define serialNumMin       100
-#define serialNumStart     250
+#define serialNumStart     280
 #define serialNumMax       999
 
 // hardware ID codes...
@@ -271,6 +271,9 @@ extern IPAddress wifiIPAddr;
 #define datToDOutput2      145
 #define datToDOutput3      146
 #define datToDOutput4      147
+// time limited command
+#define datTLCDuration     148
+#define datTLCOutput       149
 // counter and timer
 #define datCountSource     150
 #define datCounter         151
@@ -377,6 +380,7 @@ extern IPAddress wifiIPAddr;
 #define statCtrl2OneShot    67
 #define statCtrl3OneShot    68
 #define statCtrl4OneShot    69
+#define statTimeLimCmd      70
 
 // lookup array to convert IO channel to modbus address
 const int ioAddr[]={

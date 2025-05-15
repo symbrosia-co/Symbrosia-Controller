@@ -182,6 +182,8 @@
   - in userCtrl add firmware update to unit info screen
   11Apr2025 v2.9 A. Cooper
   - remove unused timer and counter enable
+  - added time limted command, a command input that will only be valid for the
+    duration specified, code in logicCtrl.cpp
   
   Known bugs...
   - none
