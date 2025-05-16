@@ -297,16 +297,20 @@ class Application(tk.Frame):
   
   def execCtrl(self):
     co2On= False
-    # ensure DSW is flowing
-    if self.device['tank1']['tempValve'] or self.device['tank2']['tempValve']:
-      co2On= True
-    # turn off CO2 if any tank is below 7 and its DSW valve is open
-    if (self.device['tank1']['pH']<minPH and self.device['tank1']['tempValve']):
-      co2On= False
-    if (self.device['tank2']['pH']<minPH and self.device['tank2']['tempValve']):
-      co2On= False
     # control enabled?
-    if not self.control: co2On= False
+    if self.control:
+      #ensure good data
+      if self.device['tank1']['tempValve']!=None and self.device['tank2']['tempValve']!=None and self.device['tank1']['pH']!=None and self.device['tank2']['pH']!=None:
+        # ensure DSW is flowing
+        if self.device['tank1']['tempValve'] or self.device['tank2']['tempValve']:
+          co2On= True
+        # turn off CO2 if any tank is below 7 and its DSW valve is open
+        if (self.device['tank1']['pH']<minPH and self.device['tank1']['tempValve']):
+          co2On= False
+        if (self.device['tank2']['pH']<minPH and self.device['tank2']['tempValve']):
+          co2On= False
+      else:
+        self.logEvent('Missing data! CO2 off',True)
     # check and act on result every minTime second
     now= dt.datetime.now()
     if now-self.lastChange>dt.timedelta(seconds=minTime):
