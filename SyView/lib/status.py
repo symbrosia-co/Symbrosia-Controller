@@ -118,7 +118,7 @@ class Status(tk.Frame):
             {'reg':'Analog2Units',  'form':'unitd', 'conf':False,'col':9,'row':7, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
             {'reg':'LocalTempUnits','form':'unitd', 'conf':False,'col':9,'row':8, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
             {'reg':'SupVoltUnits',  'form':'unitd', 'conf':False,'col':9,'row':9, 'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             },
-            {'reg':'ProcUnits',     'form':'unitd', 'conf':False,'col':9,'row':10,'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             }]
+            {'reg':'ProcessedUnits','form':'unitd', 'conf':False,'col':9,'row':10,'span':1,'width':10,'font':1,'just':'l','conf':False,'value':None             }]
   anlgChan= {'None':0,'WQ Amplifier':1,'Temperature 1':2,'Temperature 2':3,'Analog 1':4,'Analog 2':5,'Internal Temp':6,'Supply Voltage':7,'Processed':8}
   anlgName= {0:None,1:'WQSensor',2:'Temperature1',3:'Temperature2',4:'Analog1',5:'Analog2',6:'InternalTemp',7:'SupplyVoltage',8:'Processed'}
   anlgUnit= {0:None,1:'WQSensorUnits',2:'Temp1Units',3:'Temp2Units',4:'Analog1Units',5:'Analog2Units',6:'IntTempUnits',7:'SupVoltUnits',8:'ProcUnits'}
@@ -270,7 +270,7 @@ class Status(tk.Frame):
     for wid in self.widgets:
       if wid['form']=='int':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],int):
             wid['widget'].configure(text='{:d}'.format(wid['value']),state=tk.NORMAL)
         else:
@@ -278,7 +278,7 @@ class Status(tk.Frame):
           wid['value']= None
       if wid['form']=='rev':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],int):
             wid['widget'].configure(text='{:d}.{:d}'.format(wid['value'] >> 8,wid['value'] & 0xFF),state=tk.NORMAL)
         else:
@@ -286,7 +286,7 @@ class Status(tk.Frame):
           wid['value']= None
       if wid['form']=='float':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],float):
             wid['widget'].configure(text='{:.2f}'.format(wid['value']),state=tk.NORMAL)
         else:
@@ -294,7 +294,7 @@ class Status(tk.Frame):
           wid['value']= None
       if wid['form']=='read':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],float):
             wid['widget'].configure(text='{:.2f}'.format(wid['value']),state=tk.NORMAL)
         else:
@@ -302,7 +302,7 @@ class Status(tk.Frame):
           wid['value']= None
       if wid['form']=='switch':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if wid['value']:
             wid['widget'].configure(image=self.onSwitch,state=tk.NORMAL)
           else:
@@ -317,7 +317,7 @@ class Status(tk.Frame):
           wid['widget'].configure(state=tk.DISABLED)
       if wid['form']=='indoo':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if wid['value']:
             wid['widget'].configure(image=self.onIndicator,state=tk.NORMAL)
           else:
@@ -327,7 +327,7 @@ class Status(tk.Frame):
           wid['value']= None
       if wid['form']=='indtf':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if wid['value']:
             wid['widget'].configure(image=self.trueIndicator,state=tk.NORMAL)
           else:
@@ -337,7 +337,7 @@ class Status(tk.Frame):
           wid['value']= None
       if wid['form']=='unitd':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],int):
             wid['widget'].configure(text=self.controller.unit(wid['value']),state=tk.NORMAL)
         else:
@@ -346,7 +346,7 @@ class Status(tk.Frame):
       if wid['form']=='label':
         if wid['reg']!=None:
           if self.controller.connected():
-            value= self.controller.value(wid['reg'])
+            value= self.controller.read(wid['reg'])
             if isinstance(value,str):
               if value=='':
                 wid['widget'].configure(text='--',state=tk.NORMAL)
@@ -358,7 +358,7 @@ class Status(tk.Frame):
       if wid['form']=='name':
         if wid['reg']!=None:
           if self.controller.connected():
-            value= self.controller.value(wid['reg'])
+            value= self.controller.read(wid['reg'])
             if isinstance(value,str):
               if value=='':
                 wid['widget'].configure(text='Stat',state=tk.NORMAL)
@@ -370,7 +370,7 @@ class Status(tk.Frame):
       if wid['form']=='time':
         if wid['reg']!=None:
           if self.controller.connected():
-            value= self.controller.value(wid['reg'])
+            value= self.controller.read(wid['reg'])
             if isinstance(value,str):
               if value=='':
                 wid['widget'].configure(text='00:00:00',state=tk.NORMAL)
@@ -383,7 +383,7 @@ class Status(tk.Frame):
         if self.controller.connected():
           wid['widget'].configure(state=tk.NORMAL)
           for entry in self.anlgChan.keys():
-            if self.anlgChan[entry]==self.controller.value(wid['reg']):
+            if self.anlgChan[entry]==self.controller.read(wid['reg']):
               wid['entry'].set(entry)
               for w in self.widgets:
                 if w['form']=='input':
@@ -405,8 +405,8 @@ class Status(tk.Frame):
       if wid['form']=='read':
         if self.controller.connected():
           wid['widget'].configure(state=tk.NORMAL)
-          chan= self.controller.channel(self.controller.value(wid['reg'])) 
-          wid['widget'].configure(text=self.controller.textValue(chan),state=tk.NORMAL)
+          chan= self.controller.channel(self.controller.read(wid['reg'])) 
+          wid['widget'].configure(text=self.controller.textValue(chan,8,True),state=tk.NORMAL)
         else:
           wid['widget'].configure(text='--',state=tk.DISABLED)
 

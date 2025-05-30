@@ -5,35 +5,28 @@
 #  - Use multiprocess to spawn a subprocesses to get data asychronously
 #
 #  External notes...
-#  - SyScan.start(ip)          start subprocess and initiate scanning
-#  - SyScan.check()            update controller status, call regularly
-#  - SyScan.scanInt(interval)  set the controller scan interval, default is 2s
-#  - SyScan.get(regName)       retrieve a specific datum by name
-#                              will return None if an error occurs
-#  - SyScan.set(regName,value) write a specific datum to the controller
-#  - SyScan.status()           connection status, true= good
-#  - SyScan.error()            get the result of the last operation
-#                              true= error occurred
-#  - SyScan.message()          get error message in text form
-#  - SyScan.close()            kill the subprocesses and end scanning
-#  - SyScan.info()             get controller information as a dict
-#                                status: current controller status
-#                                serial: serial number
-#                                firm:   firmware version
-#                                name:   controller name
-#                                volt:   supply voltage
-#                                temp:   internal temperature in degrees C
-#  - SyScan.registers()        return all register names as a list
-#  - SyScan.type(regName)      return the register type by name
-#                                int:    signed 16bit integer
-#                                uint:   unsigned 16bit integer
-#                                float:  IEEE-754 32bit floating point
-#                                bool:   boolean
-#                                string: char string up to 16 characters
-#  - SyScan.mode(regName)      the register mode
-#                                r:      read only
-#                                w:      write only
-#                                +:      read and write
+#  - SyScan.start(ip)           start subprocess and initiate scanning
+#  - SyScan.connected()         return True if scanning a controller
+#  - SyScan.scanInt(interval)   set the controller scan interval, default is 2s
+#  - SyScan.read(regName)       retrieve a specific datum by name
+#                               will return None if an error occurs
+#  - SyScan.write(regName,value) write a specific datum to the controller
+#  - SyScan.status()            connection status, true= good
+#  - SyScan.error()             get the result of the last operation
+#                               true= error occurred
+#  - SyScan.message()           get error message in text form
+#  - SyScan.close()             kill the subprocesses and end scanning
+#  - SyScan.registers()         return all register names as a list
+#  - SyScan.type(regName)       return the register type by name
+#                                 int:    signed 16bit integer
+#                                 uint:   unsigned 16bit integer
+#                                 float:  IEEE-754 32bit floating point
+#                                 bool:   boolean
+#                                 string: char string up to 16 characters
+#  - SyScan.mode(regName)       the register mode
+#                                 r:      read only
+#                                 w:      write only
+#                                 +:      read and write
 #
 #  Internal notes...
 #  - communication with the subprocess takes place through an array of integers
@@ -63,6 +56,8 @@
 #
 # 23Mar2025 A. Cooper
 #  - initial version
+# 29Mar2025 A. Cooper
+#  - first version functionally complete
 #
 #------------------------------------------------------------------------------
 
@@ -77,7 +72,7 @@ from pyModbusTCP.client import ModbusClient
 from pyModbusTCP import utils
 
 #-- constants -----------------------------------------------------------------
-debugScan= True
+debugScan= False
 debugSub=  False
 
 #------------------------------------------------------------------------------
@@ -317,7 +312,7 @@ class SymbCtrl():
   PORT      = 502 # SymbCtrl uses default modbusTCP port
   COIL_SIZE = 70  # number of SymbCtrl coil registers
   HOLD_SIZE = 300 # number of SymbCtrl holding regs
-  DATA_EXP=   30  # expiration time for valid data in seconds
+  DATA_EXP=   10  # expiration time for valid data in seconds
 
   # data valid codes
   DAT_VALID  = 1  # current data is valid
@@ -328,6 +323,7 @@ class SymbCtrl():
   ERR_COM    = 1  # unable to open controller session
   ERR_READ   = 2  # unable to read a register
   ERR_WRITE  = 3  # unable to write a register
+  ERR_FULL   = 4  # write buffer full
 
   # command codes
   CMD_KILL   =-1  # terminate subprocess
@@ -391,18 +387,6 @@ class SymbCtrl():
     self.message= 'No error'
     return True
 
-  def check(self):
-    if self.ctrl!=None:
-      self.name= self.get('ControlName')
-      if self.ctrlName=='' or self.ctrlName==None:
-        self.ctrlName= 'SymbCtrl'
-      self.error= False
-      self.message= 'No error'
-    else:
-      self.error= True
-      self.message= 'No open controller'
-      self.name=  ''
-  
   def scanInterval(time):
     if self.ctrl==None:
       self.error= True
@@ -447,12 +431,13 @@ class SymbCtrl():
       
   def scanSub(self,shared):
     ipAddr= '{}.{}.{}.{}'.format(shared[self.SHR_IP1],shared[self.SHR_IP2],shared[self.SHR_IP3],shared[self.SHR_IP4])
+    writeBuffer= []
     # create a Modbus client object
     device= ModbusClient(debug=False)
     device.host(ipAddr)
     device.port(self.PORT)
     # initialize vars
-    scanTime= 2
+    scanTime= 1
     shared[self.SHR_VALID]= self.DAT_INVALID
     shared[self.SHR_ERROR]= self.ERR_COM
     scan= dt.datetime.now()-dt.timedelta(seconds=scanTime+1)
@@ -461,45 +446,54 @@ class SymbCtrl():
     # scanning loop
     while True:
       now= dt.datetime.now()
-      error= self.ERR_NONE
       # swallow poison pill and die
       if shared[self.SHR_CMD]==self.CMD_KILL: 
         print('    Scanner for {:15s} terminated!'.format(ipAddr))
         break
-      # check for write coil command
-      if shared[self.SHR_CMD]==self.CMD_COIL:
-        if debugSub: print('  Write coil...')
-        if device.open():
-          val= shared[self.SHR_DATA]==1
-          if device.write_single_coil(shared[self.SHR_ADDR],val):
-            shared[self.SHR_CMD]= self.CMD_NONE
+      # check for write command and move to queue
+      if shared[self.SHR_CMD]==self.CMD_COIL or shared[self.SHR_CMD]==self.CMD_HOLD:
+        if len(writeBuffer)>100: shared[self.SHR_ERROR]= self.ERR_FULL
+        else:
+          wCmd= {'cmd':shared[self.SHR_CMD],'addr':shared[self.SHR_ADDR],'size':shared[self.SHR_COUNT],'data':[]}
+          for i in range(shared[self.SHR_COUNT]): wCmd['data'].append(shared[self.SHR_DATA+i])
+          shared[self.SHR_CMD]= self.CMD_NONE
+          writeBuffer.append(wCmd)
+          continue
+      # process write buffer
+      if len(writeBuffer)>0:
+        if debugSub: print('    Buffered commands {}'.format(len(writeBuffer)))
+        wCmd= writeBuffer[0]
+        # check for write coil command
+        if wCmd['cmd']==self.CMD_COIL:
+          if debugSub: print('  Write coil...')
+          if device.open():
+            val= wCmd['data'][0]==1
+            if device.write_single_coil(wCmd['addr'],val):
+              writeBuffer.remove(wCmd)
+            else:
+              shared[self.SHR_ERROR]= self.ERR_WRITE
+              if debugSub: print('    Write error!')
+            device.close()
+            if debugSub: print('    Coil {:d} written with {}'.format(wCmd['addr'],val))
           else:
             shared[self.SHR_ERROR]= self.ERR_WRITE
             if debugSub: print('    Write error!')
-          device.close()
-          if debugSub: print('    Coil {:d} written with {}'.format(shared[self.SHR_ADDR],val))
-        else:
-          shared[self.SHR_ERROR]= self.ERR_WRITE
-          if debugSub: print('    Write error!')
-        idle= now
-      # check for write hold command
-      if shared[self.SHR_CMD]==self.CMD_HOLD:
-        if debugSub: print('  Write holding reg...')
-        if device.open():
-          vals= []
-          for i in range(shared[self.SHR_COUNT]):
-            vals.append(shared[self.SHR_DATA+i])
-          if device.write_multiple_registers(shared[self.SHR_ADDR],vals):
-            shared[self.SHR_CMD]= self.CMD_NONE
+        # check for write hold command
+        if wCmd['cmd']==self.CMD_HOLD:
+          if debugSub: print('  Write holding reg...')
+          if device.open():
+            if device.write_multiple_registers(wCmd['addr'],wCmd['data']):
+              writeBuffer.remove(wCmd)
+            else:
+              shared[self.SHR_ERROR]= self.ERR_WRITE
+              if debugSub: print('    Write error!')
+            device.close()
+            if debugSub: print('    {} holding regs written at {:d}'.format(wCmd['size'],wCmd['addr']))
           else:
             shared[self.SHR_ERROR]= self.ERR_WRITE
             if debugSub: print('    Write error!')
-          device.close()
-          if debugSub: print('    {} holding regs written at {:d}'.format(shared[self.SHR_COUNT],shared[self.SHR_ADDR]))
-        else:
-          shared[self.SHR_ERROR]= self.ERR_WRITE
-          if debugSub: print('    Write error!')
         idle= now
+        continue
       # set scantime
       if shared[self.SHR_CMD]==self.CMD_SCAN: 
         shared[self.SHR_CMD]= self.CMD_NONE
@@ -511,8 +505,8 @@ class SymbCtrl():
           if debugSub: print('    Bad value for scan time!')
         idle= now
       # low power idle if no activity besides regular scan
-      if idle-now>dt.timedelta(seconds=2):
-        time.sleep(0.1)
+      if now-idle>dt.timedelta(seconds=1):
+        time.sleep(0.01)
       # check last valid data
       if (now-last)<dt.timedelta(seconds=self.DATA_EXP):
         shared[self.SHR_VALID]= self.DAT_VALID
@@ -521,6 +515,7 @@ class SymbCtrl():
       # scan if time elapsed
       if (now-scan)>dt.timedelta(seconds=scanTime):
         scan= now
+        error= self.ERR_NONE
         if debugSub: print('Scanning controller {}...'.format(ipAddr))
         # get new data from controller
         if device.open():
@@ -565,7 +560,6 @@ class SymbCtrl():
         # handle errors
         shared[self.SHR_ERROR]= error
         if error==self.ERR_NONE: # keep data valid flag set if com good
-          shared[self.SHR_ERROR]= self.ERR_NONE #set com error flag
           shared[self.SHR_VALID]= self.DAT_VALID
           last= now
           if debugSub: print('  Good scan!')
@@ -573,48 +567,64 @@ class SymbCtrl():
 #-- controller information ----------------------------------------------------
 
   def name(self):
-    return self.ctrlName
+    if self.ctrl!=None:
+      name= self.read('ControlName')
+      if name!=None: return name
+    else: return ''
 
   def connected(self):
-    return self.open
+    if self.ctrl!=None: return True
+    return False
+
+  def status(self):
+    if self.ctrl!=None: 
+      stat= self.read('Status')
+      if self.shared[self.SHR_ERROR]==self.ERR_NONE:
+        if stat: return True
+    return False
+
+  def comStat(self):
+    if self.ctrl!=None: 
+      if self.shared[self.SHR_ERROR]==self.ERR_NONE: return True
+    return False
 
   def registers(self):
     return self.ctrlRegs.keys()
 
   def address(self,reg):
     if reg in self.ctrlRegs:
-      self.lastError= False
-      self.lastMessage= 'No error'
+      self.error= False
+      self.message= 'No error'
       return self.ctrlRegs[reg]['addr']
-    self.lastError= True
-    self.lastMessage= 'Bad register name'
+    self.error= True
+    self.message= 'Bad register name {}'.format(reg)
     return None
 
   def type(self,reg):
     if reg in self.ctrlRegs:
-      self.lastError= False
-      self.lastMessage= 'No error'
+      self.error= False
+      self.message= 'No error'
       return self.ctrlRegs[reg]['type']
-    self.lastError= True
-    self.lastMessage= 'Bad register name'
+    self.error= True
+    self.message= 'Bad register name {}'.format(reg)
     return None
     
   def mode(self,reg):
     if reg in self.ctrlRegs:
-      self.lastError= False
-      self.lastMessage= 'No error'
+      self.error= False
+      self.message= 'No error'
       return self.ctrlRegs[reg]['mode']
-    self.lastError= True
-    self.lastMessage= 'Bad register name'
+    self.error= True
+    self.message= 'Bad register name{}'.format(reg)
     return None
 
   def description(self,reg):
     if reg in self.ctrlRegs:
-      self.lastError= False
-      self.lastMessage= 'No error'
+      self.error= False
+      self.message= 'No error'
       return self.ctrlRegs[reg]['desc']
-    self.lastError= True
-    self.lastMessage= 'Bad register name'
+    self.error= True
+    self.message= 'Bad register name.'.format(reg)
     return None
 
   def unit(self,unitID):
@@ -654,11 +664,11 @@ class SymbCtrl():
       return None
     if reg not in self.ctrlRegs:
       self.error= True
-      self.message= 'Bad register name'
+      self.message= 'Bad register name {}'.format(reg)
       return None
     if self.ctrlRegs[reg]['mode']=='w':
       self.error= True
-      self.message= 'Cannot get a write only register'
+      self.message= 'Register {} not readable'.format(reg)
       return None
     if not self.shared[self.SHR_VALID]==self.DAT_VALID:
       self.error= True
@@ -683,6 +693,31 @@ class SymbCtrl():
       return self.shared[self.SHR_HOLD+addr]+self.shared[self.SHR_HOLD+addr+1]*65536
     if typ=='bool':
       return self.shared[self.SHR_COIL+addr]==1
+    if typ=='str':
+      st= ''
+      for c in range(8):
+        chs= self.shared[self.SHR_HOLD+addr+c]
+        ch= chs>>8
+        if ch==0: return st
+        st= st+chr(ch)
+        ch= chs&0xFF
+        if ch==0: return st
+        st= st+chr(ch)
+      return st
+    if typ=='dattm':
+      m= self.shared[self.SHR_HOLD+addr+1]
+      if m<0 or m>11: m= 0
+      month= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m]
+      return '{:02d}{}{:02d} {:02d}:{:02d}:{:02d}'.format(self.shared[self.SHR_HOLD+addr+2],month,self.shared[self.SHR_HOLD+addr],self.shared[self.SHR_HOLD+addr+3],self.shared[self.SHR_HOLD+addr+4],self.shared[self.SHR_HOLD+addr+5])
+    if typ=='date':
+      m= self.shared[self.SHR_HOLD+addr+1]
+      if m<0 or m>11: m= 0
+      month= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m]
+      return '{:02d}{}{:02d}'.format(self.shared[self.SHR_HOLD+addr+2],month,self.shared[self.SHR_HOLD+addr])
+    if typ=='time':
+      return '{:02d}:{:02d}:{:02d}'.format(self.shared[self.SHR_HOLD+addr],self.shared[self.SHR_HOLD+addr+1],self.shared[self.SHR_HOLD+addr+2])
+    if typ=='hour':
+      return '{:02d}:{:02d}'.format(self.shared[self.SHR_HOLD+addr],self.shared[self.SHR_HOLD+addr+1])
     # if no implemented type
     self.error= True
     self.message= 'No such type {}'.format(typ)
@@ -691,8 +726,14 @@ class SymbCtrl():
   def write(self,reg,value):
     if not reg in self.ctrlRegs:
       self.error= True
-      self.message= 'Bad register name'
+      self.message= 'Bad register name {}'.format(reg)
       return False
+    if self.ctrlRegs[reg]['mode']=='r':
+      self.error= True
+      self.message= 'Register {} not writable'.format(reg)
+      return False
+    for w in range(50):
+      if self.shared[self.SHR_CMD]!=self.CMD_NONE: time.sleep(0.01)
     if self.shared[self.SHR_CMD]!=self.CMD_NONE:
       self.error= True
       self.message= 'Controller write queue busy'
@@ -702,20 +743,23 @@ class SymbCtrl():
     if typ=='bool':
       if not isinstance(value,bool):
         self.error= True
-        self.lastMessage= 'Value not boolean for {}'.format(reg)
+        self.message= 'Value not boolean for {}'.format(reg)
         return False
       self.shared[self.SHR_ADDR]=  addr
       self.shared[self.SHR_COUNT]= 1
       if value: self.shared[self.SHR_DATA]=  1
       else:     self.shared[self.SHR_DATA]=  0
       self.shared[self.SHR_CMD]= self.CMD_COIL
+      # write into shared data to show immediate change
+      if value: self.shared[self.SHR_COIL+addr]=  1
+      else:     self.shared[self.SHR_COIL+addr]=  0
       self.error= False
       self.message= 'No error'
       return True
     if typ=='int':
       if not isinstance(value,int):
         self.error= True
-        self.lastMessage= 'Value not integer for {}'.format(reg)
+        self.message= 'Value not integer for {}'.format(reg)
         return False
       if value<-32768 or value>32767:
         self.error= True
@@ -781,6 +825,17 @@ class SymbCtrl():
         self.error= True
         self.message= 'Value not str for {}'.format(reg)
         return False
+      self.shared[self.SHR_ADDR]=  addr
+      self.shared[self.SHR_COUNT]= 8
+      for pos in range(8):
+        word= 0
+        if pos*2<len(value):   word= ord(value[pos*2])*256
+        if pos*2+1<len(value): word= word+ord(value[pos*2+1])
+        self.shared[self.SHR_DATA+pos]= word
+      self.shared[self.SHR_CMD]= self.CMD_HOLD
+      self.error= False
+      self.message= 'No error'
+      return True
     self.error= True
     self.message= 'Unknown type for writing'
     return False
@@ -789,12 +844,12 @@ class SymbCtrl():
   # units and valid status are used
   def textValue(self,chan,size,unit):
     if size<8: size= 8
-    vStr= vStr= '{val:{width}s}'.format(width=size,val='Chan!')
+    if unit: width= size-4
+    else:    width= size
+    vStr= '{val:{width}s}'.format(width=width,val='Chan!')
     # get value
     if chan in self.ctrlRegs:
       value= self.read(chan)
-      if unit: width= size-4
-      else: width= size
       if self.error:
         vStr= '{val:>{width}s}'.format(width=width,val='Err!')
       else:
@@ -813,56 +868,10 @@ class SymbCtrl():
           else:
             if value: vStr= '{val:>{width}s}'.format(width=width,val='On')
             else:     vStr= '{val:>{width}s}'.format(width=width,val='Off')
+        if self.ctrlRegs[chan]['type'] in ['str','dattm','date','time','hour']:
+          vStr= '{val:{width}s}'.format(width=width,val=value)
       # return result
       if unit: return '{}{:<4s}'.format(vStr,self.channelUnit(chan))
     return vStr
 
 #-- end SymbCtrlScan ----------------------------------------------------------
-
-
-#-- Test Code -----------------------------------------------------------------
-def boolStr(val):
-  if val!=None: 
-    if val: return 'True '
-    else:   return 'False'
-  return 'None '
-if __name__=='__main__':
-  print('Startup scanner...')
-  ctrl= SymbCtrl()
-  check= ctrl.start('192.168.200.41')
-  print('    Start:    {:<8s}  Err: {:s}  Msg: {}'.format(boolStr(check),boolStr(ctrl.error),ctrl.message))
-  for i in range(7):
-    print('  Get test data {:d}...'.format(i))
-    if ctrl!=None:
-      print('    Status:   {} Err: {:s}  Msg: {}'.format(ctrl.textValue('Status',10,True),boolStr(ctrl.error),ctrl.message))
-      print('    Flash:    {} Err: {:s}  Msg: {}'.format(ctrl.textValue('Flash',10,True),boolStr(ctrl.error),ctrl.message))
-      print('    WQSensor: {} Err: {:s}  Msg: {}'.format(ctrl.textValue('WQSensor',10,True),boolStr(ctrl.error),ctrl.message))
-      print('    Int Temp: {} Err: {:s}  Msg: {}'.format(ctrl.textValue('InternalTemp',10,True),boolStr(ctrl.error),ctrl.message))
-      print('    Ctrl1 Enb:{} Err: {:s}  Msg: {}'.format(ctrl.textValue('Ctrl1Enable',10,True),boolStr(ctrl.error),ctrl.message))
-      print('    Ctrl1 Set:{} Err: {:s}  Msg: {}'.format(ctrl.textValue('Ctrl1Setpoint',10,True),boolStr(ctrl.error),ctrl.message))
-      print('    Din2:     {} Err: {:s}  Msg: {}'.format(ctrl.textValue('DigitalIn2',10,True),boolStr(ctrl.error),ctrl.message))
-      print('    Second:   {} Err: {:s}  Msg: {}'.format(ctrl.textValue('Second',10,True),boolStr(ctrl.error),ctrl.message))
-      print('    Counter:  {} Err: {:s}  Msg: {}'.format(ctrl.textValue('Counter',10,True),boolStr(ctrl.error),ctrl.message))
-    else:
-      print('    Scanner not running')
-    if i==2:
-      print('  Write...')
-      ctrl.write('Ctrl1Enable',True)
-      print('    Ctrl1Enb:   True     Err: {:s}  Msg: {}'.format(boolStr(ctrl.error),ctrl.message))
-      ctrl.write('Ctrl1Setpoint',8)
-      print('    Ctrl1Set:    8.00    Err: {:s}  Msg: {}'.format(boolStr(ctrl.error),ctrl.message))
-    if i==4:
-      print('  Write...')
-      ctrl.write('Ctrl1Enable',False)
-      print('    Ctrl1Enb:  False     Err: {:s}  Msg: {}'.format(boolStr(ctrl.error),ctrl.message))
-      ctrl.write('Ctrl1Setpoint',5)
-      print('    Ctrl1Set:    5.00    Err: {:s}  Msg: {}'.format(boolStr(ctrl.error),ctrl.message))
-    time.sleep(2)
-  print('Close scanner...')
-  if ctrl!=None:
-    check= ctrl.close()
-    print('    Close:    {:<8s}  Err: {:s}  Msg: {}'.format(boolStr(check),boolStr(ctrl.error),ctrl.message))
-  else:
-    print('Scanner not running')
-
-#-- End Test Code -------------------------------------------------------------

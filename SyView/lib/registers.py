@@ -42,7 +42,7 @@ class Registers(tk.Frame):
   def __init__(self, parent,controller):
     tk.Frame.__init__(self, master=parent)
     self.controller= controller
-    for reg in self.controller.regList():
+    for reg in self.controller.registers():
       self.regs[reg]= {'type':self.controller.type(reg),
                        'mode':self.controller.mode(reg)}
     self.grid()
@@ -145,7 +145,7 @@ class Registers(tk.Frame):
         messagebox.showwarning(title='Entry error...', message='Integer must be between -32768 and 32767!!')
         return
       self.controller.write(reg,val)
-      if self.controller.error():
+      if self.controller.error:
         messagebox.showwarning(title='Write error...', message=self.controller.message())
     if self.regs[reg]['type']=='uint':
       try: val= int(self.regs[reg]['entry'].get())
@@ -156,7 +156,7 @@ class Registers(tk.Frame):
         messagebox.showwarning(title='Entry error...', message='Unsigned integer must be between 0 and 65535!!')
         return
       self.controller.write(reg,val)
-      if self.controller.error():
+      if self.controller.error:
         messagebox.showwarning(title='Write error...', message=self.controller.message())
     if self.regs[reg]['type']=='dint':
       try: val= int(self.regs[reg]['entry'].get())
@@ -167,7 +167,7 @@ class Registers(tk.Frame):
         messagebox.showwarning(title='Entry error...', message='Unsigned integer must be between 0 and 4294967295!!')
         return
       self.controller.write(reg,val)
-      if self.controller.error():
+      if self.controller.error:
         messagebox.showwarning(title='Write error...', message=self.controller.message())
     if self.regs[reg]['type']=='float':
       try: val= float(self.regs[reg]['entry'].get())
@@ -175,7 +175,7 @@ class Registers(tk.Frame):
         messagebox.showwarning(title='Entry error...', message='Entry not a floating point number!!')
         return
       self.controller.write(reg,val)
-      if self.controller.error():
+      if self.controller.error:
         messagebox.showwarning(title='Write error...', message=self.controller.message())
     if self.regs[reg]['type']=='str':
       val= self.regs[reg]['entry'].get()
@@ -184,7 +184,7 @@ class Registers(tk.Frame):
         self.controller.write(reg,val)
         val= val[0:15]
       self.controller.write(reg,val)
-      if self.controller.error():
+      if self.controller.error:
         messagebox.showwarning(title='Write error...', message=self.controller.message())
 
   #-- external methods --------------------------------------------------------
@@ -195,7 +195,7 @@ class Registers(tk.Frame):
     if self.controller.connected():
       for reg in self.regs.keys():
         type= self.controller.type(reg)
-        val=  self.controller.value(reg)
+        val=  self.controller.read(reg)
         if type=='bool':
           if self.regs[reg]['mode']!='w':
             if val==None:
