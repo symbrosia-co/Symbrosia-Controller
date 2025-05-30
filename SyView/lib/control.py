@@ -7,7 +7,10 @@
 #  - initial version
 #  31Oct2024 v1.2 A. Cooper
 #  - Fix analog channels numbers for time
-
+#  29May2025 v2.0 A. Cooper
+#  - replace SymCtrlModbus with SymbCtrlScan, a subprocess based comm handler
+#  - alterations all through code to support new controller handler
+#
 #-- includes ------------------------------------------------------------------
 import os
 import tkinter as tk
