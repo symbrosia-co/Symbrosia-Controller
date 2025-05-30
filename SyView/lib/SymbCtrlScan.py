@@ -42,14 +42,16 @@
 #              1:com error
 #              2:read error
 #              3:write error
+#              4:write buffer full
 #        3:  IP address byte 1
 #        4:  IP address byte 2
 #        5:  IP address byte 3
 #        6:  IP address byte 4
-#        7:  write count
-#        8 to 15:  write data
-#        16 to n:  coil register data
-#        n to m:   holding register data
+#        7:  write address
+#        8:  write count
+#        9 to 16:   write data
+#        17 to 86:  coil register data
+#        87 to 306: holding register data
 #
 #  Symbrosia
 #  Copyright 2021-2025, all rights reserved
@@ -58,6 +60,8 @@
 #  - initial version
 # 29Mar2025 A. Cooper
 #  - first version functionally complete
+#  - added a buffer in subprocess for write commands
+#  - reverted convert module, it really was needed;)
 #
 #------------------------------------------------------------------------------
 
@@ -411,7 +415,6 @@ class SymbCtrl():
       return self.shared[self.SHR_VALID]==self.DAT_VALID;
     return False
     
-  # close subprocess
   def close(self):
     print('  Terminating controller subprocess..')
     if self.ctrl!=None:
@@ -433,7 +436,7 @@ class SymbCtrl():
     ipAddr= '{}.{}.{}.{}'.format(shared[self.SHR_IP1],shared[self.SHR_IP2],shared[self.SHR_IP3],shared[self.SHR_IP4])
     writeBuffer= []
     # create a Modbus client object
-    device= ModbusClient(debug=False)
+    device= ModbusClient(debug=False,timeout=5)
     device.host(ipAddr)
     device.port(self.PORT)
     # initialize vars
@@ -565,7 +568,6 @@ class SymbCtrl():
           if debugSub: print('  Good scan!')
 
 #-- controller information ----------------------------------------------------
-
   def name(self):
     if self.ctrl!=None:
       name= self.read('ControlName')
@@ -573,7 +575,8 @@ class SymbCtrl():
     else: return ''
 
   def connected(self):
-    if self.ctrl!=None: return True
+    if self.ctrl!=None: 
+      if self.shared[self.SHR_ERROR]==self.ERR_NONE: return True
     return False
 
   def status(self):
@@ -581,11 +584,6 @@ class SymbCtrl():
       stat= self.read('Status')
       if self.shared[self.SHR_ERROR]==self.ERR_NONE:
         if stat: return True
-    return False
-
-  def comStat(self):
-    if self.ctrl!=None: 
-      if self.shared[self.SHR_ERROR]==self.ERR_NONE: return True
     return False
 
   def registers(self):
@@ -655,8 +653,6 @@ class SymbCtrl():
     return None
 
 #-- read and write controller data --------------------------------------------
-
-  # read the latest value of a particular datum
   def read(self,reg):
     if self.ctrl==None:
       self.error= True
@@ -840,8 +836,6 @@ class SymbCtrl():
     self.message= 'Unknown type for writing'
     return False
 
-  # return a formatted string of the specified channel
-  # units and valid status are used
   def textValue(self,chan,size,unit):
     if size<8: size= 8
     if unit: width= size-4
@@ -874,4 +868,35 @@ class SymbCtrl():
       if unit: return '{}{:<4s}'.format(vStr,self.channelUnit(chan))
     return vStr
 
+  def convert(self,reg,value):
+    if reg in self.ctrlRegs:
+      type= self.ctrlRegs[reg]['type']
+      if type=='str':
+        if value==None: return ''
+        return str(value)
+      if type=='int':
+        try: cval= int(value)
+        except: return None
+        return cval
+      if type=='uint':
+        try: cval= int(value)
+        except: return None
+        return cval
+      if type=='dint':
+        try: cval= int(value)
+        except: return None
+        return cval
+      if type=='float':
+        try: cval= float(value)
+        except: return None
+        return cval
+      if type=='bool':
+        if isinstance(value,bool):
+          return value
+        if value=='True':
+          return True
+        else:
+          return False
+    return None
+    
 #-- end SymbCtrlScan ----------------------------------------------------------

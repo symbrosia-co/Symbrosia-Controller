@@ -120,7 +120,7 @@ class Registers(tk.Frame):
       self.controller.write(reg,False)
         
   def set(self,reg):
-    if not self.controller.connected(): return
+    if not self.controller.valid(): return
     if reg=='SaveSettings':
       if not messagebox.askyesno(title='Check that...',message='Save settings to EEPROM?'):
         return
@@ -135,7 +135,7 @@ class Registers(tk.Frame):
     self.controller.write(reg,True)
 
   def send(self,reg):
-    if not self.controller.connected(): return
+    if not self.controller.valid(): return
     if self.regs[reg]['type']=='int':
       try: val= int(self.regs[reg]['entry'].get())
       except:
@@ -192,7 +192,7 @@ class Registers(tk.Frame):
     self.globalMethods= methodList
 
   def update(self):
-    if self.controller.connected():
+    if self.controller.valid():
       for reg in self.regs.keys():
         type= self.controller.type(reg)
         val=  self.controller.read(reg)

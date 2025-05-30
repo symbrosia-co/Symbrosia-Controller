@@ -25,14 +25,15 @@
 #  06Jan2025 v1.4 A. Cooper
 #  - fix menu issue for manual IP address
 #  - fix justification in input units dropdown menu
-#
+#  29May2025 v2.0 A. Cooper
+#  - replace SymCtrlModbus with SymbCtrlScan, a subprocess based comm handler
 #
 # Known issues:
 # - missing units for internal temp on status screen
 # - current reading not displayed for some inputs on control tab
 #
 #------------------------------------------------------------------------------
-verStr= 'SyView v1.4'
+verStr= 'SyView v2.0'
 
 #-- constants -----------------------------------------------------------------
 configFile= 'configuration.xml'
@@ -66,7 +67,7 @@ sys.path.append(libPath)
 
 #-- includes ------------------------------------------------------------------
 from config import loadConfig
-import symbCtrlModbus
+import SymbCtrlScan as SyScan
 import status,inputs,outputs,control,misc,registers,events
 
 # -- constants ----------------------------------------------------------------
@@ -95,7 +96,7 @@ class Application(tk.Frame):
     self.grid()
     self.config= loadConfig(configPath,configFile)
     #print(self.config)
-    self.controller= symbCtrlModbus.SymbCtrl()
+    self.controller= SyScan.SymbCtrl()
     self.createWidgets()
     root.resizable(width=False, height=False)
     root.protocol("WM_DELETE_WINDOW",self.done)
@@ -103,9 +104,6 @@ class Application(tk.Frame):
     self.update()
     self.eventsTab.log('{} started'.format(verStr),True)
     print('{} running...'.format(verStr))
-    # attempt to open first controller in the config
-    #self.openControl()
-    #if self.online: self.scanning= True
 
   def createWidgets(self):
     spaceX= 8
@@ -175,9 +173,7 @@ class Application(tk.Frame):
     self.spacer1= tk.Label(self,text=' ')
     self.spacer1.grid (column=9,row=0)
     # set method delegates to allow universal access
-    self.delegates= {'CtrlRegList': self.controller.regList,
-                     'CtrlValue':   self.controller.value, 
-                     'CtrlService': self.controller.service,
+    self.delegates= {'CtrlRegList': self.controller.registers,
                      'CtrlRead':    self.controller.read,
                      'CtrlWrite':   self.controller.write,
                      'CtrlType':    self.controller.type,
@@ -197,8 +193,6 @@ class Application(tk.Frame):
     self.registersTab.setDelegates(self.delegates)
 
   #- Event reporting ----------------------------------------------------------
-
-  # log event
   def logEvent(self,event,incDate):
     self.writeLogWin(event,incDate)
     self.writeLogFile(event)
@@ -249,13 +243,14 @@ class Application(tk.Frame):
   # handle the quit button
   def done(self):
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
+      if self.scanning: self.controller.close()
       root.after_cancel(self.dispUpdate)
-      #self.closeLogFile()
       self.quit()
 
   def scanToggle(self):
     if self.scanning:
       self.scanning= False
+      self.controller.close()
       self.scanButton.config(text="Scan Off",bg=colOff)
       self.eventsTab.log("Scanning turned off",True)
     else:
@@ -263,19 +258,8 @@ class Application(tk.Frame):
       self.scanButton.config(text="Scanning",bg=colOn)
       self.eventsTab.log("Scanning turned on",True)
       if not self.controller.connected(): self.openControl()
-  
-  def scanSet(self,set):
-    if set:
-      self.scanning= True
-      self.scanButton.config(text="Scanning",bg=colOn)
-      self.eventsTab.log("Scanning turned on",True)
-    else:
-      self.scanning= False
-      self.scanButton.config(text="Scan Off",bg=colOff)
-      self.eventsTab.log("Scanning turned off",True)
 
   #- controller and display update --------------------------------------------
-
   def openControl(self):
     if len(self.config['ctrlList'])<1:
       self.eventsTab.log('No controllers in config!',True)
@@ -297,40 +281,33 @@ class Application(tk.Frame):
           self.IPaddr.delete (0,tk.END)
           self.IPaddr.insert (0,self.currCtrl['address'])
     self.ipLabel.config(text=self.currCtrl['address'])
-    self.controller.start(self.currCtrl['address'],502)
-    if self.controller.error():
-      self.eventsTab.log('Controller error: {}'.format(self.controller.message()),True)
+    self.controller.start(self.currCtrl['address'])
+    if self.controller.error:
+      self.eventsTab.log('Controller error: {}'.format(self.controller.message),True)
       self.online= False
       self.currCtrl== {}
+      self.controller.close()
     else:
-      self.eventsTab.log(self.controller.message(),True)
+      self.eventsTab.log(self.controller.message,True)
       self.online= True
   
   def changeControl(self,param):
     if self.controller.connected():
-      self.openControl()  
+      self.controller.close()
+      self.openControl()
   
   def update(self):
     # read all values from the controller
-    if not self.controller.connected():
-      self.scanning= False
-      self.scanButton.config(text="Scan Off",bg=colOff)
-    if self.scanning:
-      if self.controller.connected():
-        self.onLine= True
-        self.controller.service()  
-        self.commLabel.config(bg=colOn)
-        if self.controller.value('Status'):
-          self.statLabel.config(bg=colOn)
-        else:
-          self.statLabel.config(bg=colOff)
-      else:
-        if self.online==True:
-          self.online= False
-          self.commLabel.config(bg=colOff)
-          self.eventsTab.log('Communication with {} lost!'.format(self.currCtrl['name']),True)
+    if self.controller.connected():
+      self.commLabel.config(bg=colOn)
+      self.online= True
     else:
       self.commLabel.config(bg=colOff)
+      self.online= False
+      self.eventsTab.log('Controller communications error: {}'.format(self.controller.message),True)
+    if self.controller.status():
+      self.statLabel.config(bg=colOn)
+    else:
       self.statLabel.config(bg=colOff)
     # update the various tabs
     tab= self.allTabs.index(self.allTabs.select())
@@ -345,11 +322,11 @@ class Application(tk.Frame):
     if tab==8: self.registersTab.update()
     # heartbeat
     if self.online:
-      self.heartbeat+=1
+      self.heartbeat+= 1
       if self.heartbeat>65535: self.heartbeat= 0
       self.controller.write('HeartbeatIn',self.heartbeat)
     # update again in 0.5s
-    self.dispUpdate= root.after(500,self.update)
+    self.dispUpdate= root.after(250,self.update)
     
   #- load and save controller configuration files -----------------------------
   def loadCfgFile(self):
@@ -381,7 +358,7 @@ class Application(tk.Frame):
     else:
       for reg in self.unitCfg.keys():
         self.controller.write(reg,self.unitCfg[reg])
-        if self.controller.error():
+        if self.controller.error:
           self.eventsTab.log('Send error for register {}!'.format(reg),True)
           prob= True
     if prob:
@@ -407,12 +384,12 @@ class Application(tk.Frame):
       cfgFile.write('  {:%Y%b%d %H:%M:%S}\n\n'.format(dt.datetime.now()))
       cfgFile.write('-->\n\n')
       cfgFile.write('<configuration>\n')
-      for reg in self.controller.regList():
+      for reg in self.controller.registers():
         if self.controller.mode(reg)=='rw':
           if self.controller.type(reg)=='float':
-            cfgFile.write('  <register name="{}">{:.2f}</register>\n'.format(reg,self.controller.value(reg)))
+            cfgFile.write('  <register name="{}">{:.2f}</register>\n'.format(reg,self.controller.read(reg)))
           else:
-            cfgFile.write('  <register name="{}">{}</register>\n'.format(reg,str(self.controller.value(reg))))
+            cfgFile.write('  <register name="{}">{}</register>\n'.format(reg,str(self.controller.read(reg))))
       cfgFile.write('</configuration>\n')
       cfgFile.close()
       self.eventsTab.log('Configuration {} saved'.format(file),True)
@@ -426,11 +403,12 @@ class Application(tk.Frame):
 #  - initial version
 #
 #------------------------------------------------------------------------------
-root= tk.Tk()
-app= Application(master=root)
-app.master.title(verStr)
-root.protocol("WM_DELETE_WINDOW",app.done)
-app.mainloop()
-root.destroy()
+if __name__=='__main__':
+  root= tk.Tk()
+  app= Application(master=root)
+  app.master.title(verStr)
+  root.protocol("WM_DELETE_WINDOW",app.done)
+  app.mainloop()
+  root.destroy()
 
 #-- End SyView ----------------------------------------------------------------

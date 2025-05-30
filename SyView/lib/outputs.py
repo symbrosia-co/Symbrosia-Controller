@@ -132,7 +132,7 @@ class Outputs(tk.Frame):
     spacer.grid (column=0,row=0)
 
   def set(self,reg):
-    if self.controller.connected():
+    if self.controller.valid():
       for wid in self.widgets:
         if wid['reg']==reg:
           if wid['form']=='switch':
@@ -157,7 +157,7 @@ class Outputs(tk.Frame):
     self.delegates= funcList
 
   def update(self):
-    if self.controller.connected():
+    if self.controller.valid():
       for wid in self.widgets:
         if wid['form'] in ('indtf','switch','text','entry','send'):
           wid['widget'].configure(state=tk.NORMAL)
