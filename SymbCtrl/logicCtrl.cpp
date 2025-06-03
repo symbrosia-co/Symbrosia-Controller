@@ -6,6 +6,8 @@
 
   17Apr2022 A. Cooper
   - initial version
+  14May2025 A. Cooper
+  - add timeout command
 
 --------------------------------------------------------------------------------
 

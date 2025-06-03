@@ -5,7 +5,10 @@
 #
 #  1Jul2022 A. Cooper
 #  - initial version
-
+#  29May2025 v2.0 A. Cooper
+#  - replace SymCtrlModbus with SymbCtrlScan, a subprocess based comm handler
+#  - alterations all through code to support new controller handler
+#
 #-- includes ------------------------------------------------------------------
 import os
 import tkinter as tk
@@ -132,7 +135,7 @@ class Outputs(tk.Frame):
     spacer.grid (column=0,row=0)
 
   def set(self,reg):
-    if self.controller.connected():
+    if self.controller.valid():
       for wid in self.widgets:
         if wid['reg']==reg:
           if wid['form']=='switch':
@@ -157,24 +160,24 @@ class Outputs(tk.Frame):
     self.delegates= funcList
 
   def update(self):
-    if self.controller.connected():
+    if self.controller.valid():
       for wid in self.widgets:
         if wid['form'] in ('indtf','switch','text','entry','send'):
           wid['widget'].configure(state=tk.NORMAL)
         if wid['form']=='indtf':
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if wid['value']:
             wid['widget'].configure(image=self.trueIndicator)
           else:
             wid['widget'].configure(image=self.falseIndicator)
         if wid['form']=='switch':
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if wid['value']:
             wid['widget'].configure(image=self.onSwitch)
           else:
             wid['widget'].configure(image=self.offSwitch)
         if wid['form']=='text':
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],str):
             if wid['value']=='':
               wid['widget'].configure(text='--')

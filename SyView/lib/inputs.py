@@ -7,7 +7,10 @@
 #  - initial version
 #  06Jan2025 v1.4 A. Cooper
 #  - fix justification in input units dropdown menu
-
+#  29May2025 v2.0 A. Cooper
+#  - replace SymCtrlModbus with SymbCtrlScan, a subprocess based comm handler
+#  - alterations all through code to support new controller handler
+#
 #-- includes ------------------------------------------------------------------
 import os
 import tkinter as tk
@@ -150,7 +153,7 @@ class Inputs(tk.Frame):
     {'reg':'ProcessChanB',  'form':'achan', 'conf':False,'col':3, 'row':14,'padx':0,'span':1,'width':10,'font':1,'just':'c','value':''                 },
     {'reg':'ProcessID',     'form':'proc',  'conf':False,'col':4, 'row':13,'padx':0,'span':3,'width':8, 'font':1,'just':'l','value':0                  },
     {'reg':'ProcessedData', 'form':'float', 'conf':False,'col':4, 'row':14,'padx':0,'span':2,'width':6, 'font':1,'just':'r','value':0.0                },
-    {'reg':'ProcUnits',     'form':'unitd', 'conf':False,'col':6, 'row':14,'padx':0,'span':1,'width':3, 'font':1,'just':'l','value':'-'                },
+    {'reg':'ProcessedUnits','form':'unitd', 'conf':False,'col':6, 'row':14,'padx':0,'span':1,'width':3, 'font':1,'just':'l','value':'-'                },
     {'reg':None,            'form':'label', 'conf':False,'col':10,'row':13,'padx':5,'span':1,'width':6, 'font':1,'just':'c','value':'Valid'            },
     {'reg':'ProcReadValid', 'form':'indtf', 'conf':False,'col':10,'row':14,'padx':5,'span':1,'width':6, 'font':0,'just':'c','value':None               }]
 
@@ -357,7 +360,7 @@ class Inputs(tk.Frame):
           wid['widget'].configure(text='--',state=tk.NORMAL)
           wid['value']= None
         else:
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],int):
             wid['widget'].configure(text='{:d}'.format(wid['value']),state=tk.NORMAL)
       if wid['form']=='float' or wid['form']=='input':
@@ -368,13 +371,13 @@ class Inputs(tk.Frame):
           wid['widget'].configure(text='-.--',state=tk.NORMAL)
           wid['value']= None
         else:
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],float):
             wid['widget'].configure(text='{:.2f}'.format(wid['value']),state=tk.NORMAL)
             if 'Hysteresis' in wid['reg']: self.hysteresis= wid['value']
       if wid['form']=='sethi':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],float):
             wid['widget'].configure(text='{:.2f}'.format(wid['value']+self.hysteresis/2),state=tk.NORMAL)
         else:
@@ -382,7 +385,7 @@ class Inputs(tk.Frame):
           wid['value']= None
       if wid['form']=='setlo':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],float):
             wid['widget'].configure(text='{:.2f}'.format(wid['value']-self.hysteresis/2),state=tk.NORMAL)
         else:
@@ -390,7 +393,7 @@ class Inputs(tk.Frame):
           wid['value']= None
       if wid['form']=='switch':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if wid['value']:
             wid['widget'].configure(image=self.onSwitch,state=tk.NORMAL)
           else:
@@ -405,7 +408,7 @@ class Inputs(tk.Frame):
           wid['widget'].configure(state=tk.DISABLED)
       if wid['form']=='indoo':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if wid['value']:
             wid['widget'].configure(image=self.onIndicator,state=tk.NORMAL)
           else:
@@ -415,7 +418,7 @@ class Inputs(tk.Frame):
           wid['value']= None
       if wid['form']=='indtf':
         if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if wid['value']:
             wid['widget'].configure(image=self.trueIndicator,state=tk.NORMAL)
           else:
@@ -430,7 +433,7 @@ class Inputs(tk.Frame):
           wid['value']= None
           wid['widget'].configure(text='',state=tk.NORMAL)
         else:
-          value= self.controller.value(wid['reg'])
+          value= self.controller.read(wid['reg'])
           if isinstance(value,int):
             wid['widget'].configure(text=self.controller.unit(value),state=tk.NORMAL)
           else:
@@ -438,7 +441,7 @@ class Inputs(tk.Frame):
       if wid['form']=='label':
         if wid['reg']!=None:
           if self.controller.connected():
-            value= self.controller.value(wid['reg'])
+            value= self.controller.read(wid['reg'])
             if isinstance(value,str):
               if value=='':
                 wid['widget'].configure(text='--',state=tk.NORMAL)
@@ -461,7 +464,7 @@ class Inputs(tk.Frame):
         if self.controller.connected():
           wid['widget'].configure(state=tk.NORMAL)
           for entry in anlgChan.keys():
-            if anlgChan[entry]==self.controller.value(wid['reg']):
+            if anlgChan[entry]==self.controller.read(wid['reg']):
               wid['entry'].set(entry)
               for w in self.widgets:
                 if w['form']=='input':
@@ -474,7 +477,7 @@ class Inputs(tk.Frame):
         if self.controller.connected():
           wid['widget'].configure(state=tk.NORMAL)
           for entry in procSel.keys():
-            if procSel[entry]==self.controller.value(wid['reg']):
+            if procSel[entry]==self.controller.read(wid['reg']):
               wid['entry'].set(entry)
         else:
           wid['widget'].configure(state=tk.DISABLED)
@@ -482,7 +485,7 @@ class Inputs(tk.Frame):
         if self.controller.connected():
           wid['widget'].configure(state=tk.NORMAL)
           for entry in unitsAll.keys():
-            if unitsAll[entry]==self.controller.value(wid['reg']):
+            if unitsAll[entry]==self.controller.read(wid['reg']):
               wid['entry'].set(entry)
         else:
           wid['widget'].configure(state=tk.DISABLED)
@@ -490,7 +493,7 @@ class Inputs(tk.Frame):
         if self.controller.connected():
           wid['widget'].configure(state=tk.NORMAL)
           for entry in unitsTemp.keys():
-            if unitsTemp[entry]==self.controller.value(wid['reg']):
+            if unitsTemp[entry]==self.controller.read(wid['reg']):
               wid['entry'].set(entry)
         else:
           wid['widget'].configure(state=tk.DISABLED)
@@ -498,7 +501,7 @@ class Inputs(tk.Frame):
         if self.controller.connected():
           wid['widget'].configure(state=tk.NORMAL)
           for entry in unitsWQ.keys():
-            if unitsWQ[entry]==self.controller.value(wid['reg']):
+            if unitsWQ[entry]==self.controller.read(wid['reg']):
               wid['entry'].set(entry)
         else:
           wid['widget'].configure(state=tk.DISABLED)

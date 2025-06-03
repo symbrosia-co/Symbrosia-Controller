@@ -11,19 +11,19 @@
 -->
 
 <configuration>
-  <ctrl name='Test'>
+  <ctrl name='Carbofox'>
     <model>SyCtrl Mk2</model>
-    <description>Development unit</description>
-    <address>192.168.9.96</address>
+    <description>CO2 Controller</description>
+    <address>192.168.0.212</address>
   </ctrl>
-  <ctrl name='Weather'>
+  <ctrl name='Tank X01'>
     <model>SyCtrl Mk2</model>
-    <description>Weather station</description>
-    <address>192.168.9.202</address>
+    <description>Tank Controller</description>
+    <address>192.168.0.254</address>
   </ctrl>
-  <ctrl name='Water'>
+  <ctrl name='Tank X02'>
     <model>SyCtrl Mk2</model>
-    <description>Irrigation</description>
-    <address>192.168.9.208</address>
+    <description>Tank Controller</description>
+    <address>192.168.0.244</address>
   </ctrl>
 </configuration>

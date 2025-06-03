@@ -310,6 +310,10 @@ void Memory::limit(){
   if (getUInt(datLogicFunction)<minLogicFunc)  setUInt(datLogicFunction,minLogicFunc);
   if (getUInt(datLogicFunction)>maxLogicFunc)  setUInt(datLogicFunction,maxLogicFunc);
   if (!isOutput(getUInt(datLogicOut)))  setUInt(datLogicOut,ioNone);
+  // time limited command
+  if (getUInt(datTLCDuration)<minTLCDuration)  setUInt(datTLCDuration,minTLCDuration);
+  if (getUInt(datTLCDuration)>maxTLCDuration)  setUInt(datTLCDuration,maxTLCDuration);
+  if (!isOutput(getUInt(datTLCOutput)))  setUInt(datTLCOutput,ioNone);
   // ensure no loops in logic gate
   if (getUInt(datLogicOut)==getUInt(datLogicInA)) setUInt(datLogicOut,ioNone);
   if (getUInt(datLogicOut)==getUInt(datLogicInB)) setUInt(datLogicOut,ioNone);

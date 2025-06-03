@@ -7,7 +7,10 @@
 #  - initial version
 #  31Oct2024 v1.2 A. Cooper
 #  - Fix analog channels numbers for time
-
+#  29May2025 v2.0 A. Cooper
+#  - replace SymCtrlModbus with SymbCtrlScan, a subprocess based comm handler
+#  - alterations all through code to support new controller handler
+#
 #-- includes ------------------------------------------------------------------
 import os
 import tkinter as tk
@@ -204,7 +207,7 @@ class Control(tk.Frame):
     spacer.grid (column=0,row=0)
 
   def set(self,reg):
-    if self.controller.connected():
+    if self.controller.valid():
       for wid in self.widgets:
         if wid['reg']==reg:
           if wid['form']=='switch':
@@ -257,7 +260,7 @@ class Control(tk.Frame):
                 self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
 
   def setMenu(self,reg,selection):
-    if self.controller.connected():
+    if self.controller.valid():
       for wid in self.widgets:
         if wid['reg']==reg:
           if wid['form']=='achan':
@@ -289,47 +292,47 @@ class Control(tk.Frame):
   def update(self):
     for wid in self.widgets:
       if wid['form']=='int':
-        if not self.controller.connected():
+        if not self.controller.valid():
           wid['widget'].configure(text='--',state=tk.DISABLED)
           wid['value']= None
         elif wid['reg']== None:
           wid['widget'].configure(text='--',state=tk.NORMAL)
           wid['value']= None
         else:
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],int):
             wid['widget'].configure(text='{:d}'.format(wid['value']),state=tk.NORMAL)
       if wid['form']=='float' or wid['form']=='input':
-        if not self.controller.connected():
+        if not self.controller.valid():
           wid['widget'].configure(text='-.--',state=tk.DISABLED)
           wid['value']= None
         elif wid['reg']== None:
           wid['widget'].configure(text='-.--',state=tk.NORMAL)
           wid['value']= None
         else:
-          wid['value']= self.controller.value(wid['reg'])
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],float):
             wid['widget'].configure(text='{:.2f}'.format(wid['value']),state=tk.NORMAL)
             if 'Hysteresis' in wid['reg']: self.hysteresis= wid['value']
       if wid['form']=='sethi':
-        if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+        if self.controller.valid():
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],float):
             wid['widget'].configure(text='{:.2f}'.format(wid['value']+self.hysteresis/2),state=tk.NORMAL)
         else:
           wid['widget'].configure(text='-.--',state=tk.DISABLED)
           wid['value']= None
       if wid['form']=='setlo':
-        if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+        if self.controller.valid():
+          wid['value']= self.controller.read(wid['reg'])
           if isinstance(wid['value'],float):
             wid['widget'].configure(text='{:.2f}'.format(wid['value']-self.hysteresis/2),state=tk.NORMAL)
         else:
           wid['widget'].configure(text='-.--',state=tk.DISABLED)
           wid['value']= None
       if wid['form']=='switch':
-        if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+        if self.controller.valid():
+          wid['value']= self.controller.read(wid['reg'])
           if wid['value']:
             wid['widget'].configure(image=self.onSwitch,state=tk.NORMAL)
           else:
@@ -338,13 +341,13 @@ class Control(tk.Frame):
           wid['widget'].configure(state=tk.DISABLED)
           wid['value']= None
       if wid['form']=='button':
-        if self.controller.connected():
+        if self.controller.valid():
             wid['widget'].configure(state=tk.NORMAL)
         else:
           wid['widget'].configure(state=tk.DISABLED)
       if wid['form']=='indoo':
-        if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+        if self.controller.valid():
+          wid['value']= self.controller.read(wid['reg'])
           if wid['value']:
             wid['widget'].configure(image=self.onIndicator,state=tk.NORMAL)
           else:
@@ -353,8 +356,8 @@ class Control(tk.Frame):
           wid['widget'].configure(state=tk.DISABLED)
           wid['value']= None
       if wid['form']=='indtf':
-        if self.controller.connected():
-          wid['value']= self.controller.value(wid['reg'])
+        if self.controller.valid():
+          wid['value']= self.controller.read(wid['reg'])
           if wid['value']:
             wid['widget'].configure(image=self.trueIndicator,state=tk.NORMAL)
           else:
@@ -363,21 +366,21 @@ class Control(tk.Frame):
           wid['widget'].configure(state=tk.DISABLED)
           wid['value']= None
       if wid['form']=='unitd' or wid['form']=='unitin':
-        if not self.controller.connected():
+        if not self.controller.valid():
           wid['widget'].configure(state=tk.DISABLED)
         elif wid['reg']== None:
           wid['value']= None
           wid['widget'].configure(text='',state=tk.NORMAL)
         else:
-          value= self.controller.value(wid['reg'])
+          value= self.controller.read(wid['reg'])
           if isinstance(value,int):
             wid['widget'].configure(text=self.controller.unit(value),state=tk.NORMAL)
           else:
             wid['widget'].configure(text='',state=tk.NORMAL)
       if wid['form']=='label':
         if wid['reg']!=None:
-          if self.controller.connected():
-            value= self.controller.value(wid['reg'])
+          if self.controller.valid():
+            value= self.controller.read(wid['reg'])
             if isinstance(value,str):
               if value=='':
                 wid['widget'].configure(text='--',state=tk.NORMAL)
@@ -387,20 +390,20 @@ class Control(tk.Frame):
             wid['widget'].configure(text='--',state=tk.DISABLED)
             wid['value']= None
       if wid['form']=='entry':
-        if self.controller.connected():
+        if self.controller.valid():
           wid['widget'].configure(state=tk.NORMAL)
         else:
           wid['widget'].configure(state=tk.DISABLED)
       if wid['form']=='send':
-        if self.controller.connected():
+        if self.controller.valid():
           wid['widget'].configure(state=tk.NORMAL)
         else:
           wid['widget'].configure(state=tk.DISABLED)
       if wid['form']=='achan':
-        if self.controller.connected():
+        if self.controller.valid():
           wid['widget'].configure(state=tk.NORMAL)
           for entry in anlgChan.keys():
-            if anlgChan[entry]==self.controller.value(wid['reg']):
+            if anlgChan[entry]==self.controller.read(wid['reg']):
               wid['entry'].set(entry)
               for w in self.widgets:
                 if w['form']=='input':
@@ -410,18 +413,18 @@ class Control(tk.Frame):
         else:
           wid['widget'].configure(state=tk.DISABLED)
       if wid['form']=='ochan':
-        if self.controller.connected():
+        if self.controller.valid():
           wid['widget'].configure(state=tk.NORMAL)
           for entry in outChan.keys():
-            if outChan[entry]==self.controller.value(wid['reg']):
+            if outChan[entry]==self.controller.read(wid['reg']):
               wid['entry'].set(entry)
         else:
           wid['widget'].configure(state=tk.DISABLED)
       if wid['form']=='dchan':
-        if self.controller.connected():
+        if self.controller.valid():
           wid['widget'].configure(state=tk.NORMAL)
           for entry in digChan.keys():
-            if digChan[entry]==self.controller.value(wid['reg']):
+            if digChan[entry]==self.controller.read(wid['reg']):
               wid['entry'].set(entry)
         else:
           wid['widget'].configure(state=tk.DISABLED)
