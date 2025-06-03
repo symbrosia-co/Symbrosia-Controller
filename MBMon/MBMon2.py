@@ -310,7 +310,6 @@ class Application(tk.Frame):
     self.lastLog= now
   
   def logWrite(self):
-    print(self.data)
     now= dt.datetime.now()
     # check for directory
     Path(logPath).mkdir(parents=True,exist_ok=True)
