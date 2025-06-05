@@ -317,7 +317,8 @@ const char mbCoilRWMode[statSize]= {
   '+', //  67 statCtrl2OneShot
   '+', //  68 statCtrl3OneShot
   '+', //  69 statCtrl4OneShot
-  '+'};//  70 statTimeLimCmd
+  '+', //  70 statTimeLimCmd
+  'r'};//  71 statTimeLimFlag
 
   bool mbActive;
   bool mbAvailable;
@@ -450,6 +451,8 @@ uint16_t ModbusOnWriteCoil(TRegister* reg, uint16_t val){
   if (mbCoilRWMode[addr]=='w' || mbCoilRWMode[addr]=='+'){
       if (val==65280) memory.setBool(addr,true);
       else memory.setBool(addr,false);
+      if (addr==statTimeLimCmd) // set time limited command write flag
+        memory.setBool(statTimeLimFlag,true); 
       return val;
     }
   if (memory.getBool(addr)) return 65280; // 65280 is a magic number for true in modbus

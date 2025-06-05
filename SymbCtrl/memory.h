@@ -52,7 +52,7 @@
 //- memory ---------------------------------------------------------------------
 #define dataSize        320  // size of data memory
 #define datSizeClear    300  // section of data to be cleared on defaults load
-#define statSize         75  // size of status memory
+#define statSize         76  // size of status memory
 #define fixedSize        16  // size of fixed data at start of flash memory
 #define addrSerial        0  // address of serial number
 #define addrHardware      1  // address of hardware ID

@@ -8,6 +8,8 @@
 #  29May2025 v2.0 A. Cooper
 #  - replace SymCtrlModbus with SymbCtrlScan, a subprocess based comm handler
 #  - alterations all through code to support new controller handler
+#  - added support for echo mode on logic gate
+#  - added support for time limited command
 #
 #-- includes ------------------------------------------------------------------
 import os
@@ -40,7 +42,7 @@ digChan=   {'None':0,'Input 1':9,'Input 2':10,'Relay 1':11,'Relay 2':12,'Output 
             'Control Alarm':21,'Control 1 Alarm':22,'Control 2 Alarm':23,'Control 3 Alarm':24,'Control 4 Alarm':25,
             'Control 1 Alarm Low':26,'Control 2 Alarm Low':27,'Control 3 Alarm Low':28,'Control 4 Alarm Low':29,
             'Control 1 Alarm High':30,'Control 2 Alarm High':31,'Control 3 Alarm High':32,'Control 4 Alarm High':33,'Flasher':34}
-logicFunc= {'NOT':0,'AND':1,'NAND':2,'OR':3,'NOR':4,'XOR':5,'NXOR':6}
+logicFunc= {'NOT':0,'AND':1,'NAND':2,'OR':3,'NOR':4,'XOR':5,'NXOR':6,'Echo':7}
 resetIntv= {'No Reset':0,'Reset Hourly':1,'Reset Daily':2,'Reset Monthly':3}
 
 #------------------------------------------------------------------------------
@@ -91,13 +93,22 @@ class Misc(tk.Frame):
       {'reg':'ResetTimer',      'form':'button','col':9, 'row':8, 'span':1, 'width':48,'font':0,'just':'r','value':None               },
       {'reg':None,              'form':'space', 'col':7, 'row':9, 'span':1, 'width':4, 'font':1,'just':'l','value':None               },
       {'reg':None,              'form':'sephz', 'col':1, 'row':10,'span':10,'width':0, 'font':0,'just':'n','value':None               },
+      # time limited command
+      {'reg':None,              'form':'label', 'col':1, 'row':11,'span':2, 'width':20,'font':3,'just':'l','value':'Time Limited Command'},
+      {'reg':'TimeLimCmdOut',   'form':'ochan', 'col':1, 'row':12,'span':2, 'width':0, 'font':1,'just':'l','value':None               },
+      {'reg':None,              'form':'label', 'col':1, 'row':13,'span':1, 'width':1, 'font':1,'just':'r','value':'Expire'           },
+      {'reg':'TimeLimCmdTime',  'form':'int',   'col':2, 'row':13,'span':1, 'width':4, 'font':1,'just':'w','value':None               },
+      {'reg':'TimeLimCmdTime',  'form':'entry', 'col':3, 'row':13,'span':1, 'width':4, 'font':1,'just':'w','value':None               },
+      {'reg':'TimeLimCmdTime',  'form':'send',  'col':4, 'row':13,'span':1, 'width':20,'font':1,'just':'l','value':None               },
+      {'reg':None,              'form':'label', 'col':4, 'row':11,'span':2, 'width':1, 'font':1,'just':'l','value':'Command'          },
+      {'reg':'TimeLimitedCmd',  'form':'switch','col':4, 'row':12,'span':2, 'width':48,'font':1,'just':'l','value':False              },
       # logic gate
-      {'reg':None,              'form':'label', 'col':1, 'row':11,'span':2, 'width':16,'font':3,'just':'l','value':'Logic Gate'       },
-      {'reg':'LogicInA',        'form':'dchan', 'col':1, 'row':12,'span':2, 'width':0, 'font':1,'just':'l','value':None               },
-      {'reg':'LogicInB',        'form':'dchan', 'col':1, 'row':13,'span':2, 'width':0, 'font':1,'just':'l','value':None               },
-      {'reg':'LogicFunction',   'form':'lfunc', 'col':3, 'row':12,'span':3, 'width':0, 'font':1,'just':'l','value':None               },
-      {'reg':'LogicOut',        'form':'ochan', 'col':3, 'row':13,'span':3, 'width':0, 'font':1,'just':'l','value':None               },
-      {'reg':'LogicGateResult', 'form':'indtf', 'col':6, 'row':12,'span':2, 'width':48,'font':0,'just':'l','value':False              },]
+      {'reg':None,              'form':'label', 'col':7, 'row':11,'span':2, 'width':16,'font':3,'just':'l','value':'Logic Gate'       },
+      {'reg':'LogicInA',        'form':'dchan', 'col':7, 'row':12,'span':2, 'width':0, 'font':1,'just':'l','value':None               },
+      {'reg':'LogicInB',        'form':'dchan', 'col':7, 'row':13,'span':2, 'width':0, 'font':1,'just':'l','value':None               },
+      {'reg':'LogicFunction',   'form':'lfunc', 'col':9, 'row':12,'span':3, 'width':0, 'font':1,'just':'l','value':None               },
+      {'reg':'LogicOut',        'form':'ochan', 'col':9, 'row':13,'span':3, 'width':0, 'font':1,'just':'l','value':None               },
+      {'reg':'LogicGateResult', 'form':'indtf', 'col':9, 'row':11,'span':1, 'width':0, 'font':0,'just':'r','value':False              }]
     tk.Frame.__init__(self,master=parent)
     self.controller= controller
     self.grid()  
@@ -203,7 +214,7 @@ class Misc(tk.Frame):
             if self.controller.write(reg,True):
               self.delegates['EventLog']('{} requested'.format(reg),True)
             else:
-              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
           if wid['form']=='send':
             valid= False
             for w in self.widgets:
@@ -237,7 +248,7 @@ class Misc(tk.Frame):
               if self.controller.write(reg,wid['value']):
                 self.delegates['EventLog']('{} set to {}'.format(reg,wid['value']),True)
               else:
-                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
             if self.controller.type(reg)=='hour':
               for w in self.widgets:
                 if w['reg']!=None:
@@ -250,7 +261,7 @@ class Misc(tk.Frame):
                       if self.controller.write(w['reg'],value):
                         self.delegates['EventLog']('{} set to {}'.format(reg,w['value']),True)
                       else:
-                        self.delegates['EventLog']('Write error to {}! {}'.format(w['reg'],self.controller.message()),True)
+                        self.delegates['EventLog']('Write error to {}! {}'.format(w['reg'],self.controller.message),True)
 
   def setMenu(self,reg,selection):
     if self.controller.valid():
@@ -260,22 +271,22 @@ class Misc(tk.Frame):
             if self.controller.write(reg,digChan[selection]):
               self.delegates['EventLog']('{} set to {}'.format(reg,selection),True)
             else:
-              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
           if wid['form']=='ochan':
             if self.controller.write(reg,outChan[selection]):
               self.delegates['EventLog']('{} set to {}'.format(reg,selection),True)
             else:
-              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
           if wid['form']=='lfunc':
             if self.controller.write(reg,logicFunc[selection]):
               self.delegates['EventLog']('{} set to {}'.format(reg,selection),True)
             else:
-              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
           if wid['form']=='rintv':
             if self.controller.write(reg,resetIntv[selection]):
               self.delegates['EventLog']('{} set to {}'.format(reg,selection),True)
             else:
-              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
 
   #-- external methods --------------------------------------------------------
 

@@ -182,7 +182,7 @@
   - in userCtrl add firmware update to unit info screen
   11Apr2025 v2.9 A. Cooper
   - remove unused timer and counter enable
-  - added time limted command, a command input that will only be valid for the
+  - added time limited command, a command input that will only be valid for the
     duration specified, code in logicCtrl.cpp
   
   Known bugs...
@@ -236,10 +236,10 @@ Adafruit_NeoPixel pixel(1, hdwrRGBLED, NEO_GRB + NEO_KHZ800);
 
 //- Global variables -----------------------------------------------------------
 boolean wifiStat= false;
-IPAddress wifiIPAddr;
-unsigned long pixelTime= 0;
+IPAddress     wifiIPAddr;
 unsigned long wifiTime= 0;
-const bool wifiOn= true;
+const bool    wifiOn= true;
+unsigned long pixelTime= 0;
 
 //- output control -------------------------------------------------------------
 bool ctrlMatrix[ctrlOuts][ctrlSrcs];
@@ -257,7 +257,7 @@ void setOutputs(){
       bool result= ((ctrlMatrix[out][ctrlCtrl1]  || ctrlMatrix[out][ctrlCtrl2] ||
                      ctrlMatrix[out][ctrlCtrl3]  || ctrlMatrix[out][ctrlCtrl4] ||
                      ctrlMatrix[out][ctrlLogic]) && ctrlMatrix[out][ctrlToD])  ||
-                     ctrlMatrix[out][ctrlExtReq];
+                     ctrlMatrix[out][ctrlExtReq] || ctrlMatrix[out][ctrlTLCmd];
       // handle ToD direct control
       if (!control.controlled(out+ioRelay1)
           && todCtrl.controlled(out+ioRelay1)

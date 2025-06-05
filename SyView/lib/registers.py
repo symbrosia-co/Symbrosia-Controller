@@ -149,7 +149,7 @@ class Registers(tk.Frame):
         return
       self.controller.write(reg,val)
       if self.controller.error:
-        messagebox.showwarning(title='Write error...', message=self.controller.message())
+        messagebox.showwarning(title='Write error...', message=self.controller.message)
     if self.regs[reg]['type']=='uint':
       try: val= int(self.regs[reg]['entry'].get())
       except:
@@ -160,7 +160,7 @@ class Registers(tk.Frame):
         return
       self.controller.write(reg,val)
       if self.controller.error:
-        messagebox.showwarning(title='Write error...', message=self.controller.message())
+        messagebox.showwarning(title='Write error...', message=self.controller.message)
     if self.regs[reg]['type']=='dint':
       try: val= int(self.regs[reg]['entry'].get())
       except:
@@ -171,7 +171,7 @@ class Registers(tk.Frame):
         return
       self.controller.write(reg,val)
       if self.controller.error:
-        messagebox.showwarning(title='Write error...', message=self.controller.message())
+        messagebox.showwarning(title='Write error...', message=self.controller.message)
     if self.regs[reg]['type']=='float':
       try: val= float(self.regs[reg]['entry'].get())
       except:
@@ -179,7 +179,7 @@ class Registers(tk.Frame):
         return
       self.controller.write(reg,val)
       if self.controller.error:
-        messagebox.showwarning(title='Write error...', message=self.controller.message())
+        messagebox.showwarning(title='Write error...', message=self.controller.message)
     if self.regs[reg]['type']=='str':
       val= self.regs[reg]['entry'].get()
       if len(val)>16:
@@ -188,7 +188,7 @@ class Registers(tk.Frame):
         val= val[0:15]
       self.controller.write(reg,val)
       if self.controller.error:
-        messagebox.showwarning(title='Write error...', message=self.controller.message())
+        messagebox.showwarning(title='Write error...', message=self.controller.message)
 
   #-- external methods --------------------------------------------------------
   def setDelegates(self,methodList):

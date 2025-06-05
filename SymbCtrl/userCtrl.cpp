@@ -1301,6 +1301,9 @@ void UserCtrl::drawHardware(){
   if (userSelPos==hdwrIDmk1)      lcd.print("Mk1 rev A");
   if (userSelPos==hdwrIDmk2revA)  lcd.print("Mk2 rev A");
   if (userSelPos==hdwrIDmk2revB)  lcd.print("Mk2 rev B");
+  if (userSelPos==hdwrIDmk2revC)  lcd.print("Mk2 rev C");
+  if (userSelPos==hdwrIDmk2revD)  lcd.print("Mk2 rev D");
+  if (userSelPos==hdwrIDmk2revE)  lcd.print("Mk2 rev E");
   lcd.print("     ");
   userSelScroll= 0;
   if (userSetAcpt || userSetNext){

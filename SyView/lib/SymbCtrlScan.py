@@ -62,6 +62,7 @@
 #  - first version functionally complete
 #  - added a buffer in subprocess for write commands
 #  - reverted convert module, it really was needed;)
+#  - fixed read only mode on logic gate output -> rw
 #
 #------------------------------------------------------------------------------
 
@@ -196,23 +197,25 @@ class SymbCtrl():
     'LogicInA':        {'addr':136,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
     'LogicInB':        {'addr':137,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
     'LogicFunction':   {'addr':138,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
-    'LogicOut':        {'addr':139,'mode':'r', 'type':'uint', 'unit':None,            'valid':None,            'desc':''},
+    'LogicOut':        {'addr':139,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
     'ToDStart':        {'addr':140,'mode':'r', 'type':'hour', 'unit':None,            'valid':None,            'desc':'Formatted ToD start time string'},
     'ToDStartHour':    {'addr':140,'mode':'rw','type':'uint', 'unit':'h',             'valid':None,            'desc':''},
     'ToDStartMin':     {'addr':141,'mode':'rw','type':'uint', 'unit':'m',             'valid':None,            'desc':''},
     'ToDStop':         {'addr':142,'mode':'r' ,'type':'hour', 'unit':None,            'valid':None,            'desc':'Formatted ToD stop time string'},
     'ToDStopHour':     {'addr':142,'mode':'rw','type':'uint', 'unit':'h',             'valid':None,            'desc':''},
     'ToDStopMin':      {'addr':143,'mode':'rw','type':'uint', 'unit':'m',             'valid':None,            'desc':''},
-    'ToDOutput1':      {'addr':144,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
-    'ToDOutput2':      {'addr':145,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
-    'ToDOutput3':      {'addr':146,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
-    'ToDOutput4':      {'addr':147,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
-    'CountSource':     {'addr':150,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
+    'ToDOutput1':      {'addr':144,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':'Time of day output channel 1'},
+    'ToDOutput2':      {'addr':145,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':'Time of day output channel 2'},
+    'ToDOutput3':      {'addr':146,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':'Time of day output channel 3'},
+    'ToDOutput4':      {'addr':147,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':'Time of day output channel 4'},
+    'TimeLimCmdOut':   {'addr':148,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':'Time limited command output channel'},
+    'TimeLimCmdTime':  {'addr':149,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':'Time limited command duration'},
+    'CountSource':     {'addr':150,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':'Counter source channel'},
     'Counter':         {'addr':151,'mode':'r', 'type':'dint', 'unit':None,            'valid':None,            'desc':'Event counter'},
-    'CountRstIntv':    {'addr':153,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
-    'TimerSource':     {'addr':154,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
+    'CountRstIntv':    {'addr':153,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':'Counter reset interval'},
+    'TimerSource':     {'addr':154,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':'Timer source channel'},
     'Timer':           {'addr':155,'mode':'r', 'type':'dint', 'unit':'s',             'valid':None,            'desc':'Event counter in seconds'},
-    'TimerRstIntv':    {'addr':157,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
+    'TimerRstIntv':    {'addr':157,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':'Timer reset interval'},
     'LogInterval':     {'addr':160,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
     'LogRecords':      {'addr':161,'mode':'r', 'type':'uint', 'unit':None,            'valid':None,            'desc':''},
     'LogNumber':       {'addr':162,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
@@ -290,7 +293,8 @@ class SymbCtrl():
     'statCtrl1OneShot':{'addr': 66,'mode':'rw','type':'bool', 'unit':None,            'valid':None,            'desc':'Control loop 1 one-shot mode'},
     'statCtrl2OneShot':{'addr': 67,'mode':'rw','type':'bool', 'unit':None,            'valid':None,            'desc':'Control loop 2 one-shot mode'},
     'statCtrl3OneShot':{'addr': 68,'mode':'rw','type':'bool', 'unit':None,            'valid':None,            'desc':'Control loop 3 one-shot mode'},
-    'statCtrl4OneShot':{'addr': 69,'mode':'rw','type':'bool', 'unit':None,            'valid':None,            'desc':'Control loop 4 one-shot mode'}}
+    'statCtrl4OneShot':{'addr': 69,'mode':'rw','type':'bool', 'unit':None,            'valid':None,            'desc':'Control loop 4 one-shot mode'},
+    'TimeLimitedCmd'  :{'addr': 70,'mode':'rw','type':'bool', 'unit':None,            'valid':None,            'desc':'Time limited command input'}}
   units= ['None','°C','°F','pH','mV','V','mA','A','mm','m','ml','l','g','kg','lbs','kPa','PSI','Hz','%','ppm','Ω','day','hr','min','sec','mol','mph','m/s','°','mmHg','mBar','kW','kVA']
   processes= ['Average','Minimum','Maximum','Sum','Difference','Priority']
   channels=   ['None','WQSensor','Temperature1','Temperature2','Analog1','Analog2',
