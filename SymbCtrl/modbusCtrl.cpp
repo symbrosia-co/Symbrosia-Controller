@@ -333,12 +333,12 @@ void ModbusInit(){
   mbActive=     false;
   mbTime= 0;
   //setup needed registers
-  mb.addCoil(0+mbBaseCoil,0,statSize);
-  mb.addHreg(0+mbBaseHold,0,dataSize);
-  mb.onGetCoil(0+mbBaseCoil,ModbusOnReadCoil,statSize);
-  mb.onSetCoil(0+mbBaseCoil,ModbusOnWriteCoil,statSize);
-  mb.onGetHreg(0+mbBaseHold,ModbusOnReadHold,dataSize);
-  mb.onSetHreg(0+mbBaseHold,ModbusOnWriteHold,dataSize);
+  mb.addCoil(0,0,statSize);
+  mb.addHreg(0,0,dataSize);
+  mb.onGetCoil(0,ModbusOnReadCoil,statSize);
+  mb.onSetCoil(0,ModbusOnWriteCoil,statSize);
+  mb.onGetHreg(0,ModbusOnReadHold,dataSize);
+  mb.onSetHreg(0,ModbusOnWriteHold,dataSize);
   Serial.println("    Modbus registers defined");
   Serial.println("    Modbus server running");
   return;
@@ -398,9 +398,9 @@ uint16_t ModbusOnReadHold(TRegister* reg, uint16_t val){
   // Serial.print("      Address: ");
   // Serial.println(reg->address.address);  
   // Serial.print("      Value:   ");
-  // Serial.println(memory.getInt((reg->address.address)-mbBaseHold));
+  // Serial.println(memory.getInt(reg->address.address));
   mbTime= millis();
-  int addr= reg->address.address-mbBaseHold;
+  int addr= reg->address.address;
   if (addr>mbRWModeSize && addr<dataSize) // mbRWModeSize is the end of the r/w reference array
     return memory.getInt(addr);
   if (mbHoldRWMode[addr]=='r' || mbHoldRWMode[addr]=='+') 
@@ -415,7 +415,7 @@ uint16_t ModbusOnWriteHold(TRegister* reg, uint16_t val){
   // Serial.print("      Value:   ");
   // Serial.println(val);
   mbTime= millis();
-  int addr= reg->address.address-mbBaseHold;
+  int addr= reg->address.address;
   if (addr>mbRWModeSize && addr<dataSize){ // mbRWModeSize is the end of the r/w reference array
     memory.setUInt(addr,val);
     return val;
@@ -434,9 +434,9 @@ uint16_t ModbusOnReadCoil(TRegister* reg, uint16_t val){
   // Serial.print("      Address: ");
   // Serial.println(reg->address.address);
   // Serial.print("      Value:   ");
-  // Serial.println(memory.getBool((reg->address.address)-mbBaseCoil));
+  // Serial.println(memory.getBool(reg->address.address));
   mbTime= millis();
-  if (memory.getBool((reg->address.address)-mbBaseCoil)) return 65280;
+  if (memory.getBool(reg->address.address)) return 65280;
   else return 0;
 } // ModbusOnReadCoil
 
@@ -447,7 +447,7 @@ uint16_t ModbusOnWriteCoil(TRegister* reg, uint16_t val){
   // Serial.print("      Value:   ");
   // Serial.println(val);
   mbTime= millis();
-  int addr= reg->address.address-mbBaseCoil;
+  int addr= reg->address.address;
   if (mbCoilRWMode[addr]=='w' || mbCoilRWMode[addr]=='+'){
       if (val==65280) memory.setBool(addr,true);
       else memory.setBool(addr,false);

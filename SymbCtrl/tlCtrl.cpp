@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+ /*-----------------------------------------------------------------------------
   Time Limited Control - Symbrosia Controller
   - a time limted control input
 
@@ -42,7 +42,7 @@ extern bool getChan(int chan);
 unsigned long tlcTime= 0;
 
 //- functions -----------------------------------------------------------------
-TLCtrl::TLCCtrl(){
+TLCtrl::TLCtrl(){
 }
 
 void TLCtrl::init(){
@@ -51,26 +51,26 @@ void TLCtrl::init(){
 
 void TLCtrl::service(){
   // check flag
-  if memory.getBool(statTimeLimFlag){
+  if (memory.getBool(statTimeLimFlag)){
     memory.setBool(statTimeLimFlag,false);
     tlcTime= millis();
   }
   // reset command state on timer
   if (tlcTime>millis()) tlcTime= millis(); // handle millis rollover
   if (millis()-tlcTime>memory.getUInt(datTLCDuration)*1000){
-    memory.setBool(statTimeLimCmd,false)
+    memory.setBool(statTimeLimCmd,false);
     tlcTime= millis();
   }
     // set the requested output
   int out= memory.getInt(datTLCOutput);
-  if (out==0)
-    for (int i=0;i<ctrlOuts;i++) ctrlMatrix[i][ctrlTLCmd]= false;
   if (out>=ioRelay1 && out<=ioDigOut2)
     for (int i=0;i<ctrlOuts;i++)
       if (i==(out-ioRelay1)) ctrlMatrix[i][ctrlTLCmd]= memory.getBool(statTimeLimCmd);
       else ctrlMatrix[i][ctrlTLCmd]= false;
-  if (out==ioVState1) memory.setBool(statVState1,memory.getBool(statTimeLimCmd);
-  if (out==ioVState2) memory.setBool(statVState2,memory.getBool(statTimeLimCmd);
+  else
+    for (int i=0;i<ctrlOuts;i++) ctrlMatrix[i][ctrlTLCmd]= false;
+  if (out==ioVState1) memory.setBool(statVState1,memory.getBool(statTimeLimCmd));
+  if (out==ioVState2) memory.setBool(statVState2,memory.getBool(statTimeLimCmd));
 } // service
 
 //- End TLCtrl ----------------------------------------------------------------
