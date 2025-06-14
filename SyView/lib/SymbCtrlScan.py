@@ -318,7 +318,7 @@ class SymbCtrl():
 
   # symbrosia controller
   PORT      = 502 # SymbCtrl uses default modbusTCP port
-  COIL_SIZE = 70  # number of SymbCtrl coil registers
+  COIL_SIZE = 80  # number of SymbCtrl coil registers
   HOLD_SIZE = 300 # number of SymbCtrl holding regs
   DATA_EXP=   10  # expiration time for valid data in seconds
 

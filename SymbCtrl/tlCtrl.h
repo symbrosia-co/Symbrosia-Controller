@@ -26,8 +26,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 -----------------------------------------------------------------------------*/
-#ifndef tlCtrl
-#define tlCtrl
+#ifndef tlcCtrl
+#define tlcCtrl
 
 //- Library includes ----------------------------------------------------------
 #include <Arduino.h>
@@ -38,6 +38,7 @@ class TLCtrl{
     TLCtrl();
     void init();
     void service();
+    unsigned long tlcTime;
 };
 
 #endif

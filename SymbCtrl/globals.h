@@ -42,6 +42,9 @@
   - add fixed data definitions (serial,hardware, processor)
   11Apr2025 v2.9 A. Cooper
   - remove unused timer and counter enable
+  - added registers for time limited command, datTLCDuration 148,
+  datTLCOutput 149, statTimeLimCmd 70, and statTimeLimFlag 71
+  - expanded Modbus coil space to 80 registers
 
 ------------------------------------------------------------------------------*/
 #pragma once

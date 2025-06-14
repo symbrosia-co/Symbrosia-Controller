@@ -21,6 +21,12 @@
   - revised memory map for first release
   23Mar2024 v2.4 A. Cooper
   - add call to limit on modbus holding register write
+  11Apr2025 v2.9 A. Cooper
+  - remove unused timer and counter enable
+  - added registers for time limited command, datTLCDuration 148,
+  datTLCOutput 149, statTimeLimCmd 70, and statTimeLimFlag 71
+  - added a write detect flag to coil write to support time limited command
+  - expanded Modbus coil space to 80 registers
 
 --------------------------------------------------------------------------------
 
@@ -318,7 +324,15 @@ const char mbCoilRWMode[statSize]= {
   '+', //  68 statCtrl3OneShot
   '+', //  69 statCtrl4OneShot
   '+', //  70 statTimeLimCmd
-  'r'};//  71 statTimeLimFlag
+  'r', //  71 statTimeLimFlag
+  '+', //  72 nc
+  '+', //  73 nc
+  '+', //  74 nc
+  '+', //  75 nc
+  '+', //  76 nc
+  '+', //  77 nc
+  '+', //  78 nc
+  '+'};//  79 nc
 
   bool mbActive;
   bool mbAvailable;
@@ -452,7 +466,7 @@ uint16_t ModbusOnWriteCoil(TRegister* reg, uint16_t val){
       if (val==65280) memory.setBool(addr,true);
       else memory.setBool(addr,false);
       if (addr==statTimeLimCmd) // set time limited command write flag
-        memory.setBool(statTimeLimFlag,true); 
+        memory.setBool(statTimeLimFlag,true);
       return val;
     }
   if (memory.getBool(addr)) return 65280; // 65280 is a magic number for true in modbus

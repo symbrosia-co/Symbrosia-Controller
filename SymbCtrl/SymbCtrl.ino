@@ -183,7 +183,10 @@
   11Apr2025 v2.9 A. Cooper
   - remove unused timer and counter enable
   - added time limited command, a command input that will only be valid for the
-    duration specified, code in logicCtrl.cpp
+    duration specified, code in tlCtrl.cpp
+  - added registers for time limited command, datTLCDuration 148,
+  datTLCOutput 149, statTimeLimCmd 70, and statTimeLimFlag 71
+  - expanded Modbus coil space to 80 registers
   
   Known bugs...
   - none
@@ -212,6 +215,7 @@
 #include "userCtrl.h"
 #include "logicCtrl.h"
 #include "todCtrl.h"
+#include "tlCtrl.h"
 #include "countCtrl.h"
 #include "fotaCtrl.h"
 
@@ -224,6 +228,7 @@ ProcCtrl   procCtrl;
 Control    control;
 LogicCtrl  logic;
 ToDCtrl    todCtrl;
+TLCtrl     tlCtrl;
 CountCtrl  countCtrl;
 FOtACtrl   fotaCtrl;
 
@@ -576,6 +581,7 @@ void setup() {
   control.init();
   logic.init();
   todCtrl.init();
+  tlCtrl.init();
   countCtrl.init();
   procCtrl.init();
   timeCtrl.init();
@@ -602,6 +608,7 @@ void loop() {
   control.service();
   logic.service();
   todCtrl.service();
+  tlCtrl.service();
   countCtrl.service();
   memory.service();
   checkStatus();

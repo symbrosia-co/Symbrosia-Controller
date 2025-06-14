@@ -47,6 +47,7 @@ TLCtrl::TLCtrl(){
 
 void TLCtrl::init(){
   tlcTime= millis();
+  memory.setBool(statTimeLimCmd,false);
 } // init
 
 void TLCtrl::service(){
