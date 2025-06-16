@@ -49,8 +49,8 @@
 ------------------------------------------------------------------------------*/
 #pragma once
 
-#define hardwareS2Mini 2
-//#define hardwareS3Mini 3
+//#define hardwareS2Mini 2
+#define hardwareS3Mini 3
 
 #ifdef hardwareS2Mini
 #include "hardwareSymbCtrlS2Mini.h"

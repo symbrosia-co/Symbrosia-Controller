@@ -10,3 +10,6 @@
 /SyCheck/reports
 *.zip
 *.lck
+*.bin
+*.elf
+*.map
