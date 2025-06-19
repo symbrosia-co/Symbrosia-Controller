@@ -28,6 +28,8 @@
 #  29May2025 v2.0 A. Cooper
 #  - replace SymCtrlModbus with SymbCtrlScan, a subprocess based comm handler
 #  - alterations all through code to support new controller handler
+#  - fixed read only mode on logic gate output -> rw
+#  - added support for echo mode on logic gate
 #
 # Known issues:
 # - missing units for internal temp on status screen

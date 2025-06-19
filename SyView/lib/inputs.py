@@ -270,27 +270,27 @@ class Inputs(tk.Frame):
               if self.controller.write(reg,unitsAll[selection]):
                 self.delegates['EventLog']('{} set to {}'.format(reg,selection),True)
               else:
-                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
           if wid['form']=='unitwq':
               if self.controller.write(reg,unitsWQ[selection]):
                 self.delegates['EventLog']('{} set to {}'.format(reg,selection),True)
               else:
-                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
           if wid['form']=='unitt':
               if self.controller.write(reg,unitsTemp[selection]):
                 self.delegates['EventLog']('{} set to {}'.format(reg,selection),True)
               else:
-                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
           if wid['form']=='achan':
               if self.controller.write(reg,anlgChan[selection]):
                 self.delegates['EventLog']('{} set to {}'.format(reg,selection),True)
               else:
-                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
           if wid['form']=='proc':
               if self.controller.write(reg,procSel[selection]):
                 self.delegates['EventLog']('{} set to {}'.format(reg,selection),True)
               else:
-                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
 
   def set(self,reg):
     if self.controller.connected():
@@ -309,7 +309,7 @@ class Inputs(tk.Frame):
             if self.controller.write(reg,True):
               self.delegates['EventLog']('{} set to {}'.format(reg,wid['value']),True)
             else:
-              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
           if wid['form']=='send':
             valid= False
             for w in self.widgets:
@@ -343,7 +343,7 @@ class Inputs(tk.Frame):
               if self.controller.write(reg,wid['value']):
                 self.delegates['EventLog']('{} set to {}'.format(reg,wid['value']),True)
               else:
-                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
 
   #-- external methods --------------------------------------------------------
   

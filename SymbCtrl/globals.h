@@ -42,6 +42,9 @@
   - add fixed data definitions (serial,hardware, processor)
   11Apr2025 v2.9 A. Cooper
   - remove unused timer and counter enable
+  - added registers for time limited command, datTLCDuration 148,
+  datTLCOutput 149, statTimeLimCmd 70, and statTimeLimFlag 71
+  - expanded Modbus coil space to 80 registers
 
 ------------------------------------------------------------------------------*/
 #pragma once
@@ -51,16 +54,17 @@
 
 #ifdef hardwareS2Mini
 #include "hardwareSymbCtrlS2Mini.h"
+#define modelNameStr  "SymbCtrl Mk2 S2"
 #endif
 
 #ifdef hardwareS3Mini
 #include "hardwareSymbCtrlS3Mini.h"
+#define modelNameStr  "SymbCtrl Mk2 S3"
 #endif
 
 // unit ID 
 #define firmMajor     2
-#define firmMinor     8
-#define modelNameStr  "SymbCtrl Mk2"
+#define firmMinor     7
 
 // default time zone
 #define timeZone      -10
@@ -102,8 +106,11 @@ extern IPAddress wifiIPAddr;
 #define hdwrIDmk1            1
 #define hdwrIDmk2revA        2
 #define hdwrIDmk2revB        3
+#define hdwrIDmk2revC        4
+#define hdwrIDmk2revD        5
+#define hdwrIDmk2revE        6
 #define hdwrIDMin            1
-#define hdwrIDMax            3
+#define hdwrIDMax            4
 
 // processor ID codes...
 #define procIDS2Saola        1
@@ -118,7 +125,7 @@ extern IPAddress wifiIPAddr;
 #define ctrlRelay2           1
 #define ctrlOutput1          2
 #define ctrlOutput2          3
-#define ctrlSrcs             7
+#define ctrlSrcs             8
 #define ctrlCtrl1            0
 #define ctrlCtrl2            1
 #define ctrlCtrl3            2
@@ -126,6 +133,7 @@ extern IPAddress wifiIPAddr;
 #define ctrlToD              4
 #define ctrlLogic            5
 #define ctrlExtReq           6
+#define ctrlTLCmd            7
 
 // I/O channels...
 #define ioNone               0 // no I/O channel (no action)
@@ -381,6 +389,7 @@ extern IPAddress wifiIPAddr;
 #define statCtrl3OneShot    68
 #define statCtrl4OneShot    69
 #define statTimeLimCmd      70
+#define statTimeLimFlag     71
 
 // lookup array to convert IO channel to modbus address
 const int ioAddr[]={

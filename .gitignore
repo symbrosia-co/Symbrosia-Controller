@@ -8,3 +8,7 @@
 /SyCheck/ref
 /SyCheck/cfg
 /SyCheck/reports
+*.zip
+*.lck
+*.elf
+*.map

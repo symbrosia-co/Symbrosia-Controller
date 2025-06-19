@@ -215,7 +215,7 @@ class Status(tk.Frame):
               if self.controller.write(reg,True):
                 self.delegates['EventLog']('{} requested'.format(reg),True)
               else:
-                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
           if wid['form']=='send':
             valid= False
             for w in self.widgets:
@@ -249,7 +249,7 @@ class Status(tk.Frame):
               if self.controller.write(reg,wid['value']):
                 self.delegates['EventLog']('{} set to {}'.format(reg,wid['value']),True)
               else:
-                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+                self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
 
   def setMenu(self,reg,selection):
     if self.controller.valid():
@@ -259,7 +259,7 @@ class Status(tk.Frame):
             if self.controller.write(reg,self.anlgChan[selection]):
               self.delegates['EventLog']('{} set to {}'.format(reg,selection),True)
             else:
-              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message()),True)
+              self.delegates['EventLog']('Write error to {}! {}'.format(reg,self.controller.message),True)
             for w in self.widgets:
               if w['form']=='input':
                 w['reg']= self.anlgName[self.anlgChan[selection]]

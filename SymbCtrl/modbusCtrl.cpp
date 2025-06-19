@@ -21,6 +21,12 @@
   - revised memory map for first release
   23Mar2024 v2.4 A. Cooper
   - add call to limit on modbus holding register write
+  11Apr2025 v2.9 A. Cooper
+  - remove unused timer and counter enable
+  - added registers for time limited command, datTLCDuration 148,
+  datTLCOutput 149, statTimeLimCmd 70, and statTimeLimFlag 71
+  - added a write detect flag to coil write to support time limited command
+  - expanded Modbus coil space to 80 registers
 
 --------------------------------------------------------------------------------
 
@@ -317,7 +323,16 @@ const char mbCoilRWMode[statSize]= {
   '+', //  67 statCtrl2OneShot
   '+', //  68 statCtrl3OneShot
   '+', //  69 statCtrl4OneShot
-  '+'};//  70 statTimeLimCmd
+  '+', //  70 statTimeLimCmd
+  'r', //  71 statTimeLimFlag
+  '+', //  72 nc
+  '+', //  73 nc
+  '+', //  74 nc
+  '+', //  75 nc
+  '+', //  76 nc
+  '+', //  77 nc
+  '+', //  78 nc
+  '+'};//  79 nc
 
   bool mbActive;
   bool mbAvailable;
@@ -332,12 +347,12 @@ void ModbusInit(){
   mbActive=     false;
   mbTime= 0;
   //setup needed registers
-  mb.addCoil(0+mbBaseCoil,0,statSize);
-  mb.addHreg(0+mbBaseHold,0,dataSize);
-  mb.onGetCoil(0+mbBaseCoil,ModbusOnReadCoil,statSize);
-  mb.onSetCoil(0+mbBaseCoil,ModbusOnWriteCoil,statSize);
-  mb.onGetHreg(0+mbBaseHold,ModbusOnReadHold,dataSize);
-  mb.onSetHreg(0+mbBaseHold,ModbusOnWriteHold,dataSize);
+  mb.addCoil(0,0,statSize);
+  mb.addHreg(0,0,dataSize);
+  mb.onGetCoil(0,ModbusOnReadCoil,statSize);
+  mb.onSetCoil(0,ModbusOnWriteCoil,statSize);
+  mb.onGetHreg(0,ModbusOnReadHold,dataSize);
+  mb.onSetHreg(0,ModbusOnWriteHold,dataSize);
   Serial.println("    Modbus registers defined");
   Serial.println("    Modbus server running");
   return;
@@ -397,9 +412,9 @@ uint16_t ModbusOnReadHold(TRegister* reg, uint16_t val){
   // Serial.print("      Address: ");
   // Serial.println(reg->address.address);  
   // Serial.print("      Value:   ");
-  // Serial.println(memory.getInt((reg->address.address)-mbBaseHold));
+  // Serial.println(memory.getInt(reg->address.address));
   mbTime= millis();
-  int addr= reg->address.address-mbBaseHold;
+  int addr= reg->address.address;
   if (addr>mbRWModeSize && addr<dataSize) // mbRWModeSize is the end of the r/w reference array
     return memory.getInt(addr);
   if (mbHoldRWMode[addr]=='r' || mbHoldRWMode[addr]=='+') 
@@ -414,7 +429,7 @@ uint16_t ModbusOnWriteHold(TRegister* reg, uint16_t val){
   // Serial.print("      Value:   ");
   // Serial.println(val);
   mbTime= millis();
-  int addr= reg->address.address-mbBaseHold;
+  int addr= reg->address.address;
   if (addr>mbRWModeSize && addr<dataSize){ // mbRWModeSize is the end of the r/w reference array
     memory.setUInt(addr,val);
     return val;
@@ -433,9 +448,9 @@ uint16_t ModbusOnReadCoil(TRegister* reg, uint16_t val){
   // Serial.print("      Address: ");
   // Serial.println(reg->address.address);
   // Serial.print("      Value:   ");
-  // Serial.println(memory.getBool((reg->address.address)-mbBaseCoil));
+  // Serial.println(memory.getBool(reg->address.address));
   mbTime= millis();
-  if (memory.getBool((reg->address.address)-mbBaseCoil)) return 65280;
+  if (memory.getBool(reg->address.address)) return 65280;
   else return 0;
 } // ModbusOnReadCoil
 
@@ -446,10 +461,12 @@ uint16_t ModbusOnWriteCoil(TRegister* reg, uint16_t val){
   // Serial.print("      Value:   ");
   // Serial.println(val);
   mbTime= millis();
-  int addr= reg->address.address-mbBaseCoil;
+  int addr= reg->address.address;
   if (mbCoilRWMode[addr]=='w' || mbCoilRWMode[addr]=='+'){
       if (val==65280) memory.setBool(addr,true);
       else memory.setBool(addr,false);
+      if (addr==statTimeLimCmd) // set time limited command write flag
+        memory.setBool(statTimeLimFlag,true);
       return val;
     }
   if (memory.getBool(addr)) return 65280; // 65280 is a magic number for true in modbus

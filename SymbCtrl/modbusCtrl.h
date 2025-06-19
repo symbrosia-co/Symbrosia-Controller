@@ -41,8 +41,8 @@
 #include <ModbusTCP.h>
 
 // modbus register sizes
-#define mbBaseCoil         0
-#define mbBaseHold         0
+//#define mbBaseCoil         0
+//#define mbBaseHold         0
 
 //- functions ------------------------------------------------------------------
 void ModbusInit();

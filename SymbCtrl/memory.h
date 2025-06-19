@@ -52,7 +52,7 @@
 //- memory ---------------------------------------------------------------------
 #define dataSize        320  // size of data memory
 #define datSizeClear    300  // section of data to be cleared on defaults load
-#define statSize         75  // size of status memory
+#define statSize         80  // size of status memory
 #define fixedSize        16  // size of fixed data at start of flash memory
 #define addrSerial        0  // address of serial number
 #define addrHardware      1  // address of hardware ID
@@ -79,7 +79,7 @@
 #define minLogicFunc      0
 #define maxLogicFunc      7
 #define minTLCDuration    0
-#define maxTLCDuration  300
+#define maxTLCDuration 3600
 #define minResetIntv      0
 #define maxResetIntv      3
 #define minTemp         -40
