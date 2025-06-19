@@ -187,6 +187,7 @@
   - added registers for time limited command, datTLCDuration 148,
   datTLCOutput 149, statTimeLimCmd 70, and statTimeLimFlag 71
   - expanded Modbus coil space to 80 registers
+  - add code for manual output testing to userCtrl.cpp/drawOutputs
   
   Known bugs...
   - none

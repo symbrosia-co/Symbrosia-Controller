@@ -49,21 +49,22 @@
 ------------------------------------------------------------------------------*/
 #pragma once
 
-#define hardwareS2Mini 2
-//#define hardwareS3Mini 3
+//#define hardwareS2Mini 2
+#define hardwareS3Mini 3
 
 #ifdef hardwareS2Mini
 #include "hardwareSymbCtrlS2Mini.h"
+#define modelNameStr  "SymbCtrl Mk2 S2"
 #endif
 
 #ifdef hardwareS3Mini
 #include "hardwareSymbCtrlS3Mini.h"
+#define modelNameStr  "SymbCtrl Mk2 S3"
 #endif
 
 // unit ID 
 #define firmMajor     2
-#define firmMinor     9
-#define modelNameStr  "SymbCtrl Mk2"
+#define firmMinor     7
 
 // default time zone
 #define timeZone      -10

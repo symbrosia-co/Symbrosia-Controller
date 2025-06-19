@@ -53,6 +53,8 @@
   - add screen for firmware update
   - move reset function to status screen
   - add firmware update to unit info screen
+  18Jun2025 v2.9 A. Cooper
+  - add code for output testing to drawOutputs
 
 --------------------------------------------------------------------------------
 
@@ -112,7 +114,7 @@ const char pwChars[]= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234
 //- constants ------------------------------------------------------------------
 #define lcdUpdate       250 // screen update interval in milliseconds
 #define chanOffset       16 // spacing of channel data in setup registers
-#define screenStatDelay 600 // time to return to status screen in seconds
+#define screenStatDelay 300 // time to return to status screen in seconds
 #define wifiTimeout   60000 // timeout for WiFi scanNetworks
 
 #define debugUI false
@@ -167,6 +169,7 @@ int  UserCtrl::getScreen(){
 void UserCtrl::right(){
   if (debugUI) Serial.println("Right");
   userSetTime= millis();
+  screenTime= millis();
   if (userSetReq==0){
     if (++screen>scrLast) screen= scrFirst;
     setScreen(screen);
@@ -177,6 +180,7 @@ void UserCtrl::right(){
 void UserCtrl::left(){
   if (debugUI) Serial.println("Left");
   userSetTime= millis();
+  screenTime= millis();
   if (userSetReq==0){
     if (screen==scrWiFiDone) screen= scrFirst;
     if (--screen<scrFirst) screen= scrLast;
@@ -189,6 +193,7 @@ void UserCtrl::left(){
 void UserCtrl::click(){
   if (debugUI) Serial.println("Click");
   userSetTime= millis();
+  screenTime= millis();
   if (userSetReq==0){
     if (++screen>scrLast) screen= 1;
     setScreen(screen);
@@ -203,6 +208,7 @@ void UserCtrl::click(){
 void UserCtrl::press(){
   if (debugUI) Serial.println("Press");
   userSetTime= millis();
+  screenTime= millis();
   userSetNext= false;
   userSetAcpt= false;
   switch (screen){
@@ -243,6 +249,11 @@ void UserCtrl::press(){
     case scrControl2c:
     case scrControl3c:
     case scrControl4c:
+      if (userSetReq==0) userSetReq= 1;
+      else userSetNext= true;
+      break;
+    // temperature calibrate
+    case scrOutputs:
       if (userSetReq==0) userSetReq= 1;
       else userSetNext= true;
       break;
@@ -569,14 +580,14 @@ void UserCtrl::drawScreen(){
     case scrLogic:
       drawLogic();
       break;
+    case scrOutputs:
+      drawOutputs();
+      break;
     case scrToD:
       drawToD();
       break;
     case scrToD2:
       drawToD2();
-      break;
-    case scrOutputs:
-      drawOutputs();
       break;
     case scrCounter:
       drawCounter();
@@ -938,7 +949,89 @@ void UserCtrl::drawLogic(){
   printChan(memory.getUInt(datLogicInA));
   lcd.setCursor(10,1);
   printChan(memory.getUInt(datLogicInB));
-} // drawToD
+} // drawLogic
+
+void UserCtrl::drawOutputs(){
+  if (newScr){
+    lcd.print("Out");
+    lcd.setCursor(4,0);
+    lcd.print("1:    D1:");
+    lcd.setCursor(1,1);
+    lcd.print("Rly2:    D2:");
+    newScr= false;
+  }
+  lcd.setCursor(6,0);
+  printOnOff(memory.getBool(statRelay1Status));
+  lcd.setCursor(13,0);
+  printOnOff(memory.getBool(statDigitalOut1));
+  lcd.setCursor(6,1);
+  printOnOff(memory.getBool(statRelay2Status));
+  lcd.setCursor(13,1);
+  printOnOff(memory.getBool(statDigitalOut2));
+  // test relay 1
+  if (userSetReq==1){
+    lcd.setCursor(4,0);
+    if (memory.getBool(statFlash)) lcd.print("1:");
+    else lcd.print("  ");
+    if (userSelScroll!=0) memory.setBool(statRelay1Request,!memory.getBool(statRelay1Request));
+    userSelScroll= 0;
+    if (userSetAcpt || userSetNext){
+      lcd.setCursor(4,0);
+      lcd.print("1:");
+      userSetAcpt= false;
+      userSetNext= false;
+      userSetReq= 2;
+    }
+  }
+  // test relay 2
+  if (userSetReq==2){
+    lcd.setCursor(1,1);
+    if (memory.getBool(statFlash)) lcd.print("Rly2:");
+    else lcd.print("     ");
+    if (userSelScroll!=0) memory.setBool(statRelay2Request,!memory.getBool(statRelay2Request));
+    userSelScroll= 0;
+    if (userSetAcpt || userSetNext){
+      lcd.setCursor(1,1);
+      lcd.print("Rly2:");
+      userSetAcpt= false;
+      userSetNext= false;
+      userSetReq= 3;
+    }
+  }
+  // test output 1
+  if (userSetReq==3){
+    lcd.setCursor(10,0);
+    if (memory.getBool(statFlash)) lcd.print("D1:");
+    else lcd.print("   ");
+    if (userSelScroll!=0) memory.setBool(statDout1Request,!memory.getBool(statDout1Request));
+    userSelScroll= 0;
+    if (userSetAcpt || userSetNext){
+      lcd.setCursor(10,0);
+      lcd.print("D1:");
+      userSetAcpt= false;
+      userSetNext= false;
+      userSetReq= 4;
+    }
+  }
+  // test output 2
+  if (userSetReq==4){
+    lcd.setCursor(10,1);
+    if (memory.getBool(statFlash)) lcd.print("D2:");
+    else lcd.print("   ");
+    if (userSelScroll!=0) memory.setBool(statDout2Request,!memory.getBool(statDout2Request));
+    userSelScroll= 0;
+    if (userSetAcpt || userSetNext){
+      memory.setBool(statRelay1Request,false);
+      memory.setBool(statRelay2Request,false);
+      memory.setBool(statDout1Request,false);
+      memory.setBool(statDout2Request,false);
+      lcd.setCursor(10,1);
+      lcd.print("D2:");
+      newScr= true;
+      userSetReq= 0;
+    }
+  }
+} // drawOutputs
 
 void UserCtrl::drawToD(){
   if (newScr){    
@@ -978,25 +1071,6 @@ void UserCtrl::drawToD2(){
   lcd.setCursor(11,1);
   printChan(memory.getUInt(datToDOutput4));  
 } // drawToD2
-
-void UserCtrl::drawOutputs(){
-  if (newScr){
-    lcd.print("Out");
-    lcd.setCursor(4,0);
-    lcd.print("1:    D1:");
-    lcd.setCursor(1,1);
-    lcd.print("Rly2:    D2:");
-    newScr= false;
-  }
-  lcd.setCursor(6,0);
-  printOnOff(memory.getBool(statRelay1Status));
-  lcd.setCursor(13,0);
-  printOnOff(memory.getBool(statDigitalOut1));
-  lcd.setCursor(6,1);
-  printOnOff(memory.getBool(statRelay2Status));
-  lcd.setCursor(13,1);
-  printOnOff(memory.getBool(statDigitalOut2));
-} // drawRelay
 
 void UserCtrl::drawCounter(){
   if (newScr){
