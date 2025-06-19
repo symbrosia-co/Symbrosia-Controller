@@ -196,7 +196,7 @@ class SymbCtrl():
     'LogicInA':        {'addr':136,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
     'LogicInB':        {'addr':137,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
     'LogicFunction':   {'addr':138,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
-    'LogicOut':        {'addr':139,'mode':'r', 'type':'uint', 'unit':None,            'valid':None,            'desc':''},
+    'LogicOut':        {'addr':139,'mode':'rw','type':'uint', 'unit':None,            'valid':None,            'desc':''},
     'ToDStart':        {'addr':140,'mode':'r', 'type':'hour', 'unit':None,            'valid':None,            'desc':'Formatted ToD start time string'},
     'ToDStartHour':    {'addr':140,'mode':'rw','type':'uint', 'unit':'h',             'valid':None,            'desc':''},
     'ToDStartMin':     {'addr':141,'mode':'rw','type':'uint', 'unit':'m',             'valid':None,            'desc':''},
