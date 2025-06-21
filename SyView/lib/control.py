@@ -40,7 +40,11 @@ anlgChan=  {'None':0,'WQ Amplifier':1,'Temperature 1':2,'Temperature 2':3,'Analo
 anlgName=  {0:None,1:'WQSensor',2:'Temperature1',3:'Temperature2',4:'Analog1',5:'Analog2',6:'InternalTemp',7:'SupplyVoltage',8:'Processed',35:'Day',36:'Hour',37:'Minute',38:'Second'}
 anlgUnit=  {0:None,1:'WQSensorUnits',2:'Temp1Units',3:'Temp2Units',4:'Analog1Units',5:'Analog2Units',6:'IntTempUnits',7:'SupVoltUnits',8:'ProcUnits',36:'day',37:'hour',38:'min',39:'sec'}
 outChan=   {'None':0,'Relay 1':11,'Relay 2':12,'Output 1':13,'Output 2':14,'Virtual 1':15,'Virtual 2':16}
-digChan=   {'None':0,'Input 1':9,'Input 2':10,'Relay 1':11,'Relay 2':12,'Output 1':13,'Output 2':14,'Virtual 1':15,'Virtual 2':16,'TofD':39}
+digChan=   {'None':0,'Input 1':9,'Input 2':10,'Relay 1':11,'Relay 2':12,'Output 1':13,'Output 2':14,'Virtual 1':15,'Virtual 2':16,
+            'Control 1 Out':17,'Control 2 Out':18,'Control 3 Out':19,'Control 4 Out':20,
+            'Control Alarm':21,'Control 1 Alarm':22,'Control 2 Alarm':23,'Control 3 Alarm':24,'Control 4 Alarm':25,
+            'Control 1 Alarm Low':26,'Control 2 Alarm Low':27,'Control 3 Alarm Low':28,'Control 4 Alarm Low':29,
+            'Control 1 Alarm High':30,'Control 2 Alarm High':31,'Control 3 Alarm High':32,'Control 4 Alarm High':33,'Flasher':34}
 
 #------------------------------------------------------------------------------
 #  Control Tab

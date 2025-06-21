@@ -50,7 +50,18 @@
 #pragma once
 
 //#define hardwareS2Mini 2
-#define hardwareS3Mini 3
+//#define hardwareS3Mini 3
+#define hardwareAuto 9
+
+#ifdef hardwareAuto // attempt to ID processor from IDE
+  #if defined(ARDUINO_LOLIN_S2_MINI)
+    #define hardwareS2Mini 2
+  #elif defined(ARDUINO_LOLIN_S3_MINI)
+    #define hardwareS3Mini 3
+  #else
+    #error Undefined target processor!!
+  #endif
+#endif
 
 #ifdef hardwareS2Mini
 #include "hardwareSymbCtrlS2Mini.h"
@@ -64,7 +75,7 @@
 
 // unit ID 
 #define firmMajor     2
-#define firmMinor     7
+#define firmMinor     9
 
 // default time zone
 #define timeZone      -10
