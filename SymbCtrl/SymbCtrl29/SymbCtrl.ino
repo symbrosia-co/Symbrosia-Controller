@@ -170,12 +170,12 @@
   - Set up code for fota using esp32FOTA by Chris Joyce
   - new serial number assignment method at first boot on new unit
   - reserve bytes at start of flash for fixed information including
-    serial number and hardware information
+  serial number and hardware information
   - add setSerial, setHardware, and setProcessor methods to memory
   - add getSerial, getHardware, and getProcessor methods to memory
   - add getWQInstalled and setWQInstalled methods to memory
   - modify setup to handle fixed memory entry if needed on startup,
-    setup will block while looping userCtrl.service, encoder, and button
+  setup will block while looping userCtrl.service, encoder, and button
   - in userCtrl add screens for fixed data entry
   - in userCtrl add screen for firmware update
   - in userCtrl move reset function to status screen
@@ -185,10 +185,9 @@
   - added time limited command, a command input that will only be valid for the
     duration specified, code in tlCtrl.cpp
   - added registers for time limited command, datTLCDuration 148,
-    datTLCOutput 149, statTimeLimCmd 70, and statTimeLimFlag 71
+  datTLCOutput 149, statTimeLimCmd 70, and statTimeLimFlag 71
   - expanded Modbus coil space to 80 registers
   - add code for manual output testing to userCtrl.cpp/drawOutputs
-  - added use of TWDT to prevent overall lockups
   
   Known bugs...
   - none
@@ -205,7 +204,6 @@
 #include <Button2.h>
 #include <esp32-hal-log.h>
 #include <Adafruit_NeoPixel.h>
-#include <esp_task_wdt.h>
 
 //- Local includes -------------------------------------------------------------
 #include "globals.h"
@@ -251,13 +249,6 @@ unsigned long pixelTime= 0;
 
 //- output control -------------------------------------------------------------
 bool ctrlMatrix[ctrlOuts][ctrlSrcs];
-
-//- watchdog configuration ----------------------------------------------------
-// esp_task_wdt_config_t twdt_config = {
-//         .timeout_ms= watchdogTime*1000,
-//         .idle_core_mask= (1<<watchdogCores)-1, // Bitmask of all cores
-//         .trigger_panic= true,
-//     };
   
 //- low level hardware --------------------------------------------------------- 
 void setOutputs(){
@@ -599,13 +590,6 @@ void setup() {
   wifiConnect();
   // setup network services if wifi connected...
   if (wifiStat) ModbusInit();
-  // set up ESP task watchdog TWDT
-  Serial.print("  Enable task watchdog timer ");
-  Serial.print(watchdogTime);
-  Serial.println("s");
-  // esp_task_wdt_deinit();
-  // esp_task_wdt_init(&twdt_config);
-  // esp_task_wdt_add(NULL); //add current thread to WDT watch
   Serial.println("  Setup complete, running!");
 } // setup
 
@@ -632,7 +616,6 @@ void loop() {
   setOutputs();
   checkMidnight();
   statLED();
-  // esp_task_wdt_reset();
 } // loop
 
 //- End Symbrosia Controller ---------------------------------------------------

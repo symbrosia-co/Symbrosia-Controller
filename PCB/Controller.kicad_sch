@@ -2034,14 +2034,14 @@
         )
       )
     )
-    (symbol "Reference_Voltage:TL431D" (pin_numbers hide) (pin_names hide) (in_bom yes) (on_board yes)
-      (property "Reference" "U" (at 0 -2.54 0)
+    (symbol "Reference_Voltage:TL431DBZ" (pin_numbers hide) (pin_names hide) (in_bom yes) (on_board yes)
+      (property "Reference" "U" (at -2.54 2.54 0)
         (effects (font (size 1.27 1.27)))
       )
-      (property "Value" "TL431D" (at 0 -4.445 0)
+      (property "Value" "TL431DBZ" (at 0 -2.54 0)
         (effects (font (size 1.27 1.27)))
       )
-      (property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" (at 0 -6.35 0)
+      (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 0 -3.81 0)
         (effects (font (size 1.27 1.27) italic) hide)
       )
       (property "Datasheet" "http://www.ti.com/lit/ds/symlink/tl431.pdf" (at 0 0 0)
@@ -2050,13 +2050,13 @@
       (property "ki_keywords" "diode device shunt regulator" (at 0 0 0)
         (effects (font (size 1.27 1.27)) hide)
       )
-      (property "ki_description" "Shunt Regulator, SO-8" (at 0 0 0)
+      (property "ki_description" "Shunt Regulator, SOT-23" (at 0 0 0)
         (effects (font (size 1.27 1.27)) hide)
       )
-      (property "ki_fp_filters" "SOIC?8*3.9x4.9mm*P1.27mm*" (at 0 0 0)
+      (property "ki_fp_filters" "SOT?23*" (at 0 0 0)
         (effects (font (size 1.27 1.27)) hide)
       )
-      (symbol "TL431D_0_1"
+      (symbol "TL431DBZ_0_1"
         (polyline
           (pts
             (xy -1.27 0)
@@ -2086,38 +2086,18 @@
           (fill (type none))
         )
       )
-      (symbol "TL431D_1_1"
-        (polyline
-          (pts
-            (xy 0 1.27)
-            (xy 0 0)
-          )
-          (stroke (width 0) (type default))
-          (fill (type none))
-        )
+      (symbol "TL431DBZ_1_1"
         (pin passive line (at 2.54 0 180) (length 2.54)
           (name "K" (effects (font (size 1.27 1.27))))
           (number "1" (effects (font (size 1.27 1.27))))
         )
-        (pin passive line (at -2.54 0 0) (length 2.54)
-          (name "A" (effects (font (size 1.27 1.27))))
-          (number "2" (effects (font (size 1.27 1.27))))
-        )
-        (pin passive line (at -2.54 0 0) (length 2.54) hide
-          (name "A" (effects (font (size 1.27 1.27))))
-          (number "3" (effects (font (size 1.27 1.27))))
-        )
-        (pin passive line (at -2.54 0 0) (length 2.54) hide
-          (name "A" (effects (font (size 1.27 1.27))))
-          (number "6" (effects (font (size 1.27 1.27))))
-        )
-        (pin passive line (at -2.54 0 0) (length 2.54) hide
-          (name "A" (effects (font (size 1.27 1.27))))
-          (number "7" (effects (font (size 1.27 1.27))))
-        )
         (pin passive line (at 0 2.54 270) (length 2.54)
           (name "REF" (effects (font (size 1.27 1.27))))
-          (number "8" (effects (font (size 1.27 1.27))))
+          (number "2" (effects (font (size 1.27 1.27))))
+        )
+        (pin passive line (at -2.54 0 0) (length 2.54)
+          (name "A" (effects (font (size 1.27 1.27))))
+          (number "3" (effects (font (size 1.27 1.27))))
         )
       )
     )
@@ -9510,7 +9490,7 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid e3f08dd5-3d26-4da4-9aee-48670905ed73))
-    (pin "3" (uuid 18a397b3-f5b9-437e-8c2b-02e7df3cace5))
+    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5862))
     (pin "2" (uuid 64bb951d-2c38-40a7-b5d1-0e4349b0eb51))
     (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5862))
     (instances
@@ -9721,9 +9701,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid aa0721b8-6b46-4d25-8a20-8cd94fef6d55))
-    (pin "3" (uuid 523e0626-2bd8-498a-8e14-307d9bb56bdb))
+    (pin "3" (uuid 523e0626-2bd8-498a-8e14-307d9bb56bdc))
     (pin "2" (uuid 9f3624b3-15b1-4395-97c6-2357f5a8d487))
-    (pin "3" (uuid 523e0626-2bd8-498a-8e14-307d9bb56bdb))
+    (pin "3" (uuid 523e0626-2bd8-498a-8e14-307d9bb56bdc))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -9749,9 +9729,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 8f4f4d7f-ef7d-4aba-ba4b-dcd63869dff4))
-    (pin "3" (uuid 850c7a0c-5379-4574-aff9-e4248ef0820c))
+    (pin "3" (uuid 850c7a0c-5379-4574-aff9-e4248ef0820d))
     (pin "2" (uuid 18f81e22-ee0a-43b4-8219-1a913c2d04bf))
-    (pin "3" (uuid 850c7a0c-5379-4574-aff9-e4248ef0820c))
+    (pin "3" (uuid 850c7a0c-5379-4574-aff9-e4248ef0820d))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -9931,7 +9911,7 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid d5b312eb-8f47-4af1-8987-b02ad51bd115))
-    (pin "3" (uuid ce0f434d-b9dd-4c5f-a1da-b948db8a8548))
+    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5864))
     (pin "2" (uuid 64bb951d-2c38-40a7-b5d1-0e4349b0eb52))
     (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5864))
     (instances
@@ -10116,7 +10096,7 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 7a57e5b4-b1ec-462c-8657-affe3684a88d))
-    (pin "3" (uuid 5a0ab8b4-cd6a-4e6c-ae12-c1892e2d41b6))
+    (pin "3" (uuid 94d3c945-5e87-4ef8-8847-75bfa9d8e4aa))
     (pin "2" (uuid 5bcd34a6-12b1-462d-9f4d-8dfa5a0b4eea))
     (pin "3" (uuid 94d3c945-5e87-4ef8-8847-75bfa9d8e4aa))
     (instances
@@ -10349,7 +10329,7 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid e202b6e2-89d9-4557-896c-888442f6dc55))
-    (pin "3" (uuid 6ee19e5d-36fc-4351-8928-2841e575e67c))
+    (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d094))
     (pin "2" (uuid d5a602f3-eb99-41da-80d8-1eb1c4de4b3d))
     (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d094))
     (instances
@@ -10453,9 +10433,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid d1c00c30-e1b6-45b8-a147-c078b6bd65f9))
-    (pin "3" (uuid ae70ce7c-272c-45eb-bfb7-b614a5d9acdc))
+    (pin "3" (uuid ae70ce7c-272c-45eb-bfb7-b614a5d9acdd))
     (pin "2" (uuid f1e4af89-a1d4-49e0-8b1e-771e06b78c7f))
-    (pin "3" (uuid ae70ce7c-272c-45eb-bfb7-b614a5d9acdc))
+    (pin "3" (uuid ae70ce7c-272c-45eb-bfb7-b614a5d9acdd))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -10565,9 +10545,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 94f4dbc2-3183-4ffe-b8f3-03c50665dcb4))
-    (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d093))
-    (pin "2" (uuid d5a602f3-eb99-41da-80d8-1eb1c4de4b3d))
-    (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d093))
+    (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d095))
+    (pin "2" (uuid d5a602f3-eb99-41da-80d8-1eb1c4de4b3e))
+    (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d095))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -10806,13 +10786,40 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 65d6dae5-f1f0-4d3e-b051-241f13402bdc))
-    (pin "3" (uuid 615d60c0-2414-4881-9b47-fdee7413a972))
+    (pin "3" (uuid 615d60c0-2414-4881-9b47-fdee7413a973))
     (pin "2" (uuid f8c63d29-4d3e-4fb8-b34d-e241d7b1bda0))
-    (pin "3" (uuid 615d60c0-2414-4881-9b47-fdee7413a972))
+    (pin "3" (uuid 615d60c0-2414-4881-9b47-fdee7413a973))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
           (reference "D13") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "Reference_Voltage:TL431DBZ") (at 274.32 189.23 270) (mirror x) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (uuid 7142b577-61fe-4be2-92e3-96afee841c1f)
+    (property "Reference" "U9" (at 271.78 187.96 90)
+      (effects (font (size 1.27 1.27)) (justify right))
+    )
+    (property "Value" "TL431DBZ" (at 271.78 190.5 90)
+      (effects (font (size 1.27 1.27)) (justify right))
+    )
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 270.51 189.23 0)
+      (effects (font (size 1.27 1.27) italic) hide)
+    )
+    (property "Datasheet" "http://www.ti.com/lit/ds/symlink/tl431.pdf" (at 274.32 189.23 0)
+      (effects (font (size 1.27 1.27) italic) hide)
+    )
+    (pin "1" (uuid 3653ca63-9043-4ebe-9273-734e51b3e872))
+    (pin "2" (uuid 58258339-413e-48e0-b320-b496dc442826))
+    (pin "3" (uuid 53d1c8b9-4e10-4fdb-b7fe-a0b33bbc3aca))
+    (instances
+      (project "Controller"
+        (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
+          (reference "U9") (unit 1)
         )
       )
     )
@@ -10911,9 +10918,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 4653c8e2-a283-4975-832b-da69fc4816f1))
-    (pin "3" (uuid cc144b4c-8278-4cdb-b2c8-4d83f8fcc54f))
-    (pin "2" (uuid d5a602f3-eb99-41da-80d8-1eb1c4de4b3d))
-    (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d094))
+    (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d096))
+    (pin "2" (uuid d5a602f3-eb99-41da-80d8-1eb1c4de4b3f))
+    (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d096))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -11067,9 +11074,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid f0f04653-82f6-478a-b261-266dc36a865a))
-    (pin "3" (uuid 7eb56d58-3a5c-4d6e-85e3-d7dfe5a228bc))
+    (pin "3" (uuid 7eb56d58-3a5c-4d6e-85e3-d7dfe5a228bd))
     (pin "2" (uuid d44c0bce-7c5d-4085-82f0-2844a8673f10))
-    (pin "3" (uuid 7eb56d58-3a5c-4d6e-85e3-d7dfe5a228bc))
+    (pin "3" (uuid 7eb56d58-3a5c-4d6e-85e3-d7dfe5a228bd))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -11120,7 +11127,7 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 7b2219a7-d738-423d-af03-d06c0c1bbcb8))
-    (pin "3" (uuid 58c95438-bb32-4ea1-87a6-a226347451e4))
+    (pin "3" (uuid a8e35338-c968-4319-8d57-bfe79988fbe5))
     (pin "2" (uuid eed1f10e-d966-41ab-868e-23fbbe0f5075))
     (pin "3" (uuid a8e35338-c968-4319-8d57-bfe79988fbe5))
     (instances
@@ -11148,9 +11155,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 251cdb98-ce81-4192-8ed7-f02e080463fd))
-    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5861))
-    (pin "2" (uuid 64bb951d-2c38-40a7-b5d1-0e4349b0eb51))
-    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5861))
+    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5863))
+    (pin "2" (uuid 64bb951d-2c38-40a7-b5d1-0e4349b0eb53))
+    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5863))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -11176,9 +11183,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 4d064f24-3ad7-434f-b65a-84e0a875fa24))
-    (pin "3" (uuid 44eda136-d5eb-4512-8b5b-2ea734765044))
+    (pin "3" (uuid 44eda136-d5eb-4512-8b5b-2ea734765045))
     (pin "2" (uuid eea167aa-d783-4a29-86db-6c4cb754f1a1))
-    (pin "3" (uuid 44eda136-d5eb-4512-8b5b-2ea734765044))
+    (pin "3" (uuid 44eda136-d5eb-4512-8b5b-2ea734765045))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -11432,7 +11439,7 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 7b2219a7-d738-423d-af03-d06c0c1bbcb7))
-    (pin "3" (uuid 3400a64c-6efe-4433-8d6b-ed51b2f786c8))
+    (pin "3" (uuid 75973b44-2e30-4f0e-b2f5-0ea62738b88b))
     (pin "2" (uuid 6d499be0-f400-455f-adba-97db64f2b795))
     (pin "3" (uuid 75973b44-2e30-4f0e-b2f5-0ea62738b88b))
     (instances
@@ -11561,10 +11568,10 @@
     (property "Datasheet" "https://www.onsemi.com/products/discrete-power-modules/schottky-diodes-schottky-rectifiers/BAT54SL" (at 327.66 204.47 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 7b2219a7-d738-423d-af03-d06c0c1bbcb8))
-    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5866))
+    (pin "1" (uuid 7b2219a7-d738-423d-af03-d06c0c1bbcb9))
+    (pin "3" (uuid 58c95438-bb32-4ea1-87a6-a226347451e5))
     (pin "2" (uuid ed1f18fa-cf52-4a49-bad2-5ed3255854d6))
-    (pin "3" (uuid 58c95438-bb32-4ea1-87a6-a226347451e4))
+    (pin "3" (uuid 58c95438-bb32-4ea1-87a6-a226347451e5))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -11639,10 +11646,10 @@
     (property "Datasheet" "https://www.onsemi.com/products/discrete-power-modules/schottky-diodes-schottky-rectifiers/BAT54SL" (at 321.31 33.02 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 7b2219a7-d738-423d-af03-d06c0c1bbcb7))
-    (pin "3" (uuid 3400a64c-6efe-4433-8d6b-ed51b2f786c7))
+    (pin "1" (uuid 7b2219a7-d738-423d-af03-d06c0c1bbcba))
+    (pin "3" (uuid 3400a64c-6efe-4433-8d6b-ed51b2f786c9))
     (pin "2" (uuid 7a76ed27-0c15-4e27-81f4-99791eca8768))
-    (pin "3" (uuid 3400a64c-6efe-4433-8d6b-ed51b2f786c7))
+    (pin "3" (uuid 3400a64c-6efe-4433-8d6b-ed51b2f786c9))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -11668,9 +11675,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 7224b9c7-56ff-47fa-9312-3b1c1510a512))
-    (pin "3" (uuid e63394f7-b9dc-4f98-8752-b8af4170b12a))
+    (pin "3" (uuid e63394f7-b9dc-4f98-8752-b8af4170b12b))
     (pin "2" (uuid 66961844-d263-4298-86b8-5397a9cd0a6c))
-    (pin "3" (uuid e63394f7-b9dc-4f98-8752-b8af4170b12a))
+    (pin "3" (uuid e63394f7-b9dc-4f98-8752-b8af4170b12b))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -11723,9 +11730,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 702d1e29-f67b-4526-9837-90fccb840ca9))
-    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5863))
-    (pin "2" (uuid 64bb951d-2c38-40a7-b5d1-0e4349b0eb52))
-    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5863))
+    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5867))
+    (pin "2" (uuid 64bb951d-2c38-40a7-b5d1-0e4349b0eb54))
+    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5867))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -11750,10 +11757,10 @@
     (property "Datasheet" "https://www.onsemi.com/products/discrete-power-modules/schottky-diodes-schottky-rectifiers/BAT54SL" (at 195.58 119.38 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 7a57e5b4-b1ec-462c-8657-affe3684a88d))
-    (pin "3" (uuid 5a0ab8b4-cd6a-4e6c-ae12-c1892e2d41b5))
+    (pin "1" (uuid 7a57e5b4-b1ec-462c-8657-affe3684a88e))
+    (pin "3" (uuid 5a0ab8b4-cd6a-4e6c-ae12-c1892e2d41b7))
     (pin "2" (uuid 7d2dc587-e788-49b2-b92a-8f7cd2102b6b))
-    (pin "3" (uuid 5a0ab8b4-cd6a-4e6c-ae12-c1892e2d41b5))
+    (pin "3" (uuid 5a0ab8b4-cd6a-4e6c-ae12-c1892e2d41b7))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -11803,8 +11810,8 @@
     (property "Datasheet" "https://www.onsemi.com/products/discrete-power-modules/schottky-diodes-schottky-rectifiers/BAT54SL" (at 129.54 83.82 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 7a57e5b4-b1ec-462c-8657-affe3684a88d))
-    (pin "3" (uuid 94d3c945-5e87-4ef8-8847-75bfa9d8e4aa))
+    (pin "1" (uuid 7a57e5b4-b1ec-462c-8657-affe3684a88f))
+    (pin "3" (uuid c0a2ccff-db71-48b8-8242-1fb6b2046778))
     (pin "2" (uuid bdd6a3b7-3aad-4c81-be22-5112fd11f144))
     (pin "3" (uuid c0a2ccff-db71-48b8-8242-1fb6b2046778))
     (instances
@@ -11832,43 +11839,13 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 5837aefe-47af-4daa-96f6-3d8794157e14))
-    (pin "3" (uuid 2830209e-3fdf-4566-877b-a3063f8574bd))
-    (pin "2" (uuid d5a602f3-eb99-41da-80d8-1eb1c4de4b3d))
-    (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d094))
+    (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d097))
+    (pin "2" (uuid d5a602f3-eb99-41da-80d8-1eb1c4de4b40))
+    (pin "3" (uuid 8967ab9f-29a2-4cd6-9a7b-67789c17d097))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
           (reference "D17") (unit 1)
-        )
-      )
-    )
-  )
-
-  (symbol (lib_id "Reference_Voltage:TL431D") (at 274.32 189.23 270) (mirror x) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
-    (uuid c318f00d-b1c4-4721-95b0-66fb50bd3ee6)
-    (property "Reference" "U9" (at 271.78 187.96 90)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Value" "TL431D" (at 271.78 190.5 90)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" (at 267.97 189.23 0)
-      (effects (font (size 1.27 1.27) italic) hide)
-    )
-    (property "Datasheet" "http://www.ti.com/lit/ds/symlink/tl431.pdf" (at 274.32 189.23 0)
-      (effects (font (size 1.27 1.27) italic) hide)
-    )
-    (pin "1" (uuid 96cb9737-090e-4721-9911-b9f57a1fa724))
-    (pin "2" (uuid 8394d97b-8f9d-41c0-b322-5685de59bbe4))
-    (pin "3" (uuid 381317aa-cdc9-4b30-a351-2a5a653b24e7))
-    (pin "6" (uuid c8d5e42c-2d45-4bf0-99b4-d98e82c808b7))
-    (pin "7" (uuid 67b19715-fb6b-485e-9bc8-96732905aa44))
-    (pin "8" (uuid 57ae3374-6250-4631-9fea-1359486d22c0))
-    (instances
-      (project "Controller"
-        (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
-          (reference "U9") (unit 1)
         )
       )
     )
@@ -11915,9 +11892,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid dfb6d407-730b-4c02-b8b3-ce37adc193bc))
-    (pin "3" (uuid 7c50865a-e3d7-47b8-809c-5470483b97c5))
-    (pin "2" (uuid 64bb951d-2c38-40a7-b5d1-0e4349b0eb51))
-    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5862))
+    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5868))
+    (pin "2" (uuid 64bb951d-2c38-40a7-b5d1-0e4349b0eb55))
+    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5868))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -12000,8 +11977,8 @@
     (property "Datasheet" "https://www.onsemi.com/products/discrete-power-modules/schottky-diodes-schottky-rectifiers/BAT54SL" (at 118.11 54.61 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 7a57e5b4-b1ec-462c-8657-affe3684a88d))
-    (pin "3" (uuid 94d3c945-5e87-4ef8-8847-75bfa9d8e4aa))
+    (pin "1" (uuid 7a57e5b4-b1ec-462c-8657-affe3684a890))
+    (pin "3" (uuid a7b09b85-f90d-4c73-a594-171b41955d15))
     (pin "2" (uuid faa6b240-1069-4928-adc6-878aa288ab6e))
     (pin "3" (uuid a7b09b85-f90d-4c73-a594-171b41955d15))
     (instances
@@ -12029,9 +12006,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid a677aac5-354c-488b-9266-99773591acc2))
-    (pin "3" (uuid 8f4907e5-0f8b-46e2-b38a-bc490016287e))
+    (pin "3" (uuid 8f4907e5-0f8b-46e2-b38a-bc490016287f))
     (pin "2" (uuid b0346fc6-1303-47d2-8694-1e8d5f406ed4))
-    (pin "3" (uuid 8f4907e5-0f8b-46e2-b38a-bc490016287e))
+    (pin "3" (uuid 8f4907e5-0f8b-46e2-b38a-bc490016287f))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -12320,9 +12297,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid d1b9a677-dd4d-4167-b797-3b94ae99cd13))
-    (pin "3" (uuid 61e1bb21-2580-4f15-b175-2384cb6780e5))
+    (pin "3" (uuid 61e1bb21-2580-4f15-b175-2384cb6780e6))
     (pin "2" (uuid 3fc831d3-d6a2-4f76-8bb9-896dabb117de))
-    (pin "3" (uuid 61e1bb21-2580-4f15-b175-2384cb6780e5))
+    (pin "3" (uuid 61e1bb21-2580-4f15-b175-2384cb6780e6))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -12527,10 +12504,10 @@
     (property "Datasheet" "https://www.onsemi.com/products/discrete-power-modules/schottky-diodes-schottky-rectifiers/BAT54SL" (at 300.99 33.02 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 7b2219a7-d738-423d-af03-d06c0c1bbcb8))
-    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5865))
-    (pin "2" (uuid 64bb951d-2c38-40a7-b5d1-0e4349b0eb53))
-    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a5865))
+    (pin "1" (uuid 7b2219a7-d738-423d-af03-d06c0c1bbcbb))
+    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a586a))
+    (pin "2" (uuid 64bb951d-2c38-40a7-b5d1-0e4349b0eb56))
+    (pin "3" (uuid 9d496f94-b81a-4338-a315-3cb0461a586a))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
@@ -12673,9 +12650,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid a00b2dda-ef2e-44a0-a2d9-3fd07fc2dac8))
-    (pin "3" (uuid dd67b3b6-f30c-40ae-a1c8-20b3b8e1b92f))
+    (pin "3" (uuid dd67b3b6-f30c-40ae-a1c8-20b3b8e1b930))
     (pin "2" (uuid 56ee657f-607c-4497-9356-ffe0e139ee1f))
-    (pin "3" (uuid dd67b3b6-f30c-40ae-a1c8-20b3b8e1b92f))
+    (pin "3" (uuid dd67b3b6-f30c-40ae-a1c8-20b3b8e1b930))
     (instances
       (project "Controller"
         (path "/e98a57d9-3732-4e84-8c7e-17ff22fc8918"
