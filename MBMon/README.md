@@ -8,6 +8,11 @@ The program reads a configuration file and simply runs, reading from the specifi
 ## Installation
 MBMon is installed by simply copying the MBMon directory to your desired location on a local hard drive.
 
+There are three subdirectories in the folder for MBMon...
++ **lib** should contain the required file MBScan.py
++ **setup** will likewise hold the configuration file MBMon.xml (see below)
++ **log** which will hold the resulting CSV files.  If **log** does not exist the directory will be created when MBMon is run the first time.
+
 ## Dependencies
 MBMon requires Python 3.x be installed on the local computer.  Along with Python one additional library, pyModbusTCP is required.  The latest version of Python should be downloaded and installed from the Python.org website.  The library for pyModbusTCP may be installed directly using PIP (recommended) or from the Github archive.
 
@@ -24,7 +29,7 @@ pyModbusTCP support...
 [PytModbusTCP documentation at Read the Docs](https://pymodbustcp.readthedocs.io/en/stable/index.html)
 
 ## Configuration file
-MbMon is configured using an XML file that stores the IP address and register addresses of the desired data.  This file should be named MBMon.xml and be placed the the **setup** subdirectory.
+MbMon is configured using an XML file that stores the IP address and register addresses of the desired data.  This file should be named MBMon.xml and be placed the the **setup** subdirectory.  A couple example configuration files are provided in the Github repository.
 
 ``
 <!-- Modbus Monitor  Configuration File -->
