@@ -80,5 +80,4 @@ Currently three sample systems are documented here, use these setups as is, or m
 * [Weather Station](/samples/weather/)
   
 Each of these designs are provided with schematics, 3D models, and setup files for the Symbrosia Controller.
-
-<div align="center">![Logo](/res/SymbrosiaLogo.png)</div>
+<p align="center"><img src="/res/SymbrosiaLogo.png"></p>
