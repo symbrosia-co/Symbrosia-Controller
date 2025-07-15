@@ -32,7 +32,7 @@
   - MCP_ADC, handling for the MCP3208 AtoD by Rob Tillaart v0.5.1
   - MCP3X21, handling for the MCP3021 AtoD by Pavel Slama v1.0.1
   - esp32FOTA, support for over-the-air firmware update by Chris Joyce v0.2.9
-  - ArduinoJSON, JSON file used in firmware update by Benoit Blanchon v7.2.1
+  - ArduinoJSON, JSON file used in firmware update by Benoit Blanchon v7.2.1 
 
 -- revision record ------------------------------------------------------------
 
