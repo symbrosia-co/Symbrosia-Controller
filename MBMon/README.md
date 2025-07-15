@@ -80,4 +80,5 @@ A description of each XML field is below.
 + **precision** The number of decimal points to be displayed during logging, this field is not required or used for non-floating point values
 + **log** If **true** the value is logged to the CSV file, if **false** the value is displayed only.
 
-<div style="text-align: center">![A tank controller using SymbCtrl](/res/SymbrosiaLogo.jpg)</div>
+
+ <div align="center">![A tank controller using SymbCtrl](/res/SymbrosiaLogo.jpg)</div>
