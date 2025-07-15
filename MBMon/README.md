@@ -16,25 +16,25 @@ There are three subdirectories in the folder for MBMon...
 + **log** which will hold the resulting CSV files.  If **log** does not exist the directory will be created when MBMon is run the first time.
 
 ## Dependencies
-MBMon requires Python 3.x be installed on the local computer.  Along with Python one additional library, pyModbusTCP is required.  The latest version of Python should be downloaded and installed from the Python.org website.  The library for pyModbusTCP may be installed directly using PIP (recommended) or from the Github archive.
+MBMon requires Python 3.x be installed on the local computer.  Along with Python there is one additional library, pyModbusTCP required.  The latest version of Python should be downloaded and installed from the Python.org website.  The library for pyModbusTCP may be installed directly using PIP (recommended) or from the Github archive.
 
-[Python.org](https://www.python.org/) Follow the install links of the main page for your operating system
++ [Python.org](https://www.python.org/) Follow the install links of the main page for your operating system
 
 To install pyModbudTCP using PIP use the following at a command line...
 
-Unix/Linix systems  **sudo pip3 install pyModbusTCP**
-Windows **pip install pyModbusTCP**
++ Unix/Linix systems  **sudo pip3 install pyModbusTCP**
++ Windows **pip install pyModbusTCP**
 
 pyModbusTCP support...
 
-[PyModbusTCP at Github](https://github.com/sourceperl/pyModbusTCP)
-[PytModbusTCP documentation at Read the Docs](https://pymodbustcp.readthedocs.io/en/stable/index.html)
++ [pyModbusTCP at Github](https://github.com/sourceperl/pyModbusTCP)
++ [pyModbusTCP documentation at Read the Docs](https://pymodbustcp.readthedocs.io/en/stable/index.html)
 
 ## Configuration file
 MbMon is configured using an XML file that stores the IP address and register addresses of the desired data.  This file should be named MBMon.xml and be placed the the **setup** subdirectory.  A couple example configuration files are provided in the Github repository.
 
 ```xml
-<!-- Modbus Monitor  Configuration File -->
+<!-- Modbus Monitor Configuration File -->
 <configuration>
   <scanInterval>1</scanInterval>
   <logInterval>120</logInterval>
@@ -44,11 +44,12 @@ MbMon is configured using an XML file that stores the IP address and register ad
     <ipAddr>192.168.0.111</ipAddr>
     <port>502</port>
     <datum>
-      <name>Tank Temp 1</name>
+      <name>Tank Temp</name>
       <addr>22</addr>
       <type>float</type>
       <unit>°C</unit>
-      <precision>2</precision>
+      <dispPrec>2</dispPrec>
+      <logPrec>2</logPrec>
       <log>True</log>
     </datum>
     <datum>
@@ -56,7 +57,14 @@ MbMon is configured using an XML file that stores the IP address and register ad
       <addr>20</addr>
       <type>float</type>
       <unit>pH</unit>
-      <precision>2</precision>
+      <dispPrec>1</dispPrec>
+      <logPrec>2</logPrec>
+      <log>True</log>
+    </datum>
+    <datum>
+      <name>CO2 Valve</name>
+      <addr>12</addr>
+      <type>coil</type>
       <log>True</log>
     </datum>
   </device>
@@ -77,6 +85,7 @@ A description of each XML field is below.
 + **addr** The ModbusTCP register address, addressing starting at zero is used. It is important to specify a type to read the cirrect address in the device, coil registers are used for coil or boolean values, else holding registers are read.
 + **type** The type of data expected, the following values are permissable
 + **unit** The units (if any), this is used for data display during logging, this field is not required and is not used for coil or boolean types
-+ **precision** The number of decimal points to be displayed during logging, this field is not required or used for non-floating point values
++ **dispPrec** The number of decimal points to be displayed during logging, this field is not required or used for non-floating point values
++ **logPrec** The number of decimal points to be recorded in the log file, this field is not required or used for non-floating point values
 + **log** If **true** the value is logged to the CSV file, if **false** the value is displayed only.
 <p align="center"><img src="/res/SymbrosiaLogo.png"></p>
