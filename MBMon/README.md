@@ -5,6 +5,8 @@ MbMon is a simple Modbus logging utility, it can monitor any ModbusTCP device an
 
 The program reads a configuration file and simply runs, reading from the specified Modbus devices and registers and logging the data to the specified CSV file.
 
+Each device is shown in a section with the device name and IP address displayed.  Beneath a header each dataum is diaplayed in table format.  The background color to the header indicated connection status to the device, green or red.  Occasional red may be displayed if network connectivity is poor or temporarily interrupted, and the data request will be re-attempted.  A prolonged connection error will result in the data values being dashed out indicating stale and invalid data.
+
 ## Installation
 MBMon is installed by simply copying the MBMon directory to your desired location on a local hard drive.
 
@@ -77,3 +79,5 @@ A description of each XML field is below.
 + **unit** The units (if any), this is used for data display during logging, this field is not required and is not used for coil or boolean types
 + **precision** The number of decimal points to be displayed during logging, this field is not required or used for non-floating point values
 + **log** If **true** the value is logged to the CSV file, if **false** the value is displayed only.
+
+<div style="text-align: center">![A tank controller using SymbCtrl](/res/SymbrosiaLogo.jpg)</div>
