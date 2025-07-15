@@ -81,4 +81,4 @@ A description of each XML field is below.
 + **log** If **true** the value is logged to the CSV file, if **false** the value is displayed only.
 
 
-![Logo](/res/SymbrosiaLogo.jpg)
+ <div align="center">![Logo](/res/SymbrosiaLogo.png)</div>

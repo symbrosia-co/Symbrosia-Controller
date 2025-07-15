@@ -81,4 +81,4 @@ Currently three sample systems are documented here, use these setups as is, or m
   
 Each of these designs are provided with schematics, 3D models, and setup files for the Symbrosia Controller.
 
- <div align="center">![A tank controller using SymbCtrl](/res/SymbrosiaLogo.jpg)</div>
+<div align="center">![Logo](/res/SymbrosiaLogo.png)</div>
