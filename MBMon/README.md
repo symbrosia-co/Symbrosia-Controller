@@ -5,7 +5,7 @@ MbMon is a simple Modbus logging utility, it can monitor any ModbusTCP device an
 
 The program reads a configuration file and simply runs, reading from the specified Modbus devices and registers and logging the data to the specified CSV file.
 
-Each device is shown in a section with the device name and IP address displayed.  Beneath a header each dataum is diaplayed in table format.  The background color to the header indicated connection status to the device, green or red.  Occasional red may be displayed if network connectivity is poor or temporarily interrupted, and the data request will be re-attempted.  A prolonged connection error will result in the data values being dashed out indicating stale and invalid data.
+Each device is shown in a section with the device name and IP address displayed.  Beneath a header each datum is displayed in table format.  The background color to the header indicates connection status to the device, green or red.  Occasional red may be displayed if network connectivity is poor or temporarily interrupted, the data request will be re-attempted.  A prolonged connection error will result in the data values being dashed out indicating stale and invalid data.
 
 ## Installation
 MBMon is installed by simply copying the MBMon directory to your desired location on a local hard drive.
@@ -33,7 +33,7 @@ pyModbusTCP support...
 ## Configuration file
 MbMon is configured using an XML file that stores the IP address and register addresses of the desired data.  This file should be named MBMon.xml and be placed the the **setup** subdirectory.  A couple example configuration files are provided in the Github repository.
 
-``
+```xml
 <!-- Modbus Monitor  Configuration File -->
 <configuration>
   <scanInterval>1</scanInterval>
@@ -61,7 +61,7 @@ MbMon is configured using an XML file that stores the IP address and register ad
     </datum>
   </device>
 </configuration>
-``
+```
 
 A description of each XML field is below.
 
