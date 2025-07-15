@@ -1,7 +1,7 @@
 # MbMon
 MbMon is a simple Modbus logging utility, it can monitor any ModbusTCP device and store data into a CSV file.  The application is a Python GUI that may be used as is, or examined as an example of how to write you own Modbus scripts.
 
-![A tank controller using SymbCtrl](/res/MBMon.png)
+![MBMon GUI](/res/MBMon.png)
 
 The program reads a configuration file and simply runs, reading from the specified Modbus devices and registers and logging the data to the specified CSV file.
 
@@ -81,4 +81,4 @@ A description of each XML field is below.
 + **log** If **true** the value is logged to the CSV file, if **false** the value is displayed only.
 
 
- <div align="center">![A tank controller using SymbCtrl](/res/SymbrosiaLogo.jpg)</div>
+![Logo](/res/SymbrosiaLogo.jpg)
