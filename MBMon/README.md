@@ -79,6 +79,4 @@ A description of each XML field is below.
 + **unit** The units (if any), this is used for data display during logging, this field is not required and is not used for coil or boolean types
 + **precision** The number of decimal points to be displayed during logging, this field is not required or used for non-floating point values
 + **log** If **true** the value is logged to the CSV file, if **false** the value is displayed only.
-
-
- <div align="center">![Logo](/res/SymbrosiaLogo.png)</div>
+<p align="center"><img width="460" height="300" src="/res/SymbrosiaLogo.png"></p>
