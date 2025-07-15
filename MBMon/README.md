@@ -7,6 +7,8 @@ The program reads a configuration file and simply runs, reading from the specifi
 
 Each device is shown in a section with the device name and IP address displayed.  Beneath a header each datum is displayed in table format.  The background color to the header indicates connection status to the device, green or red.  Occasional red may be displayed if network connectivity is poor or temporarily interrupted, the data request will be re-attempted.  A prolonged connection error will result in the data values being dashed out indicating stale and invalid data.
 
+Below the data table is a log window that records a record of logging events and communications errors.
+
 ## Installation
 MBMon is installed by simply copying the MBMon directory to your desired location on a local hard drive.
 
@@ -20,7 +22,7 @@ MBMon requires Python 3.x be installed on the local computer.  Along with Python
 
 + [Python.org](https://www.python.org/) Follow the install links of the main page for your operating system
 
-To install pyModbudTCP using PIP use the following at a command line...
+To install pyModbusTCP using PIP use the following at a command line...
 
 + Unix/Linix systems  **sudo pip3 install pyModbusTCP**
 + Windows **pip install pyModbusTCP**
@@ -88,4 +90,5 @@ A description of each XML field is below.
 + **dispPrec** The number of decimal points to be displayed during logging, this field is not required or used for non-floating point values
 + **logPrec** The number of decimal points to be recorded in the log file, this field is not required or used for non-floating point values
 + **log** If **true** the value is logged to the CSV file, if **false** the value is displayed only.
-<p align="center"><img src="/res/SymbrosiaLogo.png"></p>
+
+<p align="center"><img width="50" height="50" src="/res/SymbrosiaLogo.png"></p>
