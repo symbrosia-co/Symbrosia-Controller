@@ -75,20 +75,27 @@ MbMon is configured using an XML file that stores the IP address and register ad
 
 A description of each XML field is below.
 
-+ **configuration** This tag encompasses the entire MBMon configuration file
-+ **scanInterval** Specified the rate at which the device should be queried for data over the network in seconds.  Can be set to longer intervals for equipment that cannot support high data rates.
-+ **logInterval** Specifies the interval for writing to the log file in seconds.
-+ **logname** Base filename for the resulting data file, the name will have the date and the filename extension **.xml** appended to the supplied name.  Files will be created when needed, if the file already exists data will be appended each logging interval.
-+ **name** A decriptive name for the device, this will be used to organize the data for display during logging and will be appended to the column header in the CSV file.
-+ **ipAddr** The local IP address for the ModbusTCP device.
-+ **port** The port for ModbusTCP access, usually the default ModbusTCP port 502.
-+ **datum** Used to specify a specific item of data.
-+ **name** A descriptive name for the item of data, this will be used to format the data for display when logging and as the column header in the CSV file.
-+ **addr** The ModbusTCP register address, addressing starting at zero is used. It is important to specify a type to read the cirrect address in the device, coil registers are used for coil or boolean values, else holding registers are read.
-+ **type** The type of data expected, the following values are permissable
-+ **unit** The units (if any), this is used for data display during logging, this field is not required and is not used for coil or boolean types
-+ **dispPrec** The number of decimal points to be displayed during logging, this field is not required or used for non-floating point values
-+ **logPrec** The number of decimal points to be recorded in the log file, this field is not required or used for non-floating point values
-+ **log** If **true** the value is logged to the CSV file, if **false** the value is displayed only.
++ **configuration:** This tag encompasses the entire MBMon configuration file
++ **scanInterval:** Specified the rate at which the device should be queried for data over the network in seconds.  Can be set to longer intervals for equipment that cannot support high data rates.
++ **logInterval:** Specifies the interval for writing to the log file in seconds.
++ **logname:** Base filename for the resulting data file, the name will have the date and the filename extension **.xml** appended to the supplied name.  Files will be created when needed, if the file already exists data will be appended each logging interval.
++ **name:** A short descriptive name for the device, this will be used to organize the data for display during logging and will be appended to the column header in the CSV file.
++ **ipAddr:** The local IP address for the ModbusTCP device.
++ **port:** The port for ModbusTCP access, usually the default ModbusTCP port 502.
++ **datum:** Used to specify a specific item of data.
++ **name:** A descriptive name for the item of data, this will be used to format the data for display when logging and as the column header in the CSV file.
++ **addr:** The ModbusTCP register address, addressing starting at zero is used. It is important to specify a type to read the cirrect address in the device, coil registers are used for coil or boolean values, else holding registers are read.
++ **type:** The type of data expected, the following values are permissable, the allowable types are as follows...
+  + coil: A boolean value (true or false) from a Modbus coil register
+  + bool: Same as coil
+  + hold: An unsigned 16bit integer value from a holding register
+  + uint: Same as hold
+  + int: A signed 16 bit integer value from a holding register
+  + long: an unsigned long integer of 32 bits from two consecutive holding registers, the address should point at the first register
+  + float: a 32 bit IEEE-754 floating point number from two consecutive holding registers, the address should point at the first register
++ **unit:** The units (if any), this is used for data display during logging, this field is not required and is not used for coil or boolean types
++ **dispPrec:** The number of decimal points to be displayed during logging, this field is not required or used for non-floating point values
++ **logPrec:** The number of decimal points to be recorded in the log file, this field is not required or used for non-floating point values
++ **log:** If **true** the value is logged to the CSV file, if **false** the value is displayed only.
 
 <p align="center"><img width="50" height="50" src="/res/SymbrosiaLogo.png"></p>
