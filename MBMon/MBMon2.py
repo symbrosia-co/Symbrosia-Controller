@@ -204,7 +204,7 @@ class Application(tk.Frame):
     try:
       tree = xml.parse(os.path.join(configPath,configFile))
     except:
-      messagebox.showerror(title='Startup error...',message='Unable to load configuration file {}\{}'.format(configPath,configFile))
+      messagebox.showerror(title='Startup error...',message='Unable to load configuration file {}:{}'.format(configPath,configFile))
       return False
     #process XML
     self.config['devices']= []

@@ -50,8 +50,8 @@
 #pragma once
 
 //#define hardwareS2Mini 2
-#define hardwareS3Mini 3
-//#define hardwareAuto 9
+//#define hardwareS3Mini 3
+#define hardwareAuto 9
 
 #ifdef hardwareAuto // attempt to ID processor from IDE
   #if defined(ARDUINO_LOLIN_S2_MINI)

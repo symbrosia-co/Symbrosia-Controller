@@ -116,8 +116,11 @@ def scanSub(shared):
   port= '{}'.format(shared[Share.PORT])
   # create a Modbus client object
   device= ModbusClient(debug=False)
-  device.host(ipAddr)
-  device.port(port)
+  device.host= ipAddr
+  if isinstance(port,int):
+    device.port= int(port)
+  else:
+    device.port= 502
   # freeze array indexes
   holdStart= shared[Share.HOLDSTART]
   holdStop=  shared[Share.HOLDSTOP]
