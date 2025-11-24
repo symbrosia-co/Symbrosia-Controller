@@ -149,10 +149,10 @@ void Control::service(){
   }
   else active= false;
   // enable logic
-  bool enable= false;
-  bool extEnable= ioNone;
+  bool enable=    false;
+  bool extEnable= false;
   int  extChan= memory.getInt(datCtrl1EnbSource+(proc*offset));
-  if (isDigital(extEnable)) extEnable= getChan(extChan);
+  if (isDigital(extChan)) extEnable= getChan(extChan);
   if (memory.getBool(statCtrl1Enable+proc)) enable= true;
   else if (extChan!=ioNone)
     if (memory.getBool(statCtrl1OneShot+proc)){  // one shot logic

@@ -3,7 +3,7 @@ As originally designed, the Symbrosia Controller is a low cost, robust, controll
 
 In addition to commercial use, we envision the Symbrosia Controller as a powerful educational tool. By promoting literacy in electronics, programming, and agricultural management, we hope to empower individuals and communities to innovate and thrive in the agricultural sector. Our goal is to create a community where knowledge and technology are shared to drive sustainable agricultural practices and food security worldwide.
 
-![A tank controller using SymbCtrl](/res/CL46-47-24138-DC.jpg)
+<p align="center"><img src="/res/CL46-47-24138-DC.jpg"></p>
 
 ## Background
 The Symbrosia controller was developed for in-house use as a lower-cost alternative to the PLC-based and commercial off-the-shelf systems we use for algae tank and bioreactor control.  In addition to controlling the tanks there were a few other needs, places where a little remote control and monitoring is invaluable.  With the availability of WiFi processors like the ESP32 automating these functions was a practical option.
@@ -81,5 +81,4 @@ Currently three sample systems are documented here, use these setups as is, or m
   
 Each of these designs are provided with schematics, 3D models, and setup files for the Symbrosia Controller.
 
-
-
+<p align="center"><img width="50" height="50" src="/res/SymbrosiaLogo.png"></p>

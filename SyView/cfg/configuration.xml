@@ -19,11 +19,21 @@
   <ctrl name='Tank X01'>
     <model>SyCtrl Mk2</model>
     <description>Tank Controller</description>
-    <address>192.168.0.254</address>
+    <address>192.168.0.24</address>
   </ctrl>
   <ctrl name='Tank X02'>
     <model>SyCtrl Mk2</model>
     <description>Tank Controller</description>
-    <address>192.168.0.244</address>
+    <address>192.168.0.245</address>
+  </ctrl>
+  <ctrl name='Tank X03'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank Controller</description>
+    <address>192.168.0.61</address>
+  </ctrl>
+  <ctrl name='Tank X04'>
+    <model>SyCtrl Mk2</model>
+    <description>Tank Controller</description>
+    <address>192.168.0.251</address>
   </ctrl>
 </configuration>

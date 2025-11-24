@@ -6,15 +6,15 @@
 #  Symbrosia
 #  Copyright 2021-2025, all rights reserved
 #
-# 29Nov2021 A. Cooper v0.1
+#  29Nov2021 A. Cooper v0.1
 #  - initial version
-# 29Mar2025 A. Cooper v0.2
+#  29Mar2025 A. Cooper v0.2
 #  - make data frame scrollable
-# 30Apr2025 A. Cooper v0.3
+#  30Apr2025 A. Cooper v0.3
 #  - add snapshot button
 #  - clean up formatting of data window
 #  - autoscale size of data window
-# 05May2025 A. Cooper v2.0
+#  05May2025 A. Cooper v2.0
 #  - create MBMon2 as a major upgrade
 #  - use MBScan library to perform subprocess reads of Modbus devices,
 #    the decouples the GUI from reading and avoids laggy operation on com
@@ -33,9 +33,11 @@
 #    <precision> still works if no log or display precision is specified, if
 #    none specified two decimal places used
 #  - Fix data box scrolling for mouse entry and exit
+#  09Jul2025 A. Cooper
+#  - Fix CSV output bug, may skip fields
 #
 #------------------------------------------------------------------------------
-verStr= 'MBMon2 v2.0'
+verStr= 'MBMon2 v2.1'
 
 #-- constants -----------------------------------------------------------------
 cfgFileName=  'MBMon.xml'
@@ -119,7 +121,7 @@ class Application(tk.Frame):
     # scrollable frame for data
     datWinSize= self.dataFields*26
     if datWinSize<100: datWinSize= 100
-    if datWinSize>800: datWinSize= 500
+    if datWinSize>600: datWinSize= 600
     canvas= tk.Canvas(self,width=580,height=datWinSize)
     canvas.grid(column=1,row=1,pady=spaceY,columnspan=4)
     scrollbar= ttk.Scrollbar(self,orient=tk.VERTICAL,command=canvas.yview)
@@ -202,7 +204,7 @@ class Application(tk.Frame):
     try:
       tree = xml.parse(os.path.join(configPath,configFile))
     except:
-      messagebox.showerror(title='Startup error...',message='Unable to load configuration file {}\{}'.format(configPath,configFile))
+      messagebox.showerror(title='Startup error...',message='Unable to load configuration file {}:{}'.format(configPath,configFile))
       return False
     #process XML
     self.config['devices']= []
@@ -334,23 +336,21 @@ class Application(tk.Frame):
     # write data line
     outFile.write('{}'.format(dt.datetime.now().strftime('%Y-%b-%d, %H:%M:%S')))
     for datum in self.data:
-      if verbose: print(datum['name'],datum['value'])
       if datum['log']:
-        if datum['value']==None:
-          outFile.write(',          ')
+        if datum['type']=='float' and isinstance(datum['value'],(int,float)):
+          if 'precision' in datum: prec= datum['precision']
+          else: prec= 2
+          if 'logPrec' in datum: prec= datum['logPrec']
+          outFile.write(',{0:10.{1}f}'.format(datum['value'],prec))
+        elif datum['type'] in ['hold','int','uint','long'] and isinstance(datum['value'],int):
+          outFile.write(',{:10d}'.format(int(datum['value'])))
+        elif datum['type'] in ['coil','bool'] and isinstance(datum['value'],bool):
+          if datum['value']:
+            outFile.write(',      True')
+          else:
+            outFile.write(',     False')
         else:
-          if datum['type']=='float':
-            prec= 2
-            if 'precision' in datum: prec= datum['precision']
-            if 'logPrec' in datum: prec= datum['logPrec']
-            outFile.write(',{0:10.{1}f}'.format(datum['value'],prec))
-          if datum['type']=='hold' or datum['type']=='int' or datum['type']=='uint' or datum['type']=='long':
-            outFile.write(',{:10d}'.format(int(datum['value'])))
-          if datum['type']=='coil' or datum['type']=='bool':
-            if datum['value']:
-              outFile.write(',      True')
-            else:
-              outFile.write(',     False')
+          outFile.write(',          ')
     outFile.write('\n')
     outFile.close()
     self.logEvent('Log file {} appended'.format(logName),True)

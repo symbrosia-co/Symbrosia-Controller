@@ -50,37 +50,47 @@
 #pragma once
 
 //#define hardwareS2Mini 2
-#define hardwareS3Mini 3
+//#define hardwareS3Mini 3
+#define hardwareAuto 9
+
+#ifdef hardwareAuto // attempt to ID processor from IDE
+  #if defined(ARDUINO_LOLIN_S2_MINI)
+    #define hardwareS2Mini 2
+  #elif defined(ARDUINO_LOLIN_S3_MINI)
+    #define hardwareS3Mini 3
+  #else
+    #error Undefined target processor!!
+  #endif
+#endif
 
 #ifdef hardwareS2Mini
-#include "hardwareSymbCtrlS2Mini.h"
-#define modelNameStr  "SymbCtrl Mk2 S2"
+  #include "hardwareSymbCtrlS2Mini.h"
+  #define modelNameStr  "SymbCtrl Mk2 S2"
+  #define watchdogCores  1
 #endif
 
 #ifdef hardwareS3Mini
-#include "hardwareSymbCtrlS3Mini.h"
-#define modelNameStr  "SymbCtrl Mk2 S3"
+  #include "hardwareSymbCtrlS3Mini.h"
+  #define modelNameStr  "SymbCtrl Mk2 S3"
+  #define watchdogCores  2
 #endif
 
+// watchdog
+#define watchdogTime   5 // watchdog timeout in seconds
 // unit ID 
-#define firmMajor     2
-#define firmMinor     7
-
+#define firmMajor      2
+#define firmMinor      9
 // default time zone
-#define timeZone      -10
-
+#define timeZone     -10
 // alarm points
-#define alarmVSupLow  8  // low supply voltage alarm point
+#define alarmVSupLow   8 // low supply voltage alarm point
 #define alarmVSupHigh 16 // high supply voltage alarm point
 #define alarmIntTHigh 55 // high internal temperature alarm point in C
-
 // network loss time limits
 #define timeNoNetMax   2 // time to indicate net loss in hours
 #define timeNoNTPMax  48 // time to indicate NTP time invalid in hours
-
 // startup lockout
 #define startupDelay  30 // startup lockout in seconds\p\order\detail.html
-
 // misc
 #define forceSerial   false // force load of fixed data (serial, hardware, etc)
 #define forceDefaults false // force load of defaults on boot
