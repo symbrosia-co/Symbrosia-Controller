@@ -6,15 +6,15 @@
 #  Symbrosia
 #  Copyright 2021-2025, all rights reserved
 #
-#  29Nov2021 A. Cooper v0.1
+#  29Nov2021 v0.1 A. Cooper
 #  - initial version
-#  29Mar2025 A. Cooper v0.2
+#  29Mar2025 v0.2 A. Cooper
 #  - make data frame scrollable
-#  30Apr2025 A. Cooper v0.3
+#  30Apr2025 v0.3 A. Cooper
 #  - add snapshot button
 #  - clean up formatting of data window
 #  - autoscale size of data window
-#  05May2025 A. Cooper v2.0
+#  05May2025 v2.0 A. Cooper
 #  - create MBMon2 as a major upgrade
 #  - use MBScan library to perform subprocess reads of Modbus devices,
 #    the decouples the GUI from reading and avoids laggy operation on com
@@ -33,7 +33,7 @@
 #    <precision> still works if no log or display precision is specified, if
 #    none specified two decimal places used
 #  - Fix data box scrolling for mouse entry and exit
-#  09Jul2025 A. Cooper
+#  09Jul2025 v2.1 A. Cooper
 #  - Fix CSV output bug, may skip fields
 #
 #------------------------------------------------------------------------------

@@ -95,7 +95,7 @@
 #define forceSerial   false // force load of fixed data (serial, hardware, etc)
 #define forceDefaults false // force load of defaults on boot
 
-//- WiFi credentials -----------------------------------------------------------
+//- WiFi credentials -------------s----------------------------------------------
 #define defWiFi "SSID"
 #define defPass "Pass"
 

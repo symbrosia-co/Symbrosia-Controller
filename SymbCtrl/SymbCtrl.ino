@@ -188,7 +188,7 @@
     datTLCOutput 149, statTimeLimCmd 70, and statTimeLimFlag 71
   - expanded Modbus coil space to 80 registers
   - add code for manual output testing to userCtrl.cpp/drawOutputs
-  - added use of TWDT to prevent overall lockups
+  - adjusted use of TWDT to prevent overall lockups
   
   Known bugs...
   - none
